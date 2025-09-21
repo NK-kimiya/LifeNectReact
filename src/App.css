@@ -52,3 +52,53 @@ body {
   min-height: 300px; /* 調整可能 */
   padding-bottom: 1rem;
 }
+
+/* 共通：背景＝黄色、文字＝白 */
+.page-link {
+  background-color: #ffc107 !important; /* Bootstrapのwarning色 */
+  color: #fff !important;
+  border: none !important; /* デフォルトの枠線を消す */
+}
+
+/* ホバー時も同じ色に */
+.page-link:hover {
+  background-color: #e0a800 !important; /* 少し濃い黄色 */
+  color: #fff !important;
+}
+
+/* 選択中（active）のページ */
+.page-item.active .page-link {
+  background-color: #c0c0c0 !important; /* 黒背景 */
+  color: #fff !important; /* 白文字 */
+  border: none !important; /* 青い枠を消す */
+}
+
+/* スマホ幅（768px未満）のときは active の背景色を無効化 */
+@media (max-width: 767.98px) {
+  #simple-list-example .nav-link.active,
+  #simple-list-example .active {
+    background-color: transparent !important; /* 背景色を消す */
+    color: inherit !important; /* 文字色もデフォルトに戻す場合 */
+  }
+}
+
+/* App.css に追加 */
+@media (max-width: 767.98px) {
+  #simple-list-example {
+    background-color: var(
+      --bs-secondary-bg-subtle
+    ); /* Bootstrapのbg-secondary-subtle */
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: #198754;
+    position: static !important;
+  }
+}
+
+@media (min-width: 768px) {
+  #simple-list-example {
+    background-color: transparent; /* PC/タブレットでは背景なし */
+    position: fixed !important;
+    top: 200px; /* top-2 に相当 */
+  }
+}

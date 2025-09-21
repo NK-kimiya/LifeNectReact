@@ -5,7 +5,9 @@ const Article = () => {
     <>
       {/* h2タグのタイトルにする */}
       {/* h3タグのIDはheading1,heading2...とする */}
-      <h2 className="border-bottom border-warning">病気と就職活動について</h2>
+      <h2 className="border-bottom border-success bg-success text-white p-3">
+        病気と就職活動について
+      </h2>
       <div
         data-bs-spy="scroll"
         data-bs-target="#simple-list-example"
@@ -27,7 +29,7 @@ const Article = () => {
             私も同じように、不安でいっぱいでした。しかし、今は自分らしく働くことができています。この記事が、同じように悩む誰かの助けになれば嬉しいです。
           </p>
           <h3
-            className="text-start bg-light rounded p-3 text-warning "
+            className="text-start bg-light rounded p-3 text-success "
             id="simple-list-item-1"
           >
             自分の「得意」と「苦手」を正直に見つめる
@@ -41,7 +43,7 @@ const Article = () => {
           </div>
 
           <h3
-            className="text-start bg-light rounded p-3 text-warning"
+            className="text-start bg-light rounded p-3 text-success"
             id="simple-list-item-2"
           >
             2. オープンかクローズか、決断のとき
@@ -64,7 +66,7 @@ const Article = () => {
           </div>
 
           <h3
-            className="text-start bg-light rounded p-3 text-warning "
+            className="text-start bg-light rounded p-3 text-success"
             id="simple-list-item-3"
           >
             就労移行支援事業所の活用
@@ -76,7 +78,7 @@ const Article = () => {
           </div>
 
           <h3
-            className="text-start bg-light rounded p-3 text-warning "
+            className="text-start bg-light rounded p-3 text-success"
             id="simple-list-item-4"
           >
             就労移行支援事業所とは？
@@ -88,7 +90,7 @@ const Article = () => {
             </p>
           </div>
           <h3
-            className="text-start bg-light rounded p-3 text-warning"
+            className="text-start bg-light rounded p-3 text-success "
             id="simple-list-item-5"
           >
             同じ境遇の方へ
