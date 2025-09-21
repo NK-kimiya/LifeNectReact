@@ -8,6 +8,7 @@ import ArticleCreateTemplate from "./Templates/ArticleCreateTemplate.tsx";
 import ArticleDetailPage from "./Pages/ArticleDetailPage.tsx";
 import ArticleUpdate from "./Templates/ArticleUpdate.tsx";
 import AdminTopPage from "./Pages/AdminTopPage.tsx";
+import ArticleSearchPage from "./Pages/ArticleSearchPage.tsx";
 
 const App: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<TopPage />} />
           <Route path="/article-detail" element={<ArticleDetailPage />} />
+          <Route path="/article-search" element={<ArticleSearchPage />} />
           <Route path="/chat" element={<AiChatPage />} />
           <Route path="/admin-login" element={<AdminLoginPage />} />
           <Route path="/admin-top" element={<AdminTopPage />} />
