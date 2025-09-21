@@ -1,6 +1,8 @@
 import React from "react";
 import Table, { RowData } from "../Organisms/Table.tsx"; // ← 型も一緒にインポート
-
+import NavBar from "../Organisms/NavBar.tsx";
+import Footer from "../Organisms/Footer.tsx";
+import { Link } from "react-router-dom";
 const AdminTopTemplate: React.FC = () => {
   // --- 表示するデータを準備 ---
   const rows: RowData[] = [
@@ -20,11 +22,28 @@ const AdminTopTemplate: React.FC = () => {
 
   return (
     <div className="d-flex flex-column min-vh-100">
+      <NavBar />
+      <div className="container text-start ">
+        <button
+          type="button"
+          className="btn btn-success rounded-circle d-flex align-items-center justify-content-center mt-5"
+          style={{ width: "60px", height: "60px" }} // 正方形にする
+        >
+          <Link
+            to="/article-create"
+            className="text-white text-decoration-none"
+          >
+            <i className="bi bi-file-earmark-plus fs-2"></i>{" "}
+            {/* アイコンを大きく */}
+          </Link>
+        </button>
+      </div>
       <div className="container flex-fill">
         <h2 className="my-3">管理者ページ - 投稿一覧</h2>
         {/* --- Tableを呼び出し、ページネーションを有効化 --- */}
         <Table rows={rows} itemsPerPage={5} />
       </div>
+      <Footer />
     </div>
   );
 };
