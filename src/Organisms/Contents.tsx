@@ -7,12 +7,11 @@ const ScrollSpyLink = styled.a`
   padding: 0.25rem;
   border-radius: 0.375rem;
   display: block;
-  text-align: center;
   text-decoration: none;
   color: inherit;
 
   &.active {
-    background-color: #ffc107; /* Bootstrapのbg-primary相当 */
+    background-color: #198754; /* Bootstrapのbg-primary相当 */
     color: white;
   }
 `;
@@ -27,10 +26,10 @@ const Contents = () => {
     }
   }, []);
   return (
-    <div>
+    <div className="contents-wrap">
       <div
         id="simple-list-example"
-        className="d-flex flex-column gap-2 simple-list-example-scrollspy text-center position-fixed top-2"
+        className="d-flex flex-column gap-2 simple-list-example-scrollspy text-start"
       >
         {/* hrefにh3タグの番号をIDに指定
                 コンテンツをh3のタイトルにする */}
@@ -47,10 +46,6 @@ const Contents = () => {
           就労移行支援事業所とは？
         </ScrollSpyLink>
         <ScrollSpyLink href="#simple-list-item-5">同じ境遇の方へ</ScrollSpyLink>
-        <div className="pt-3">
-          <button className="btn btn-danger">削除</button>
-          <button className="btn btn-warning">編集</button>
-        </div>
       </div>
     </div>
   );
