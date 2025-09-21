@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 // --- 行データの型定義 ---
 export type RowData = {
@@ -40,9 +41,9 @@ const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5 }) => {
               <td>
                 <div>
                   <p>{row.title}</p>
-                  <a className="px-2" href="#">
+                  <Link to="/article-update" className="link-success">
                     編集
-                  </a>
+                  </Link>
                   <a className="link-danger px-2" href="#">
                     削除
                   </a>
