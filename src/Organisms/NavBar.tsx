@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 const NavBar = () => {
   return (
     <>
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+      <nav className="navbar navbar-expand-lg bg-success">
         <div className="container-fluid">
-          <Link className="navbar-brand" to="/">
+          <Link className="navbar-brand text-white" to="/">
             LifeConnect
           </Link>
           <button
-            className="navbar-toggler"
+            className="navbar-toggler   bg-success"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#navbarTogglerDemo02"
@@ -22,17 +22,17 @@ const NavBar = () => {
           <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link" to="/">
+                <Link className="nav-link text-white text-start" to="/">
                   ブログ一覧
                 </Link>
               </li>
-              <li className="nav-item">
+              <li className="nav-item text-start">
                 <Link
                   to="/chat"
                   type="button"
-                  className="btn btn-secondary d-flex align-items-center rounded-pill"
+                  className="btn btn-secondary  align-items-center rounded-pill bg-warning"
                 >
-                  AIチャット<i className="bi bi-chat-left"></i>
+                  AIチャット<i className="bi bi-chat-left "></i>
                 </Link>
               </li>
             </ul>
@@ -43,8 +43,11 @@ const NavBar = () => {
                 placeholder="Search"
                 aria-label="Search"
               ></input>
-              <button className="btn btn-outline-success" type="submit">
-                Search
+              <button
+                className="btn btn-outline-success bg-warning text-white"
+                type="submit"
+              >
+                <i className="bi bi-search"></i>
               </button>
             </form>
           </div>

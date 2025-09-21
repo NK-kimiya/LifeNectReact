@@ -17,6 +17,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<TopPage />} />
           <Route path="/article-detail" element={<ArticleDetailPage />} />
+          {/* http://localhost:3000/article-search?showTable=true&search=tag&tagId=1&tagName=文字 */}
           <Route path="/article-search" element={<ArticleSearchPage />} />
           <Route path="/chat" element={<AiChatPage />} />
           <Route path="/admin-login" element={<AdminLoginPage />} />
