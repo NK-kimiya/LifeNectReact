@@ -1,6 +1,6 @@
 import React from "react";
 
-const Article = () => {
+const Article: React.FC = () => {
   return (
     <>
       {/* h2タグのタイトルにする */}

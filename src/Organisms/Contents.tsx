@@ -15,7 +15,7 @@ const ScrollSpyLink = styled.a`
     color: white;
   }
 `;
-const Contents = () => {
+const Contents: React.FC = () => {
   useEffect(() => {
     const spyEl = document.querySelector(
       '[data-bs-spy="scroll"]'

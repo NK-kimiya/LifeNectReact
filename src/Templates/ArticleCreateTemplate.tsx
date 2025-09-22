@@ -4,7 +4,7 @@ import UploadImgDisplay from "../Organisms/UploadImgDisplay.tsx";
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
 
-const ArticleCreateTemplate = () => {
+const ArticleCreateTemplate: React.FC = () => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />

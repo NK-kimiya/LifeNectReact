@@ -238,7 +238,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
   ];
 
   // --- 見出しを切り替え ---
-  const renderHeading = () => {
+  const renderHeading = (): React.ReactElement => {
     if (search === "tag" && tag) {
       return <h2>「タグ検索：{tag.name}」の結果</h2>;
     }
@@ -252,7 +252,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
     <>
       <NavBar />
       <div className="container flex-fill min-vh-100">
-        <TagSelect />
+        <TagSelect variant="scroll" />
 
         {/* 見出しを表示 */}
         {renderHeading()}

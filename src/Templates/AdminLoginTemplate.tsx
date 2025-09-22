@@ -3,7 +3,7 @@ import Auth from "../Organisms/Auth.tsx";
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
 
-const AdminLoginTemplate = () => {
+const AdminLoginTemplate: React.FC = () => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />
