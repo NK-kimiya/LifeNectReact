@@ -7,19 +7,31 @@ const ScrollBoxContent = styled.div`
     width: 70%;
     margin: 0 auto;
   }
+
+  overflow-y: auto;
+
+  /* IE, Edge (旧) */
+  -ms-overflow-style: none;
+
+  max-height: 60vh;
+
+  /* Chrome, Safari (Webkit系) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const ChatMessage: React.FC = () => {
   return (
     <>
       <div
-        className="container flex-grow-1 overflow-auto pt-5"
+        className="container flex-grow-1 pt-5"
         style={{ maxWidth: "80%", height: "80vh" }}
       >
-        <ScrollBoxContent>
+        <ScrollBoxContent className="">
           <div
             className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f0f8ff" }}
+            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
           >
             <p className="fw-bold mb-1">質問：</p>
             <p>うつ病の人がどのように就職をしているかを教えて</p>
@@ -40,7 +52,7 @@ const ChatMessage: React.FC = () => {
 
           <div
             className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f0f8ff" }}
+            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
           >
             <p className="fw-bold mb-1">質問：</p>
             <p>うつ病の人がどのように就職をしているかを教えて</p>
@@ -61,7 +73,7 @@ const ChatMessage: React.FC = () => {
 
           <div
             className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f0f8ff" }}
+            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
           >
             <p className="fw-bold mb-1">質問：</p>
             <p>うつ病の人がどのように就職をしているかを教えて</p>
@@ -82,7 +94,7 @@ const ChatMessage: React.FC = () => {
 
           <div
             className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f0f8ff" }}
+            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
           >
             <p className="fw-bold mb-1">質問：</p>
             <p>うつ病の人がどのように就職をしているかを教えて</p>
