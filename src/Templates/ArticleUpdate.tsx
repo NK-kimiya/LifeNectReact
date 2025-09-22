@@ -4,7 +4,7 @@ import BlogForm from "../Organisms/BlogForm.tsx";
 import UploadImgDisplay from "../Organisms/UploadImgDisplay.tsx";
 import Footer from "../Organisms/Footer.tsx";
 
-const ArticleUpdate = () => {
+const ArticleUpdate: React.FC = () => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />

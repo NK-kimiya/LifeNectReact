@@ -8,7 +8,8 @@ const ScrollBoxContent = styled.div`
     margin: 0 auto;
   }
 `;
-const ChatInput = () => {
+
+const ChatInput: React.FC = () => {
   return (
     <>
       <div className="bg-white border-top" style={{ height: "20vh" }}>

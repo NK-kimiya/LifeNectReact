@@ -1,4 +1,5 @@
 import React from "react";
+import TagSelect from "./TagSelect.tsx";
 
 type BlogFormProps = {
   buttonLabel: string;
@@ -40,6 +41,8 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           id="exampleFormControlTextarea1"
           rows={15}
         ></textarea>
+
+        <TagSelect variant="static" />
       </div>
 
       <button type="button" className="btn btn-primary">

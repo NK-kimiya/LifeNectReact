@@ -8,11 +8,12 @@ const ScrollBoxContent = styled.div`
     margin: 0 auto;
   }
 `;
-const ChatMessage = () => {
+
+const ChatMessage: React.FC = () => {
   return (
     <>
       <div
-        className="container flex-grow-1 overflow-auto"
+        className="container flex-grow-1 overflow-auto pt-5"
         style={{ maxWidth: "80%", height: "80vh" }}
       >
         <ScrollBoxContent>

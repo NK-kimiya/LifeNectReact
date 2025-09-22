@@ -1,7 +1,7 @@
 import React from "react";
 import ArticleCreateTemplate from "../Templates/ArticleCreateTemplate.tsx";
 
-const ArticleCreate = () => {
+const ArticleCreate: React.FC = () => {
   return (
     <>
       <ArticleCreateTemplate />

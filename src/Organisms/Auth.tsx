@@ -7,7 +7,7 @@ const LoginBoxContent = styled.div`
     width: 480px;
   }
 `;
-const Auth = () => {
+const Auth: React.FC = () => {
   return (
     <>
       <LoginBoxContent className="container border border-secondary-subtle rounded p-3 mt-5">

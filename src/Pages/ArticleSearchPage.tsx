@@ -1,6 +1,7 @@
 import React from "react";
 import ArticleSearchTemplate from "../Templates/ArticleSearchTemplate.tsx";
 import { useSearchParams } from "react-router-dom";
+
 const ArticleSearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
 

@@ -1,7 +1,7 @@
 import "../App.css";
 import ArticleDetailTemplate from "../Templates/ArticleDetailTemplate.tsx";
 
-const ArticleDetailPage = () => {
+const ArticleDetailPage: React.FC = () => {
   return (
     <>
       <ArticleDetailTemplate />

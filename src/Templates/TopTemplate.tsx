@@ -3,7 +3,8 @@ import CardMolecule from "../Organisms/Card.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
-const TopTemplate = () => {
+
+const TopTemplate: React.FC = () => {
   type CardData = {
     imgSrc: string;
     title: string;
@@ -201,7 +202,7 @@ const TopTemplate = () => {
     <div className="d-flex flex-column min-vh-100">
       <NavBar />
       <div className="container flex-fill">
-        <TagSelect />
+        <TagSelect variant="scroll" />
         <CardMolecule cards={cards} itemsPerPage={6} />
       </div>
       <Footer />

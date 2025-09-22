@@ -19,7 +19,12 @@ const ScrollBoxContent = styled.div`
     display: none;
   }
 `;
-const TagSelect = () => {
+
+type TagSelectProps = {
+  variant?: "scroll" | "static"; // ← 追加: 表示方法を切り替える
+};
+
+const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const [showButtons, setShowButtons] = useState(false);
 
   useEffect(() => {
@@ -40,79 +45,82 @@ const TagSelect = () => {
 
   return (
     <div className="container text-start p-4 ">
-      <div className="row justify-content-md-center">
-        <div className="col-2 text-end">
-          {showButtons && (
-            <button
-              className="btn btn-light w-5 text-end"
-              onClick={() =>
-                document
-                  .getElementById("scroll-box-content")
-                  ?.scrollBy({ left: -150, behavior: "smooth" })
-              }
-            >
-              ◀
-            </button>
-          )}
+      {variant === "scroll" ? (
+        // ===== スクロール表示 =====
+        <div className="row justify-content-md-center">
+          <div className="col-2 text-end">
+            {showButtons && (
+              <button
+                className="btn btn-light w-5 text-end"
+                onClick={() =>
+                  document
+                    .getElementById("scroll-box-content")
+                    ?.scrollBy({ left: -150, behavior: "smooth" })
+                }
+              >
+                ◀
+              </button>
+            )}
+          </div>
+          <div className="col-8">
+            <ScrollBoxContent id="scroll-box-content">
+              <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
+                うつ病
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                小児がん
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                就職
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                就職
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                就職
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                就職
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                就職
+              </span>
+              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
+                就職
+              </span>
+              {/* ...他のタグ */}
+            </ScrollBoxContent>
+          </div>
+          <div className="col-2">
+            {showButtons && (
+              <button
+                className="btn btn-light w-5 text-start"
+                onClick={() =>
+                  document
+                    .getElementById("scroll-box-content")
+                    ?.scrollBy({ left: 150, behavior: "smooth" })
+                }
+              >
+                ▶
+              </button>
+            )}
+          </div>
         </div>
-        <div className="col-8">
-          <ScrollBoxContent id="scroll-box-content">
-            <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
-              うつ病
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              うつ病
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              小児がん
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              就職
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              比較
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              結婚
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              趣味
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              プログラミング
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              通院
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              抗うつ薬
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              焦る気持ち
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              お出かけ
-            </span>
-            <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-              学業
-            </span>
-          </ScrollBoxContent>
+      ) : (
+        // ===== 固定表示 =====
+        <div className="container">
+          <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
+            うつ病
+          </span>
+          <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
+            小児がん
+          </span>
+          <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
+            就職
+          </span>
+          {/* ...他のタグ */}
         </div>
-        <div className="col-2">
-          {showButtons && (
-            <button
-              className="btn btn-light w-5 text-start"
-              onClick={() =>
-                document
-                  .getElementById("scroll-box-content")
-                  ?.scrollBy({ left: 150, behavior: "smooth" })
-              }
-            >
-              ▶
-            </button>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };
