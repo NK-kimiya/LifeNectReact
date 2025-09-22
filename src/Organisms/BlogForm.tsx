@@ -45,7 +45,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
         <TagSelect variant="static" />
       </div>
 
-      <button type="button" className="btn btn-primary">
+      <button type="button" className="btn btn-success">
         {buttonLabel}
       </button>
     </>

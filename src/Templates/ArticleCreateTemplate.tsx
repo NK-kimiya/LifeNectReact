@@ -6,10 +6,11 @@ import Footer from "../Organisms/Footer.tsx";
 
 const ArticleCreateTemplate: React.FC = () => {
   return (
-    <div className="d-flex flex-column min-vh-100">
+    <div className="d-flex flex-column min-vh-100 bg-light">
       <NavBar />
-      <main className="flex-grow-1 pt-4">
-        <div className="container">
+      <div className="container">
+        <h2 className="text-start">新規投稿</h2>
+        <main className="flex-grow-1 pt-4">
           <div className="row">
             {/* メインカラム */}
             <div className="col-8">
@@ -18,14 +19,14 @@ const ArticleCreateTemplate: React.FC = () => {
 
             {/* サイドバー */}
             <div className="col-4">
-              <div className="row">
+              <div>
                 {/* サイドバー内部2カラム */}
                 <UploadImgDisplay />
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
       <Footer />
     </div>
   );

@@ -12,8 +12,8 @@ const ScrollBoxContent = styled.div`
 const ChatInput: React.FC = () => {
   return (
     <>
-      <div className="bg-white border-top" style={{ height: "20vh" }}>
-        <div className="container" style={{ maxWidth: "80%" }}>
+      <div className="bg-white border-top">
+        <div className="container pb-2" style={{ maxWidth: "80%" }}>
           <ScrollBoxContent>
             <div className="row h-100 align-items-center">
               <div className="col-10">
@@ -24,7 +24,7 @@ const ChatInput: React.FC = () => {
                 ></textarea>
               </div>
               <div className="col-2 d-grid">
-                <button className="btn btn-primary" type="submit">
+                <button className="btn btn-success" type="submit">
                   <i className="bi bi-send"></i>
                 </button>
               </div>
