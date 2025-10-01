@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
-
+import { fetchTags } from "../API/Tag.tsx";
 const ScrollBoxContent = styled.div`
   display: flex;
   flex-wrap: nowrap;
@@ -24,8 +24,28 @@ type TagSelectProps = {
   variant?: "scroll" | "static"; // ← 追加: 表示方法を切り替える
 };
 
+type Tag = {
+  id: number;
+  name: string;
+};
+
 const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showButtons, setShowButtons] = useState(false);
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const data = await fetchTags();
+        setTags(data);
+      } catch (err) {
+        console.error("タグの取得に失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTags();
+  }, []);
 
   useEffect(() => {
     const el = document.getElementById("scroll-box-content");
@@ -35,13 +55,12 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
       setShowButtons(el.scrollWidth > el.clientWidth);
     };
 
-    // 初期判定
     checkOverflow();
-
-    // リサイズ時にも再判定
     window.addEventListener("resize", checkOverflow);
     return () => window.removeEventListener("resize", checkOverflow);
-  }, []);
+  }, [tags]); // ← tags が変わったら再チェック
+
+  if (loading) return <p>読み込み中...</p>;
 
   return (
     <div className="container text-start p-4 ">
@@ -63,32 +82,15 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
             )}
           </div>
           <div className="col-8">
-            <ScrollBoxContent id="scroll-box-content">
-              <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
-                うつ病
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                小児がん
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                就職
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                就職
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                就職
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                就職
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                就職
-              </span>
-              <span className="badge text-bg-light m-2 py-2 px-5 rounded-pill">
-                就職
-              </span>
-              {/* ...他のタグ */}
+            <ScrollBoxContent id="scroll-box-content" style={{ flex: 1 }}>
+              {tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="badge text-bg-success m-2 py-2 px-5 rounded-pill"
+                >
+                  {tag.name}
+                </span>
+              ))}
             </ScrollBoxContent>
           </div>
           <div className="col-2">
@@ -109,16 +111,14 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
       ) : (
         // ===== 固定表示 =====
         <div className="container">
-          <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
-            うつ病
-          </span>
-          <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
-            小児がん
-          </span>
-          <span className="badge text-bg-success m-2 py-2 px-5 rounded-pill">
-            就職
-          </span>
-          {/* ...他のタグ */}
+          {tags.map((tag) => (
+            <span
+              key={tag.id}
+              className="badge text-bg-success m-2 py-2 px-5 rounded-pill"
+            >
+              {tag.name}
+            </span>
+          ))}
         </div>
       )}
     </div>

@@ -18,7 +18,8 @@ export const login = async (
     switch (response.status) {
       case 200: {
         const data = await response.json();
-        const token = data.token;
+        const token = data.access;
+        console.log(token);
         localStorage.setItem("authToken", token);
         window.location.href = "/admin-top";
         return token;
