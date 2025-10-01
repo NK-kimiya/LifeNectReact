@@ -1,11 +1,31 @@
 import React from "react";
 import TagSelect from "./TagSelect.tsx";
+import { useState } from "react";
+import { useError } from "../Context/ErrorContext.tsx";
+import { createTag } from "../API/Tag.tsx";
+import Aleart from "./Aleart.tsx";
 
 type BlogFormProps = {
   buttonLabel: string;
 };
 
 const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
+  const [tagName, setTagName] = useState("");
+  const { setError } = useError();
+  const [successMessage, setSuccessMessage] = useState("");
+
+  //タグ作成の処理
+  const handleCreateTag = async () => {
+    if (!tagName) return;
+    try {
+      const newTag = await createTag(tagName, setError);
+      setSuccessMessage(`「${newTag.name}」が追加されました。`);
+      setTagName("");
+      setError("");
+    } catch {
+      // エラー時は setError が呼ばれて UI に反映される
+    }
+  };
   return (
     <>
       <div className="mb-3">
@@ -43,11 +63,71 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
         ></textarea>
 
         <TagSelect variant="static" />
+        <button
+          type="button"
+          className="btn text-bg-success white rounded-circle d-inline-flex align-items-center justify-content-center"
+          style={{ width: "50px", height: "50px" }}
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+          onClick={() => setSuccessMessage("")}
+        >
+          ＋
+        </button>
+
+        <div
+          className="modal fade"
+          id="exampleModal"
+          tabIndex={-1}
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="exampleModalLabel">
+                  タグ名
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <input
+                  type="text"
+                  placeholder="新しいタグ名"
+                  value={tagName}
+                  onChange={(e) => setTagName(e.target.value)}
+                />
+              </div>
+              {successMessage && <p>{successMessage}</p>}
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  閉じる
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleCreateTag}
+                >
+                  追加する
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <button type="button" className="btn btn-success">
         {buttonLabel}
       </button>
+      <Aleart />
     </>
   );
 };
