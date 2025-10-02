@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { uploadFile, fetchFiles, UploadedFile } from "../API/File.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
+import { useFileContext } from "../Context/FileContext.tsx";
+
 const ScrollBox = styled.div`
   min-height: 100vh;
   overflow-y: scroll;
@@ -12,17 +15,10 @@ const ScrollBox = styled.div`
   }
 `;
 
-// サイドバーに表示する要素の型
-type SidebarItem = {
-  id: number;
-  imageUrl: string;
-  urlText: string;
-};
-
 const UploadImgDisplay = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [files, setFiles] = useState<UploadedFile[]>([]);
-  const [error, setError] = useState<string>("");
+  const { setError } = useError();
+  const { files, setFiles } = useFileContext(); // ★ コンテキストから取得
   useEffect(() => {
     const loadFiles = async () => {
       try {
@@ -33,7 +29,7 @@ const UploadImgDisplay = () => {
       }
     };
     loadFiles();
-  }, []);
+  }, [setFiles, setError]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -43,23 +39,20 @@ const UploadImgDisplay = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError("アップロードするファイルを選択してください");
+      setError("アップロードするファイルを選択してください。");
       return;
     }
-    try {
-      const uploaded = await uploadFile(selectedFile);
-      setFiles([uploaded, ...files]); // 先頭に追加
-      setSelectedFile(null);
-      setError("");
-    } catch {
-      setError("ファイルのアップロードに失敗しました");
+    const uploaded = await uploadFile(selectedFile, setError); // ★ setError を渡す
+    if (uploaded) {
+      setFiles([uploaded, ...files]); // ★ Context経由で更新
     }
+    setSelectedFile(null);
+    setError("");
   };
 
   return (
     <>
       <h3>ファイルアップロード</h3>
-      {error && <p style={{ color: "red" }}>{error}</p>}
       <input type="file" onChange={handleFileChange}></input>
       <button className="btn btn-primary ms-2" onClick={handleUpload}>
         アップロード

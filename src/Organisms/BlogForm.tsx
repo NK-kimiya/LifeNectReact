@@ -3,6 +3,7 @@ import TagSelect from "./TagSelect.tsx";
 import { useState } from "react";
 import { useError } from "../Context/ErrorContext.tsx";
 import { createTag } from "../API/Tag.tsx";
+import { useTagContext } from "../Context/TagContext.tsx";
 import Aleart from "./Aleart.tsx";
 
 type BlogFormProps = {
@@ -13,21 +14,27 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
   const [tagName, setTagName] = useState("");
   const { setError } = useError();
   const [successMessage, setSuccessMessage] = useState("");
+  const { tags, setTags } = useTagContext();
 
   //タグ作成の処理
   const handleCreateTag = async () => {
     if (!tagName) return;
     try {
       const newTag = await createTag(tagName, setError);
-      setSuccessMessage(`「${newTag.name}」が追加されました。`);
+      if (newTag) {
+        setTags([...tags, newTag]);
+        setSuccessMessage(`「${newTag.name}」が追加されました。`);
+        setError("");
+      }
+
       setTagName("");
-      setError("");
     } catch {
       // エラー時は setError が呼ばれて UI に反映される
     }
   };
   return (
     <>
+      <Aleart />
       <div className="mb-3">
         <label htmlFor="exampleFormControlInput1" className="form-label">
           タイトル
