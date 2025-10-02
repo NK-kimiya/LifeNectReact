@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { fetchTags } from "../API/Tag.tsx";
+import { useTagContext } from "../Context/TagContext.tsx";
 const ScrollBoxContent = styled.div`
   display: flex;
   flex-wrap: nowrap;
@@ -30,7 +31,7 @@ type Tag = {
 };
 
 const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
-  const [tags, setTags] = useState<Tag[]>([]);
+  const { tags, setTags } = useTagContext();
   const [loading, setLoading] = useState(true);
   const [showButtons, setShowButtons] = useState(false);
   useEffect(() => {
