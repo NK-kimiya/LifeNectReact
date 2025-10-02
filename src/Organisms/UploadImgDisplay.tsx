@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { uploadFile, fetchFiles, UploadedFile } from "../API/File.tsx";
 const ScrollBox = styled.div`
   min-height: 100vh;
   overflow-y: scroll;
@@ -18,48 +19,67 @@ type SidebarItem = {
   urlText: string;
 };
 
-// サイドバーのデータ（仮）
-const sidebarItems: SidebarItem[] = [
-  {
-    id: 1,
-    imageUrl:
-      "https://qureo.jp/class/wp/content/uploads/NO25_%E7%94%BB%E5%83%8F%E2%91%A0-1.jpeg",
-    urlText: "https://test1.com",
-  },
-  {
-    id: 2,
-    imageUrl:
-      "https://qureo.jp/class/wp/content/uploads/NO25_%E7%94%BB%E5%83%8F%E2%91%A0-1.jpeg",
-    urlText: "https://test2.com",
-  },
-  {
-    id: 3,
-    imageUrl:
-      "https://qureo.jp/class/wp/content/uploads/NO25_%E7%94%BB%E5%83%8F%E2%91%A0-1.jpeg",
-    urlText: "https://test3.com",
-  },
-  {
-    id: 4,
-    imageUrl:
-      "https://qureo.jp/class/wp/content/uploads/NO25_%E7%94%BB%E5%83%8F%E2%91%A0-1.jpeg",
-    urlText: "https://test3.com",
-  },
-];
 const UploadImgDisplay = () => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [error, setError] = useState<string>("");
+  useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        const data = await fetchFiles();
+        setFiles(data);
+      } catch {
+        setError("ファイル一覧の取得に失敗しました");
+      }
+    };
+    loadFiles();
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError("アップロードするファイルを選択してください");
+      return;
+    }
+    try {
+      const uploaded = await uploadFile(selectedFile);
+      setFiles([uploaded, ...files]); // 先頭に追加
+      setSelectedFile(null);
+      setError("");
+    } catch {
+      setError("ファイルのアップロードに失敗しました");
+    }
+  };
+
   return (
     <>
+      <h3>ファイルアップロード</h3>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <input type="file" onChange={handleFileChange}></input>
+      <button className="btn btn-primary ms-2" onClick={handleUpload}>
+        アップロード
+      </button>
       <ScrollBox>
-        {sidebarItems.map((item) => (
-          <div className="" key={item.id}>
-            <div className="card mb-3">
-              <img src={item.imageUrl} className="card-img-top" alt="" />
+        {files.map((file) => (
+          <div className="">
+            <div key={file.id} className="card mb-3">
+              <img src={file.file_url} className="card-img-top" alt="" />
               <div className="card-body">
                 <input
                   type="text"
                   className="form-control"
-                  value={item.urlText}
+                  value={file.file_url}
                   readOnly
                 />
+                <br />
+                <small>
+                  Uploaded at: {new Date(file.uploaded_at).toLocaleString()}
+                </small>
               </div>
             </div>
           </div>

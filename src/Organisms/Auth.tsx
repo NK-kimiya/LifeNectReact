@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { login } from "../API/Login.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "./Aleart.tsx";
+import { useNavigate } from "react-router-dom";
 const LoginBoxContent = styled.div`
   width: 80%;
 
@@ -10,14 +11,19 @@ const LoginBoxContent = styled.div`
     width: 480px;
   }
 `;
-const Auth: React.FC = () => {
+
+type AuthProps = {
+  onSubmit: (username: string, password: string) => void; // 親から渡す
+};
+const Auth: React.FC<AuthProps> = ({ onSubmit }) => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { error, setError } = useError(); // Context から取得
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = await login(username, password, setError);
+    onSubmit(username, password);
   };
   return (
     <>

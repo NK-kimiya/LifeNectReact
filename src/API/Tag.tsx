@@ -1,64 +1,73 @@
 // src/API/Tag.tsx
-import axios from "axios";
 import { Dispatch, SetStateAction } from "react";
-const BASE_URL = "http://localhost:8000";
+import client from "./client.tsx";
 
+export type Tag = {
+  id: number;
+  name: string;
+};
+
+// タグ作成（認証必須）
 export const createTag = async (
   name: string,
   setError: Dispatch<SetStateAction<string>>
-) => {
+): Promise<Tag | null> => {
   try {
-    // localStorage から JWTトークンを取得
-    const token = localStorage.getItem("authToken");
-    if (!token)
-      throw new Error("認証トークンがありません。ログインしてください。");
-
-    const response = await axios.post(
-      `${BASE_URL}/api/tags/`,
+    const response = await client.post<Tag>(
+      "/api/tags/",
       { name },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // トークンを付与
-          "Content-Type": "application/json",
-        },
-      }
+      { headers: { Authorization: "" } } // interceptorsで付与される
     );
-
     return response.data;
   } catch (error: any) {
     if (error.response) {
-      switch (error.response.status) {
+      const status: number = error.response.status;
+      switch (status) {
         case 400:
-          setError("入力が不正です。もう一度確認してください。");
+          setError("タグ名が不正です。");
           break;
         case 401:
-          setError("認証エラーです。再ログインしてください。");
+          setError("認証エラー。ログインしてください。");
           break;
         case 403:
-          setError("権限がありません。管理者のみが実行できます。");
+          setError("タグを作成する権限がありません。");
           break;
         case 500:
         default:
-          setError("サーバーでエラーが発生しました。");
+          setError("タグ作成中にサーバーエラーが発生しました。");
+          break;
       }
     } else {
       setError("ネットワークエラーが発生しました。");
     }
-    throw error;
+    return null;
   }
 };
 
-export const fetchTags = async () => {
+// タグ一覧取得（認証不要）
+export const fetchTags = async (
+  setError: Dispatch<SetStateAction<string>>
+): Promise<Tag[]> => {
   try {
-    const response = await axios.get(`${BASE_URL}/api/tags/`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const response = await client.get<Tag[]>("/api/tags/", {
+      headers: { Authorization: "none" }, // 認証不要を明示
     });
-
-    return response.data; // [{id: 1, name: "Django"}, ...]
+    return response.data;
   } catch (error: any) {
-    console.error("タグ取得エラー:", error.response?.data || error.message);
-    throw error;
+    if (error.response) {
+      const status: number = error.response.status;
+      switch (status) {
+        case 404:
+          setError("タグが見つかりませんでした。");
+          break;
+        case 500:
+        default:
+          setError("タグ取得中にサーバーエラーが発生しました。");
+          break;
+      }
+    } else {
+      setError("ネットワークエラーが発生しました。");
+    }
+    return [];
   }
 };

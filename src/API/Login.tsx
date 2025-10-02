@@ -1,52 +1,49 @@
+// src/API/Login.tsx
 import { Dispatch, SetStateAction } from "react";
+import client from "./client.tsx";
 
-// src/api/auth.ts
 export const login = async (
   username: string,
   password: string,
   setError: Dispatch<SetStateAction<string>>
 ): Promise<string | null> => {
   try {
-    const response = await fetch("http://localhost:8000/api/token/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
+    const response = await client.post<{ access: string }>("/api/token/", {
+      username,
+      password,
     });
 
-    switch (response.status) {
-      case 200: {
-        const data = await response.json();
-        const token = data.access;
-        console.log(token);
-        localStorage.setItem("authToken", token);
-        window.location.href = "/admin-top";
-        return token;
-      }
-      case 400:
-        setError("入力内容が正しくありません。もう一度確認してください。");
-        return null;
-
-      case 401:
-        setError("ユーザー名またはパスワードが間違っています。");
-        return null;
-
-      case 500:
-      case 502:
-      case 503:
-        setError(
-          "サーバー内部でエラーが発生しました。時間を置いて再試行してください。"
-        );
-        return null;
-
-      default:
-        setError(`予期しないエラーが発生しました (status: ${response.status})`);
-        return null;
+    if (response.status === 200) {
+      const accessToken: string = response.data.access;
+      localStorage.setItem("authToken", accessToken);
+      return accessToken;
     }
-  } catch (error) {
-    console.error("ログインエラー:", error);
-    setError("ネットワークエラーが発生しました。");
+    return null;
+  } catch (error: any) {
+    if (error.response) {
+      const status: number = error.response.status;
+      switch (status) {
+        case 400:
+          setError("リクエストが不正です。入力内容を確認してください。");
+          break;
+        case 401:
+          setError(
+            "認証に失敗しました。ユーザー名またはパスワードを確認してください。"
+          );
+          break;
+        case 403:
+          setError("アクセス権限がありません。");
+          break;
+        case 500:
+        default:
+          setError(
+            "サーバーエラーが発生しました。しばらくしてから再度お試しください。"
+          );
+          break;
+      }
+    } else {
+      setError("ネットワークエラーが発生しました。接続を確認してください。");
+    }
     return null;
   }
 };
