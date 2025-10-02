@@ -1,7 +1,7 @@
 // src/API/Tag.tsx
 import { Dispatch, SetStateAction } from "react";
 import client from "./client.tsx";
-
+import { handleApiError } from "./errorHandler.tsx";
 export type Tag = {
   id: number;
   name: string;
@@ -20,26 +20,7 @@ export const createTag = async (
     );
     return response.data;
   } catch (error: any) {
-    if (error.response) {
-      const status: number = error.response.status;
-      switch (status) {
-        case 400:
-          setError("タグ名が不正です。");
-          break;
-        case 401:
-          setError("認証エラー。ログインしてください。");
-          break;
-        case 403:
-          setError("タグを作成する権限がありません。");
-          break;
-        case 500:
-        default:
-          setError("タグ作成中にサーバーエラーが発生しました。");
-          break;
-      }
-    } else {
-      setError("ネットワークエラーが発生しました。");
-    }
+    handleApiError(error, setError, "タグ作成に失敗しました。");
     return null;
   }
 };
@@ -54,20 +35,7 @@ export const fetchTags = async (
     });
     return response.data;
   } catch (error: any) {
-    if (error.response) {
-      const status: number = error.response.status;
-      switch (status) {
-        case 404:
-          setError("タグが見つかりませんでした。");
-          break;
-        case 500:
-        default:
-          setError("タグ取得中にサーバーエラーが発生しました。");
-          break;
-      }
-    } else {
-      setError("ネットワークエラーが発生しました。");
-    }
+    handleApiError(error, setError, "タグ作成に失敗しました。");
     return [];
   }
 };
