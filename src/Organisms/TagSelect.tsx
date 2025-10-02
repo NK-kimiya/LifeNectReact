@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { fetchTags } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
 const ScrollBoxContent = styled.div`
   display: flex;
   flex-wrap: nowrap;
@@ -34,10 +35,11 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const { tags, setTags } = useTagContext();
   const [loading, setLoading] = useState(true);
   const [showButtons, setShowButtons] = useState(false);
+  const { setError } = useError();
   useEffect(() => {
     const loadTags = async () => {
       try {
-        const data = await fetchTags();
+        const data = await fetchTags(setError);
         setTags(data);
       } catch (err) {
         console.error("タグの取得に失敗しました");
