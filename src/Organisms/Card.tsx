@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 type CardData = {
   // ← 1枚のカードデータの型
-  imgSrc: string;
+  image: string;
   title: string;
   text: string;
   buttonText: string;
@@ -32,15 +32,11 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
         {currentItems.map((card, i) => (
           <div className="col-12 col-md-4 col-lg-3 mb-3" key={i}>
             <div className="card">
-              <img
-                src={card.imgSrc}
-                className="card-img-top"
-                alt={card.title}
-              />
+              <img src={card.image} className="card-img-top" alt={card.title} />
               <div className="card-body">
                 <h5 className="card-title">{card.title}</h5>
-                <p className="card-text">{card.text}</p>
-                <Link className="btn btn-success" to="/article-detail">
+
+                <Link className="btn btn-success" to={card.buttonHref}>
                   {card.buttonText}
                 </Link>
               </div>

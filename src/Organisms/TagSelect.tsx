@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { fetchTags } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
+import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 const ScrollBoxContent = styled.div`
   display: flex;
   flex-wrap: nowrap;
@@ -36,6 +37,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const [loading, setLoading] = useState(true);
   const [showButtons, setShowButtons] = useState(false);
   const { setError } = useError();
+  const { selectedTagIds, toggleTag } = useTagSelection();
   useEffect(() => {
     const loadTags = async () => {
       try {
@@ -117,7 +119,13 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
           {tags.map((tag) => (
             <span
               key={tag.id}
-              className="badge text-bg-success m-2 py-2 px-5 rounded-pill"
+              onClick={() => toggleTag(tag.id)}
+              className={`badge m-2 py-2 px-5 rounded-pill ${
+                selectedTagIds.includes(tag.id)
+                  ? "bg-secondary text-white" // ★ 選択時の背景色（青）
+                  : "bg-success text-white" // ★ 未選択時の背景色（グレー）
+              }`}
+              style={{ cursor: "pointer" }}
             >
               {tag.name}
             </span>

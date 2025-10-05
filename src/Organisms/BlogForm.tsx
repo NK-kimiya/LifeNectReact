@@ -5,17 +5,22 @@ import { useError } from "../Context/ErrorContext.tsx";
 import { createTag } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
 import Aleart from "./Aleart.tsx";
+import { useTagSelection } from "../Context/TagSelectionContext.tsx";
+import { createBlog } from "../API/Blog.tsx";
 
 type BlogFormProps = {
   buttonLabel: string;
 };
 
 const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [tagName, setTagName] = useState("");
   const { setError } = useError();
   const [successMessage, setSuccessMessage] = useState("");
   const { tags, setTags } = useTagContext();
-
+  const { selectedTagIds } = useTagSelection();
+  const [eyecatch, setEyecatch] = useState("");
   //タグ作成の処理
   const handleCreateTag = async () => {
     if (!tagName) return;
@@ -32,6 +37,28 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
       // エラー時は setError が呼ばれて UI に反映される
     }
   };
+
+  const handleCreateBlog = async () => {
+    if (!title || !content) {
+      setError("タイトルと本文を入力してください。");
+      return;
+    }
+
+    const newBlog = await createBlog(
+      title,
+      content,
+      selectedTagIds,
+      eyecatch,
+      setError
+    ); // ★ ここで送信
+    if (newBlog) {
+      setSuccessMessage(`記事「${newBlog.title}」が作成されました。`);
+      setTitle("");
+      setContent("");
+      setEyecatch("");
+      setError("");
+    }
+  };
   return (
     <>
       <Aleart />
@@ -44,6 +71,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           className="form-control"
           id="exampleFormControlInput1"
           placeholder="タイトルを入力"
+          onChange={(e) => setTitle(e.target.value)}
         />
       </div>
 
@@ -56,6 +84,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           className="form-control"
           id="exampleFormControlInput1"
           placeholder="アイキャッチ画像のURLを入力"
+          onChange={(e) => setEyecatch(e.target.value)}
         />
       </div>
 
@@ -67,6 +96,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           className="form-control"
           id="exampleFormControlTextarea1"
           rows={15}
+          onChange={(e) => setContent(e.target.value)}
         ></textarea>
 
         <TagSelect variant="static" />
@@ -131,7 +161,11 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
         </div>
       </div>
 
-      <button type="button" className="btn btn-success">
+      <button
+        type="button"
+        className="btn btn-success"
+        onClick={handleCreateBlog}
+      >
         {buttonLabel}
       </button>
       <Aleart />
