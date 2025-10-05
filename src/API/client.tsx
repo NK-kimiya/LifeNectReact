@@ -29,4 +29,9 @@ client.interceptors.response.use(
   }
 );
 
+export const clientPublic: AxiosInstance = axios.create({
+  baseURL: "http://localhost:8000",
+  headers: { "Content-Type": "application/json" },
+});
+
 export default client;
