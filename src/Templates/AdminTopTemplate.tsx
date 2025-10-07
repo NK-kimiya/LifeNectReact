@@ -1,25 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table, { RowData } from "../Organisms/Table.tsx"; // ← 型も一緒にインポート
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
 import { Link } from "react-router-dom";
+import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
 const AdminTopTemplate: React.FC = () => {
-  // --- 表示するデータを準備 ---
-  const rows: RowData[] = [
-    { id: 1, title: "就職と小児がん", author: "田中", date: "2025/9/20" },
-    { id: 2, title: "就職活動と小児がん", author: "田中", date: "2025/9/21" },
-    {
-      id: 3,
-      title: "小児がん経験者の就労支援",
-      author: "佐藤",
-      date: "2025/9/22",
-    },
-    { id: 4, title: "医療と就職の両立", author: "鈴木", date: "2025/9/23" },
-    { id: 5, title: "支援制度の活用法", author: "高橋", date: "2025/9/24" },
-    { id: 6, title: "仲間との交流", author: "田中", date: "2025/9/25" },
-    // ...さらに複数のデータ
-  ];
+  const [rows, setRows] = useState<RowData[]>([]);
 
+  useEffect(() => {
+    fetchArticles()
+      .then((data: BlogArticle[]) => {
+        // BlogArticle → RowData に変換
+        const mapped: RowData[] = data.map((article) => ({
+          id: article.id,
+          title: article.title,
+          author: "管理者", // ★ APIにauthorがある場合は article.author に修正
+          date: new Date(article.updated_at).toLocaleDateString(), // ★ APIにdateがある場合は article.date に修正
+        }));
+        setRows(mapped);
+      })
+      .catch((err) => {
+        console.error("記事一覧の取得に失敗しました:", err);
+      });
+  }, []);
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />

@@ -24,7 +24,7 @@ const TopTemplate: React.FC = () => {
               title: article.title,
               text: article.body.slice(0, 100) + "...",
               buttonText: "詳細を見る",
-              buttonHref: `/articles/:${article.id}`,
+              buttonHref: `/articles/${article.id}`,
             }))}
             itemsPerPage={6}
           />

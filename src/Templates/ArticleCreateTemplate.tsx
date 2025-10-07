@@ -14,7 +14,7 @@ const ArticleCreateTemplate: React.FC = () => {
           <div className="row">
             {/* メインカラム */}
             <div className="col-8">
-              <BlogForm buttonLabel="新規投稿" />
+              <BlogForm mode="create" />
             </div>
 
             {/* サイドバー */}

@@ -3,10 +3,11 @@ import client from "./client.tsx";
 import { Dispatch, SetStateAction } from "react";
 import { handleApiError } from "./errorHandler.tsx";
 import { clientPublic } from "./client.tsx";
+import axios from "axios";
 export type BlogArticle = {
   id: number;
   title: string;
-  content: string;
+  body: string;
   created_at: string;
   updated_at: string;
   tags: number[]; // タグIDの配列
@@ -55,4 +56,9 @@ export const fetchArticles = async (): Promise<BlogArticle[]> => {
   } catch (error) {
     return [];
   }
+};
+
+export const fetchArticleById = async (id: string): Promise<BlogArticle> => {
+  const res = await axios.get(`http://localhost:8000/api/articles/${id}/`);
+  return res.data;
 };

@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import ScrollSpy from "bootstrap/js/dist/scrollspy";
 import "../App.css";
 import styled from "styled-components";
-
+interface ContentsProps {
+  headings: { id: string; title: string }[];
+}
 const ScrollSpyLink = styled.a`
   padding: 0.25rem;
   border-radius: 0.375rem;
@@ -15,7 +17,7 @@ const ScrollSpyLink = styled.a`
     color: white;
   }
 `;
-const Contents: React.FC = () => {
+const Contents: React.FC<ContentsProps> = ({ headings }) => {
   useEffect(() => {
     const spyEl = document.querySelector(
       '[data-bs-spy="scroll"]'
@@ -24,7 +26,15 @@ const Contents: React.FC = () => {
       const scrollSpy = (ScrollSpy as any).getOrCreateInstance(spyEl);
       scrollSpy.refresh();
     }
-  }, []);
+  }, [[headings]]);
+
+  if (!headings || headings.length === 0) {
+    return (
+      <>
+        <p>目次はありません。</p>
+      </>
+    );
+  }
   return (
     <div className="contents-wrap">
       <div
@@ -33,19 +43,11 @@ const Contents: React.FC = () => {
       >
         {/* hrefにh3タグの番号をIDに指定
                 コンテンツをh3のタイトルにする */}
-        <ScrollSpyLink href="#simple-list-item-1">
-          自分の「得意」と「苦手」を正直に見つめる
-        </ScrollSpyLink>
-        <ScrollSpyLink href="#simple-list-item-2">
-          2. オープンかクローズか、決断のとき
-        </ScrollSpyLink>
-        <ScrollSpyLink href="#simple-list-item-3">
-          就労移行支援事業所の活用
-        </ScrollSpyLink>
-        <ScrollSpyLink href="#simple-list-item-4">
-          就労移行支援事業所とは？
-        </ScrollSpyLink>
-        <ScrollSpyLink href="#simple-list-item-5">同じ境遇の方へ</ScrollSpyLink>
+        {headings.map((heading) => (
+          <ScrollSpyLink key={heading.id} href={`#${heading.id}`}>
+            {heading.title}
+          </ScrollSpyLink>
+        ))}
       </div>
     </div>
   );
