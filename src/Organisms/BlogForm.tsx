@@ -6,13 +6,14 @@ import { createTag } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
 import Aleart from "./Aleart.tsx";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
-import { createBlog } from "../API/Blog.tsx";
+import { createBlog, BlogArticle } from "../API/Blog.tsx";
 
 type BlogFormProps = {
-  buttonLabel: string;
+  mode: "create" | "edit";
+  initialData?: BlogArticle;
 };
 
-const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
+const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tagName, setTagName] = useState("");
@@ -38,25 +39,38 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
     }
   };
 
-  const handleCreateBlog = async () => {
+  const handleSubmitBlog = async () => {
     if (!title || !content) {
       setError("タイトルと本文を入力してください。");
       return;
     }
 
-    const newBlog = await createBlog(
-      title,
-      content,
-      selectedTagIds,
-      eyecatch,
-      setError
-    ); // ★ ここで送信
-    if (newBlog) {
-      setSuccessMessage(`記事「${newBlog.title}」が作成されました。`);
-      setTitle("");
-      setContent("");
-      setEyecatch("");
-      setError("");
+    if (mode === "create") {
+      // 新規作成
+      const newBlog = await createBlog(
+        title,
+        content,
+        selectedTagIds,
+        eyecatch,
+        setError
+      );
+      if (newBlog) {
+        setSuccessMessage(`記事「${newBlog.title}」が作成されました。`);
+        setTitle("");
+        setContent("");
+        setEyecatch("");
+        setError("");
+      }
+    } else {
+      // 更新処理（例：APIが未定なら後で updateBlog を実装）
+      console.log("記事更新処理をここに追加してください", {
+        id: initialData?.id,
+        title,
+        content,
+        eyecatch,
+        tags: selectedTagIds,
+      });
+      setSuccessMessage(`記事「${title}」が更新されました。`);
     }
   };
   return (
@@ -71,6 +85,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           className="form-control"
           id="exampleFormControlInput1"
           placeholder="タイトルを入力"
+          value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
@@ -84,6 +99,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           className="form-control"
           id="exampleFormControlInput1"
           placeholder="アイキャッチ画像のURLを入力"
+          value={eyecatch}
           onChange={(e) => setEyecatch(e.target.value)}
         />
       </div>
@@ -96,6 +112,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
           className="form-control"
           id="exampleFormControlTextarea1"
           rows={15}
+          value={content}
           onChange={(e) => setContent(e.target.value)}
         ></textarea>
 
@@ -164,9 +181,9 @@ const BlogForm: React.FC<BlogFormProps> = ({ buttonLabel }) => {
       <button
         type="button"
         className="btn btn-success"
-        onClick={handleCreateBlog}
+        onClick={handleSubmitBlog}
       >
-        {buttonLabel}
+        {mode === "create" ? "記事を作成" : "記事を更新"} {/* ★ 修正 */}
       </button>
       <Aleart />
     </>
