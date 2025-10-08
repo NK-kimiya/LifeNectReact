@@ -22,10 +22,10 @@ const Article: React.FC<ArticleProps> = ({ article }) => {
         className="scrollspy-example position-relative"
         style={{ minHeight: "90vh", scrollBehavior: "smooth" }}
       >
-        <div className="text-align-left">
+        <div className="text-start">
           {/* 記事本文 */}
           <div
-            className="text-align-left"
+            className="text-start"
             dangerouslySetInnerHTML={{ __html: article?.body }}
           />
         </div>

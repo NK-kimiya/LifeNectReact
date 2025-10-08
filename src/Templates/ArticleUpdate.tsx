@@ -1,12 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../Organisms/NavBar.tsx";
 import BlogForm from "../Organisms/BlogForm.tsx";
 import UploadImgDisplay from "../Organisms/UploadImgDisplay.tsx";
 import Footer from "../Organisms/Footer.tsx";
+import { useParams } from "react-router-dom";
+import { fetchArticleById, BlogArticle } from "../API/Blog.tsx";
+import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 
 const ArticleUpdate: React.FC = () => {
+  const { setSelectedTagIds } = useTagSelection();
+  const { id } = useParams<{ id: string }>();
+
+  // 記事データ用のstate
+  const [article, setArticle] = useState<any>(null);
+
+  useEffect(() => {
+    if (id) {
+      fetchArticleById(id)
+        .then((data) => {
+          setArticle(data);
+          if (data?.tags) {
+            const tagIds = data.tags.map(
+              (tag: { id: number; name: string }) => tag.id
+            );
+            setSelectedTagIds(tagIds);
+          }
+        })
+        .catch((err) => {
+          console.error("記事取得に失敗しました:", err);
+        });
+    }
+  }, [id]);
   return (
     <div className="d-flex flex-column min-vh-100 bg-light ">
+      <p>{id}</p>
       <NavBar />
       <div className="container">
         <h2 className="text-start">編集ページ</h2>
@@ -14,7 +41,11 @@ const ArticleUpdate: React.FC = () => {
           <div className="row">
             {/* メインカラム */}
             <div className="col-8">
-              <BlogForm buttonLabel="更新" />
+              <BlogForm
+                mode="edit"
+                initialData={article}
+                onUpdate={(updated) => setArticle(updated)}
+              />
             </div>
 
             {/* サイドバー */}

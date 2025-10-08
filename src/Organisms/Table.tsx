@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { deleteBlog } from "../API/Blog";
+import { useError } from "../Context/ErrorContext"; // エラー表示用
 // --- 行データの型定義 ---
 export type RowData = {
   id: number;
@@ -12,9 +13,10 @@ export type RowData = {
 type TableProps = {
   rows: RowData[]; // ← 呼び出し側からデータを受け取る
   itemsPerPage?: number; // ← 1ページあたりの件数（デフォルト5）
+  onDelete: (id: number) => void;
 };
 
-const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5 }) => {
+const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5, onDelete }) => {
   // --- ページ番号を管理 ---
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -41,10 +43,20 @@ const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5 }) => {
               <td>
                 <div>
                   <p>{row.title}</p>
-                  <Link to="/article-update" className="link-success">
+                  <Link
+                    to={`/article-update/${row.id}`}
+                    className="link-success"
+                  >
                     編集
                   </Link>
-                  <a className="link-danger px-2" href="#">
+                  <a
+                    className="link-danger px-2"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onDelete(row.id);
+                    }}
+                  >
                     削除
                   </a>
                 </div>

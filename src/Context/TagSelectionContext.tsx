@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 type TagSelectionContextType = {
   selectedTagIds: number[];
+  setSelectedTagIds: React.Dispatch<React.SetStateAction<number[]>>; // ★ 初期化や一括更新用
   toggleTag: (tagId: number) => void;
 };
 
@@ -23,7 +24,9 @@ export const TagSelectionProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <TagSelectionContext.Provider value={{ selectedTagIds, toggleTag }}>
+    <TagSelectionContext.Provider
+      value={{ selectedTagIds, setSelectedTagIds, toggleTag }}
+    >
       {children}
     </TagSelectionContext.Provider>
   );

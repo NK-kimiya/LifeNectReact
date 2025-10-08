@@ -8,15 +8,16 @@ export type BlogArticle = {
   id: number;
   title: string;
   body: string;
+  eyecatch: string;
   created_at: string;
   updated_at: string;
-  tags: number[]; // タグIDの配列
+  tags: { id: number; name: string }[]; // タグIDの配列
 };
 
 export const createBlog = async (
   title: string,
   body: string,
-  tags: number[],
+  tagIds: number[],
   eyecatch: string,
   setError: Dispatch<SetStateAction<string>>
 ): Promise<BlogArticle | null> => {
@@ -24,7 +25,7 @@ export const createBlog = async (
     const response = await client.post<BlogArticle>("/api/articles/", {
       title,
       body,
-      tags,
+      tag_ids: tagIds,
       eyecatch,
     });
     return response.data;
@@ -61,4 +62,39 @@ export const fetchArticles = async (): Promise<BlogArticle[]> => {
 export const fetchArticleById = async (id: string): Promise<BlogArticle> => {
   const res = await axios.get(`http://localhost:8000/api/articles/${id}/`);
   return res.data;
+};
+
+export const updateBlog = async (
+  id: number,
+  title: string,
+  body: string,
+  tagIds: number[],
+  eyecatch: string,
+  setError: (msg: string) => void
+): Promise<BlogArticle | null> => {
+  try {
+    const response = await client.put(`api/articles/${id}/`, {
+      title,
+      body,
+      tag_ids: tagIds,
+      eyecatch,
+    });
+    return response.data;
+  } catch (error: any) {
+    setError("記事の更新に失敗しました。");
+    return null;
+  }
+};
+
+export const deleteBlog = async (
+  id: number,
+  setError: (msg: string) => void
+): Promise<boolean> => {
+  try {
+    await client.delete(`api/articles/${id}/`);
+    return true; // 成功したら true
+  } catch (error: any) {
+    setError("記事の削除に失敗しました。");
+    return false;
+  }
 };

@@ -1,27 +1,37 @@
 import React from "react";
 import TagSelect from "./TagSelect.tsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useError } from "../Context/ErrorContext.tsx";
 import { createTag } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
 import Aleart from "./Aleart.tsx";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
-import { createBlog, BlogArticle } from "../API/Blog.tsx";
+import { createBlog, BlogArticle, updateBlog } from "../API/Blog.tsx";
 
 type BlogFormProps = {
   mode: "create" | "edit";
   initialData?: BlogArticle;
+  onUpdate?: (updated: BlogArticle) => void;
 };
 
-const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
   const [tagName, setTagName] = useState("");
   const { setError } = useError();
   const [successMessage, setSuccessMessage] = useState("");
   const { tags, setTags } = useTagContext();
   const { selectedTagIds } = useTagSelection();
-  const [eyecatch, setEyecatch] = useState("");
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [content, setContent] = useState(initialData?.body || "");
+  const [eyecatch, setEyecatch] = useState(initialData?.eyecatch || "");
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || "");
+      setContent(initialData.body || "");
+      setEyecatch(initialData.eyecatch || "");
+    }
+  }, [initialData]);
+  console.log("blogデータ" + initialData?.title);
   //タグ作成の処理
   const handleCreateTag = async () => {
     if (!tagName) return;
@@ -61,16 +71,19 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
         setEyecatch("");
         setError("");
       }
-    } else {
-      // 更新処理（例：APIが未定なら後で updateBlog を実装）
-      console.log("記事更新処理をここに追加してください", {
-        id: initialData?.id,
+    } else if (mode === "edit" && initialData) {
+      const updated = await updateBlog(
+        initialData.id,
         title,
         content,
+        selectedTagIds,
         eyecatch,
-        tags: selectedTagIds,
-      });
-      setSuccessMessage(`記事「${title}」が更新されました。`);
+        setError
+      );
+      if (updated) {
+        setSuccessMessage(`記事「${updated.title}」が更新されました。`);
+        if (onUpdate) onUpdate(updated);
+      }
     }
   };
   return (
@@ -84,7 +97,6 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
           type="text"
           className="form-control"
           id="exampleFormControlInput1"
-          placeholder="タイトルを入力"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -98,7 +110,6 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
           type="text"
           className="form-control"
           id="exampleFormControlInput1"
-          placeholder="アイキャッチ画像のURLを入力"
           value={eyecatch}
           onChange={(e) => setEyecatch(e.target.value)}
         />
@@ -117,6 +128,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
         ></textarea>
 
         <TagSelect variant="static" />
+        {initialData?.tags?.map((tag) => tag).join(", ")}
         <button
           type="button"
           className="btn text-bg-success white rounded-circle d-inline-flex align-items-center justify-content-center"
@@ -151,7 +163,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData }) => {
               <div className="modal-body">
                 <input
                   type="text"
-                  placeholder="新しいタグ名"
+                  // placeholder="新しいタグ名"
                   value={tagName}
                   onChange={(e) => setTagName(e.target.value)}
                 />

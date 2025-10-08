@@ -3,10 +3,12 @@ import Table, { RowData } from "../Organisms/Table.tsx"; // ← 型も一緒に�
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
 import { Link } from "react-router-dom";
+import { deleteBlog } from "../API/Blog.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
 import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
 const AdminTopTemplate: React.FC = () => {
   const [rows, setRows] = useState<RowData[]>([]);
-
+  const { setError } = useError();
   useEffect(() => {
     fetchArticles()
       .then((data: BlogArticle[]) => {
@@ -23,6 +25,15 @@ const AdminTopTemplate: React.FC = () => {
         console.error("記事一覧の取得に失敗しました:", err);
       });
   }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("本当に削除しますか？")) return;
+    const ok = await deleteBlog(id, setError);
+    if (ok) {
+      // ★ 成功したら rows から削除
+      setRows((prev) => prev.filter((row) => row.id !== id));
+    }
+  };
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />
@@ -44,7 +55,7 @@ const AdminTopTemplate: React.FC = () => {
       <div className="container flex-fill">
         <h2 className="my-3">管理者ページ - 投稿一覧</h2>
         {/* --- Tableを呼び出し、ページネーションを有効化 --- */}
-        <Table rows={rows} itemsPerPage={5} />
+        <Table rows={rows} itemsPerPage={5} onDelete={handleDelete} />
       </div>
       <Footer />
     </div>
