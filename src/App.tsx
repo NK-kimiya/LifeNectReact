@@ -23,7 +23,7 @@ const App: React.FC = () => {
           <Route path="/admin-login" element={<AdminLoginPage />} />
           <Route path="/admin-top" element={<AdminTopPage />} />
           <Route path="/article-create" element={<ArticleCreateTemplate />} />
-          <Route path="/article-update" element={<ArticleUpdate />} />
+          <Route path="/article-update/:id" element={<ArticleUpdate />} />
         </Routes>
       </Router>
     </div>
