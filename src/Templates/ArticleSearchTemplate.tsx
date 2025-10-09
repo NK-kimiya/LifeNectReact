@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../Organisms/NavBar.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
 import CardMolecule from "../Organisms/Card.tsx";
 import Footer from "../Organisms/Footer.tsx";
 import Table, { RowData } from "../Organisms/Table.tsx";
+import { useSearchParams } from "react-router-dom";
+import { fetchFilteredArticles, BlogArticle } from "../API/Blog.tsx";
+import { CardData } from "../Organisms/Card.tsx"; // ← 必ず1つに統一
+import { deleteBlog } from "../API/Blog.tsx";
+interface Props {
+  showTable: boolean;
+  search: "tag" | "keyword";
+  tag: { id: number; name: string } | null;
+  keyword: { id: number; name: string } | null;
+}
 
 // --- 型定義 ---
 type TagInfo = {
@@ -29,214 +39,55 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
   tag,
   keyword,
 }) => {
-  type CardData = {
-    imgSrc: string;
-    title: string;
-    text: string;
-    buttonText: string;
-    buttonHref: string;
-  };
+  const [articles, setArticles] = useState<BlogArticle[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const cards: CardData[] = [
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル1",
-      text: "これはカード1の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/1",
-    },
-    {
-      imgSrc: "https://via.placeholder.com/150",
-      title: "サンプルタイトル2",
-      text: "これはカード2の説明文です。",
-      buttonText: "詳細を見る",
-      buttonHref: "https://example.com/2",
-    },
-  ];
+  useEffect(() => {
+    console.log("タグは" + tag?.name);
+    const fetchData = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // 🔽 searchの値によって tag か keyword を使い分け
+        let keywordQuery = "";
+        let tagQuery = "";
 
-  const rows: RowData[] = [
-    { id: 1, title: "就職と小児がん", author: "田中", date: "2025/9/20" },
-    { id: 2, title: "就職活動と小児がん", author: "田中", date: "2025/9/21" },
-    {
-      id: 3,
-      title: "小児がん経験者の就労支援",
-      author: "佐藤",
-      date: "2025/9/22",
-    },
-    { id: 4, title: "医療と就職の両立", author: "鈴木", date: "2025/9/23" },
-    { id: 5, title: "支援制度の活用法", author: "高橋", date: "2025/9/24" },
-    { id: 6, title: "仲間との交流", author: "田中", date: "2025/9/25" },
-    // ...さらに複数のデータ
-  ];
+        if (search === "keyword" && keyword) {
+          keywordQuery = keyword.name;
+        }
+        if (search === "tag" && tag) {
+          tagQuery = tag.name;
+        }
 
+        const res = await fetchFilteredArticles(keywordQuery, tagQuery);
+        setArticles(res.data);
+      } catch (e) {
+        setError("記事の取得に失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [search, tag, keyword]);
+
+  // BlogArticle → Table用 RowData に変換
+  const tableRows: RowData[] = articles.map((a) => ({
+    id: a.id,
+    title: a.title,
+    author: a.author ?? "不明", // BlogArticleに無ければ仮の値
+    date: a.created_at ?? "不明", // BlogArticleに無ければcreated_atを利用
+  }));
+
+  // BlogArticle → Card用 CardData に変換
+  const cards: CardData[] = articles.map((a) => ({
+    image: a.eyecatch ?? "/default.png", // BlogArticleにimageが無ければデフォルト
+    title: a.title,
+    text: a.body.substring(0, 100),
+    buttonText: "続きを読む",
+    buttonHref: `/articles/${a.id}`,
+  }));
   // --- 見出しを切り替え ---
   const renderHeading = (): React.ReactElement => {
     if (search === "tag" && tag) {
@@ -259,7 +110,18 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
 
         {/* --- 表示切り替え（Table or Card） --- */}
         {showTable ? (
-          <Table rows={rows} itemsPerPage={5} />
+          <Table
+            rows={tableRows}
+            itemsPerPage={5}
+            onDelete={async (id: number) => {
+              try {
+                await deleteBlog(id, setError);
+                alert("記事を削除しました");
+              } catch (e) {
+                alert("削除に失敗しました");
+              }
+            }}
+          />
         ) : (
           <CardMolecule cards={cards} itemsPerPage={6} />
         )}

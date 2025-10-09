@@ -1,7 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const NavBar: React.FC = () => {
+  const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!keyword.trim()) return;
+    // 🔽 クエリパラメータ付きで検索ページに遷移
+    navigate(
+      `/article-search?search=keyword&keywordName=${encodeURIComponent(
+        keyword
+      )}`
+    );
+  };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-success">
@@ -43,10 +58,12 @@ const NavBar: React.FC = () => {
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
+                onChange={(e) => setKeyword(e.target.value)}
               ></input>
               <button
                 className="btn btn-outline-success bg-warning text-white"
                 type="submit"
+                onClick={handleSearch}
               >
                 <i className="bi bi-search"></i>
               </button>

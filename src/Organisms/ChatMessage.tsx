@@ -21,100 +21,36 @@ const ScrollBoxContent = styled.div`
   }
 `;
 
-const ChatMessage: React.FC = () => {
+interface ChatMessageProps {
+  role: "user" | "assistant";
+  content: string;
+}
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ role, content }) => {
+  const isUser = role === "user";
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: isUser ? "flex-end" : "flex-start",
+        margin: "5px 0",
+      }}
+    >
       <div
-        className="container flex-grow-1 pt-5"
-        style={{ maxWidth: "80%", height: "80vh" }}
+        className="text-start"
+        style={{
+          background: isUser ? "#007bff" : "#e9ecef",
+          color: isUser ? "#fff" : "#000",
+          padding: "8px 12px",
+          borderRadius: "12px",
+          maxWidth: "70%",
+          wordBreak: "break-word",
+          whiteSpace: "pre-wrap",
+        }}
       >
-        <ScrollBoxContent className="">
-          <div
-            className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
-          >
-            <p className="fw-bold mb-1">質問：</p>
-            <p>うつ病の人がどのように就職をしているかを教えて</p>
-          </div>
-          <div
-            className="border-bottom text-start mt-3"
-            style={{ maxWidth: "75%" }}
-          >
-            <p className="fw-bold mb-1">回答</p>
-            <p>
-              うつ病を経験した方の就職方法としては以下の通りです。…（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-            </p>
-          </div>
-
-          <div
-            className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
-          >
-            <p className="fw-bold mb-1">質問：</p>
-            <p>うつ病の人がどのように就職をしているかを教えて</p>
-          </div>
-          <div
-            className="border-bottom text-start mt-3"
-            style={{ maxWidth: "75%" }}
-          >
-            <p className="fw-bold mb-1">回答</p>
-            <p>
-              うつ病を経験した方の就職方法としては以下の通りです。…（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-            </p>
-          </div>
-
-          <div
-            className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
-          >
-            <p className="fw-bold mb-1">質問：</p>
-            <p>うつ病の人がどのように就職をしているかを教えて</p>
-          </div>
-          <div
-            className="border-bottom text-start mt-3"
-            style={{ maxWidth: "75%" }}
-          >
-            <p className="fw-bold mb-1">回答</p>
-            <p>
-              うつ病を経験した方の就職方法としては以下の通りです。…（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-            </p>
-          </div>
-
-          <div
-            className="rounded p-3 text-start ms-auto"
-            style={{ maxWidth: "75%", backgroundColor: "#f5f5f5" }}
-          >
-            <p className="fw-bold mb-1">質問：</p>
-            <p>うつ病の人がどのように就職をしているかを教えて</p>
-          </div>
-          <div
-            className="border-bottom text-start mt-3"
-            style={{ maxWidth: "75%" }}
-          >
-            <p className="fw-bold mb-1">回答</p>
-            <p>
-              うつ病を経験した方の就職方法としては以下の通りです。…（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-              …（省略）……（省略）……（省略）……（省略）……（省略）…
-            </p>
-          </div>
-        </ScrollBoxContent>
+        {content}
       </div>
-    </>
+    </div>
   );
 };
 
