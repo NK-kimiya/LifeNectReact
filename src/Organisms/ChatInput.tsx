@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+
 const ScrollBoxContent = styled.div`
   width: 100%;
 
@@ -9,7 +10,19 @@ const ScrollBoxContent = styled.div`
   }
 `;
 
-const ChatInput: React.FC = () => {
+interface ChatInputProps {
+  onSend: (text: string) => void;
+}
+
+const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
+  const [text, setText] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    onSend(text);
+    setText("");
+  };
   return (
     <>
       <div className="bg-white border-top">
@@ -21,10 +34,16 @@ const ChatInput: React.FC = () => {
                   className="form-control"
                   rows={2}
                   style={{ resize: "none" }}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
                 ></textarea>
               </div>
               <div className="col-2 d-grid">
-                <button className="btn btn-success" type="submit">
+                <button
+                  className="btn btn-success"
+                  type="submit"
+                  onClick={handleSubmit}
+                >
                   <i className="bi bi-send"></i>
                 </button>
               </div>

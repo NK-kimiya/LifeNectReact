@@ -1,7 +1,7 @@
 import { div } from "@tensorflow/tfjs";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-type CardData = {
+export type CardData = {
   // ← 1枚のカードデータの型
   image: string;
   title: string;

@@ -3,6 +3,7 @@ import client from "./client.tsx";
 import { Dispatch, SetStateAction } from "react";
 import { handleApiError } from "./errorHandler.tsx";
 import { clientPublic } from "./client.tsx";
+import { AxiosResponse } from "axios";
 import axios from "axios";
 export type BlogArticle = {
   id: number;
@@ -96,5 +97,23 @@ export const deleteBlog = async (
   } catch (error: any) {
     setError("記事の削除に失敗しました。");
     return false;
+  }
+};
+
+export const fetchFilteredArticles = async (
+  keyword: string,
+  tag: string
+): Promise<AxiosResponse<BlogArticle[]>> => {
+  try {
+    const response = await client.get<BlogArticle[]>("api/articles-search/", {
+      params: {
+        search: keyword || undefined,
+        tag: tag || undefined,
+      },
+    });
+    console.log("タグ" + tag + "を検索");
+    return response;
+  } catch (error) {
+    throw error;
   }
 };
