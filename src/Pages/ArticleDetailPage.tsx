@@ -15,6 +15,7 @@ const ArticleDetailPage: React.FC = () => {
       fetchArticleById(id)
         .then((data) => {
           // HTMLをパース
+          console.log("取得した記事:", data);
           const parser = new DOMParser();
           const doc = parser.parseFromString(data.body, "text/html");
 

@@ -22,7 +22,7 @@ export const uploadFile = async (
 
     const token: string | null = localStorage.getItem("authToken");
 
-    const response = await client.post<UploadedFile>("/api/files/", formData, {
+    const response = await client.post<UploadedFile>("/files/", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
@@ -34,6 +34,6 @@ export const uploadFile = async (
 };
 
 export const fetchFiles = async (): Promise<UploadedFile[]> => {
-  const response = await client.get<UploadedFile[]>("/api/files/");
+  const response = await client.get<UploadedFile[]>("/files/");
   return response.data;
 };

@@ -8,7 +8,7 @@ export const login = async (
   setError: Dispatch<SetStateAction<string>>
 ): Promise<string | null> => {
   try {
-    const response = await client.post<{ access: string }>("/api/token/", {
+    const response = await client.post<{ access: string }>("/token/", {
       username,
       password,
     });
