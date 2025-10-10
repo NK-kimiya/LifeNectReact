@@ -19,11 +19,17 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
   const { setError } = useError();
   const [successMessage, setSuccessMessage] = useState("");
   const { tags, setTags } = useTagContext();
-  const { selectedTagIds } = useTagSelection();
+
+  const { selectedTagIds, setSelectedTagIds } = useTagSelection();
   const [title, setTitle] = useState(initialData?.title || "");
   const [content, setContent] = useState(initialData?.body || "");
   const [eyecatch, setEyecatch] = useState(initialData?.eyecatch || "");
 
+  useEffect(() => {
+    if (mode === "create") {
+      setSelectedTagIds([]);
+    }
+  }, []);
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title || "");

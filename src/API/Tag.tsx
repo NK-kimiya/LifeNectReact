@@ -14,7 +14,7 @@ export const createTag = async (
 ): Promise<Tag | null> => {
   try {
     const response = await client.post<Tag>(
-      "/api/tags/",
+      "/tags/",
       { name },
       { headers: { Authorization: "" } } // interceptorsで付与される
     );
@@ -30,7 +30,7 @@ export const fetchTags = async (
   setError: Dispatch<SetStateAction<string>>
 ): Promise<Tag[]> => {
   try {
-    const response = await client.get<Tag[]>("/api/tags/", {
+    const response = await client.get<Tag[]>("/tags/", {
       headers: { Authorization: "none" }, // 認証不要を明示
     });
     return response.data;

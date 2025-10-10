@@ -6,7 +6,7 @@ import axios, {
 } from "axios";
 
 const client: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://localhost:8000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,12 +25,13 @@ client.interceptors.request.use(
 client.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => response,
   (error: AxiosError): Promise<never> => {
+    console.error("API Error:", error);
     return Promise.reject(error);
   }
 );
 
 export const clientPublic: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://localhost:8000/api",
   headers: { "Content-Type": "application/json" },
 });
 
