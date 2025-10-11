@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import NavBar from "../Organisms/NavBar.tsx";
 import styled from "styled-components";
 import Footer from "../Organisms/Footer.tsx";
@@ -7,6 +7,8 @@ import ChatInput from "../Organisms/ChatInput.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
 import { fetchRagAnswer, IdTitle } from "../API/RagChat.tsx";
 import { useChat } from "../Context/ChatContext.tsx";
+import { Modal } from "bootstrap";
+import Terms from "../Organisms/Terms.tsx";
 const ScrollBoxContent = styled.div`
   width: 100%;
 
@@ -25,6 +27,39 @@ interface Message {
 const AiChatTemplate: React.FC = () => {
   const { messages, setMessages } = useChat();
   const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState<boolean>(false);
+
+  const modalRef = useRef<HTMLDivElement | null>(null); // モーダル最上位<div>への参照
+  const modalInstance = useRef<Modal | null>(null); //Bootstrap の Modalインスタンスを格納
+
+  useEffect(() => {
+    let cancelled = false; // ← このフラグは「このエフェクトが無効化された（アンマウントされた）」ことを示すための安全スイッチ。
+    //非同期待機（await）の“後半処理”が動く前にコンポーネントが消えた場合、続きの処理を中断するために使う
+    const showAsync = async () => {
+      if (!modalRef.current) return; //ref にまだ DOM が割り当てられていない（初回直後など）場合は何もしないで終了
+      if (!document.body.contains(modalRef.current)) return; //要素がまだ実 DOM ツリー（body 配下）に挿入されていない瞬間を弾く保険
+
+      // ←【重要】描画完了フレームまで待つと「.style」nullエラーを回避しやすい
+      await new Promise(requestAnimationFrame); //非同期処理は待機中になり、その間に開発中はアンマウントが行われる。
+
+      if (cancelled || !modalRef.current) return; // ← 待機中にアンマウント（または StrictMode の一時アンマウント）が起きたら途中の処理を終了する。
+
+      modalInstance.current = new Modal(modalRef.current, {
+        backdrop: "static", // ← 背景クリックでは閉じない
+        keyboard: false, // ← Esc キーでは閉じない
+      });
+      modalInstance.current.show(); // ←【ここで自動表示】
+    };
+
+    showAsync();
+    return () => {
+      cancelled = true; //クリーンアップ時に「このエフェクトは無効化された」と印を付ける。
+      //← モーダルを確実に閉じ、イベントリスナ等を解放してリークを防ぐ。
+      modalInstance.current?.hide();
+      modalInstance.current?.dispose();
+      modalInstance.current = null;
+    };
+  }, []);
 
   const handleSend = async (text: string, allowSave: boolean) => {
     // ユーザーメッセージを追加
@@ -62,6 +97,53 @@ const AiChatTemplate: React.FC = () => {
       style={{ height: "100vh", overflow: "hidden" }}
     >
       <NavBar />
+      {/* ====== ここにモーダルのJSXを組み込む（class → className, tabindex → tabIndex） ====== */}
+      <div
+        ref={modalRef}
+        className="modal fade"
+        id="staticBackdrop" // ★ 同一idが他所に重複しないよう注意
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabIndex={-1}
+        aria-labelledby="staticBackdropLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                利用規約
+              </h1>
+            </div>
+            <div className="modal-body">
+              <Terms />
+              <div className="form-check form-switch text-start">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="flexSwitchCheckChecked"
+                  onChange={(e) => setAgreed(e.target.checked)}
+                ></input>
+                <label className="" for="flexSwitchCheckChecked">
+                  同意する
+                </label>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+                disabled={!agreed}
+              >
+                利用する
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* ====== ここまで ====== */}
       <TagSelect variant="scroll" />
       <ScrollBoxContent style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
         {messages?.map((msg, idx) => (
