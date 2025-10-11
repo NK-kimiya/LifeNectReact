@@ -7,6 +7,7 @@ import { useTagContext } from "../Context/TagContext.tsx";
 import Aleart from "./Aleart.tsx";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 import { createBlog, BlogArticle, updateBlog } from "../API/Blog.tsx";
+import { useSuccess } from "../Context/SuccessContext.tsx";
 
 type BlogFormProps = {
   mode: "create" | "edit";
@@ -17,6 +18,7 @@ type BlogFormProps = {
 const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
   const [tagName, setTagName] = useState("");
   const { setError } = useError();
+  const { setSuccess } = useSuccess();
   const [successMessage, setSuccessMessage] = useState("");
   const { tags, setTags } = useTagContext();
 
@@ -45,13 +47,13 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
       const newTag = await createTag(tagName, setError);
       if (newTag) {
         setTags([...tags, newTag]);
-        setSuccessMessage(`「${newTag.name}」が追加されました。`);
         setError("");
+        setSuccessMessage(`「${newTag.name}」が追加されました。`);
       }
 
       setTagName("");
     } catch {
-      // エラー時は setError が呼ばれて UI に反映される
+      setSuccess("");
     }
   };
 
@@ -63,38 +65,47 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
 
     if (mode === "create") {
       // 新規作成
-      const newBlog = await createBlog(
-        title,
-        content,
-        selectedTagIds,
-        eyecatch,
-        setError
-      );
-      if (newBlog) {
-        setSuccessMessage(`記事「${newBlog.title}」が作成されました。`);
-        setTitle("");
-        setContent("");
-        setEyecatch("");
-        setError("");
+      try {
+        const newBlog = await createBlog(
+          title,
+          content,
+          selectedTagIds,
+          eyecatch,
+          setError
+        );
+        if (newBlog) {
+          setError("");
+          setSuccess(`記事「${newBlog.title}」が作成されました。`);
+          setTitle("");
+          setContent("");
+          setEyecatch("");
+          setError("");
+        }
+      } catch (e) {
+        setSuccess("");
       }
     } else if (mode === "edit" && initialData) {
-      const updated = await updateBlog(
-        initialData.id,
-        title,
-        content,
-        selectedTagIds,
-        eyecatch,
-        setError
-      );
-      if (updated) {
-        setSuccessMessage(`記事「${updated.title}」が更新されました。`);
-        if (onUpdate) onUpdate(updated);
+      try {
+        const updated = await updateBlog(
+          initialData.id,
+          title,
+          content,
+          selectedTagIds,
+          eyecatch,
+          setError
+        );
+        if (updated) {
+          setError("");
+          setSuccess(`記事「${updated.title}」が更新されました。`);
+          if (onUpdate) onUpdate(updated);
+        }
+      } catch (e) {
+        setSuccess("");
       }
     }
   };
   return (
     <>
-      <Aleart />
       <div className="mb-3">
         <label htmlFor="exampleFormControlInput1" className="form-label">
           タイトル
@@ -203,7 +214,6 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
       >
         {mode === "create" ? "記事を作成" : "記事を更新"} {/* ★ 修正 */}
       </button>
-      <Aleart />
     </>
   );
 };

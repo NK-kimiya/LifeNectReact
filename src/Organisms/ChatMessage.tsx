@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import { fetchFilteredArticles } from "../API/Blog";
 import { IdTitle } from "../API/RagChat.tsx";
 import { Link } from "react-router-dom";
 const ScrollBoxContent = styled.div`
@@ -67,7 +66,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           // }}
           <>
             <h6>もっとも関連度の高い記事</h6>
-            {id_title_list.map((item) => (
+            {id_title_list?.map((item) => (
               <div>
                 <Link key={item.id} className="" to={`/articles/${item.id}`}>
                   {item.title}

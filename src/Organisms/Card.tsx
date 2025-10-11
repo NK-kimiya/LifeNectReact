@@ -29,7 +29,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
   return (
     <div className="container">
       <div className="row">
-        {currentItems.map((card, i) => (
+        {currentItems?.map((card, i) => (
           <div className="col-12 col-md-4 col-lg-3 mb-3" key={i}>
             <div className="card">
               <img src={card.image} className="card-img-top" alt={card.title} />
@@ -82,7 +82,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
               });
 
               // ★ 実際にページ番号（または「…」）を描画する
-              return filtered.map((p, i) =>
+              return filtered?.map((p, i) =>
                 p === "..." ? (
                   // 「…」はクリックできない → disabled
                   <li key={i} className="page-item disabled">

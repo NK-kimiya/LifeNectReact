@@ -35,7 +35,7 @@ export const fetchTags = async (
     });
     return response.data;
   } catch (error: any) {
-    handleApiError(error, setError, "タグ作成に失敗しました。");
+    handleApiError(error, setError, "タグ作成の取得に失敗しました。");
     return [];
   }
 };

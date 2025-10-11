@@ -4,6 +4,7 @@ import Contents from "../Organisms/Contents.tsx";
 import Article from "../Organisms/Article.tsx";
 import Footer from "../Organisms/Footer.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
+import Aleart from "../Organisms/Aleart.tsx";
 interface ArticleDetailTemplateProps {
   article: any; // TODO: 記事の型を定義できる場合は修正
 }
@@ -14,6 +15,7 @@ const ArticleDetailTemplate: React.FC<ArticleDetailTemplateProps> = ({
   return (
     <>
       <NavBar />
+      <Aleart />
       <TagSelect variant="scroll" />
       <div className="container pt-5">
         <div className="row">

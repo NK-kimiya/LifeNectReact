@@ -8,6 +8,8 @@ import { useSearchParams } from "react-router-dom";
 import { fetchFilteredArticles, BlogArticle } from "../API/Blog.tsx";
 import { CardData } from "../Organisms/Card.tsx"; // ← 必ず1つに統一
 import { deleteBlog } from "../API/Blog.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
+import Aleart from "../Organisms/Aleart.tsx";
 interface Props {
   showTable: boolean;
   search: "tag" | "keyword";
@@ -41,8 +43,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
 }) => {
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
+  const { setError } = useError();
   useEffect(() => {
     console.log("タグは" + tag?.name);
     const fetchData = async () => {
@@ -60,8 +61,12 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
           tagQuery = tag.name;
         }
 
-        const res = await fetchFilteredArticles(keywordQuery, tagQuery);
-        setArticles(res.data);
+        const res = await fetchFilteredArticles(
+          keywordQuery,
+          tagQuery,
+          setError
+        );
+        setArticles(res);
       } catch (e) {
         setError("記事の取得に失敗しました");
       } finally {
@@ -81,7 +86,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
   }));
 
   // BlogArticle → Card用 CardData に変換
-  const cards: CardData[] = articles.map((a) => ({
+  const cards: CardData[] = articles?.map((a) => ({
     image: a.eyecatch ?? "/default.png", // BlogArticleにimageが無ければデフォルト
     title: a.title,
     text: a.body.substring(0, 100),
@@ -102,6 +107,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
   return (
     <>
       <NavBar />
+      <Aleart />
       <div className="container flex-fill min-vh-100">
         <TagSelect variant="scroll" />
 
@@ -117,9 +123,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
               try {
                 await deleteBlog(id, setError);
                 alert("記事を削除しました");
-              } catch (e) {
-                alert("削除に失敗しました");
-              }
+              } catch (e) {}
             }}
           />
         ) : (

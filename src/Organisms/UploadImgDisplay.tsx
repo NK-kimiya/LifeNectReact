@@ -22,7 +22,7 @@ const UploadImgDisplay = () => {
   useEffect(() => {
     const loadFiles = async () => {
       try {
-        const data = await fetchFiles();
+        const data = await fetchFiles(setError);
         setFiles(data);
       } catch {
         setError("ファイル一覧の取得に失敗しました");
@@ -58,7 +58,7 @@ const UploadImgDisplay = () => {
         アップロード
       </button>
       <ScrollBox>
-        {files.map((file) => (
+        {files?.map((file) => (
           <div className="">
             <div key={file.id} className="card mb-3">
               <img src={file.file_url} className="card-img-top" alt="" />

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { deleteBlog } from "../API/Blog";
-import { useError } from "../Context/ErrorContext"; // エラー表示用
+
 // --- 行データの型定義 ---
 export type RowData = {
   id: number;
@@ -37,7 +36,7 @@ const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5, onDelete }) => {
           </tr>
         </thead>
         <tbody>
-          {currentRows.map((row) => (
+          {currentRows?.map((row) => (
             <tr key={row.id}>
               <th scope="row">{row.id}</th>
               <td>
@@ -83,7 +82,7 @@ const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5, onDelete }) => {
             </button>
           </li>
 
-          {[...Array(totalPages)].map((_, i) => (
+          {[...Array(totalPages)]?.map((_, i) => (
             <li
               key={i}
               className={`page-item ${currentPage === i + 1 ? "active" : ""}`}

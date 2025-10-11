@@ -4,22 +4,26 @@ import TagSelect from "../Organisms/TagSelect.tsx";
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
 import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
+import Aleart from "../Organisms/Aleart.tsx";
+import { useSuccess } from "../Context/SuccessContext.tsx";
 
 const TopTemplate: React.FC = () => {
   const [articles, setArticles] = useState<BlogArticle[]>([]);
-  const [error, setError] = useState("");
+  const { setError } = useError();
 
   useEffect(() => {
-    fetchArticles().then((data) => setArticles(data));
+    fetchArticles(setError).then((data) => setArticles(data));
   }, []);
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />
+      <Aleart />
       <div className="container flex-fill">
         <TagSelect variant="scroll" />
         {articles.length > 0 && (
           <CardMolecule
-            cards={articles.map((article) => ({
+            cards={articles?.map((article) => ({
               image: article.eyecatch || "https://via.placeholder.com/150",
               title: article.title,
               text: article.body.slice(0, 100) + "...",
