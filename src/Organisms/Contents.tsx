@@ -43,7 +43,7 @@ const Contents: React.FC<ContentsProps> = ({ headings }) => {
       >
         {/* hrefにh3タグの番号をIDに指定
                 コンテンツをh3のタイトルにする */}
-        {headings.map((heading) => (
+        {headings?.map((heading) => (
           <ScrollSpyLink key={heading.id} href={`#${heading.id}`}>
             {heading.title}
           </ScrollSpyLink>

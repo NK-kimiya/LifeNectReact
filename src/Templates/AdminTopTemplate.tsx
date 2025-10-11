@@ -6,14 +6,18 @@ import { Link } from "react-router-dom";
 import { deleteBlog } from "../API/Blog.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
+import Aleart from "../Organisms/Aleart.tsx";
+import { useSuccess } from "../Context/SuccessContext.tsx";
+import AleartSuccess from "../Organisms/AleartSuccess.tsx";
 const AdminTopTemplate: React.FC = () => {
   const [rows, setRows] = useState<RowData[]>([]);
   const { setError } = useError();
+  const { setSuccess } = useSuccess();
   useEffect(() => {
-    fetchArticles()
+    fetchArticles(setError)
       .then((data: BlogArticle[]) => {
         // BlogArticle → RowData に変換
-        const mapped: RowData[] = data.map((article) => ({
+        const mapped: RowData[] = data?.map((article) => ({
           id: article.id,
           title: article.title,
           author: "管理者", // ★ APIにauthorがある場合は article.author に修正
@@ -28,15 +32,23 @@ const AdminTopTemplate: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("本当に削除しますか？")) return;
-    const ok = await deleteBlog(id, setError);
-    if (ok) {
-      // ★ 成功したら rows から削除
-      setRows((prev) => prev.filter((row) => row.id !== id));
+    try {
+      setError("");
+      const ok = await deleteBlog(id, setError);
+      if (ok) {
+        setSuccess("削除に成功しました。");
+        // ★ 成功したら rows から削除
+        setRows((prev) => prev.filter((row) => row.id !== id));
+      }
+    } catch (e) {
+      setSuccess("");
     }
   };
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />
+      <AleartSuccess />
+      <Aleart />
       <div className="container text-start ">
         <button
           type="button"

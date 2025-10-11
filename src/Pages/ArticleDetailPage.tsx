@@ -4,18 +4,18 @@ import ArticleDetailTemplate from "../Templates/ArticleDetailTemplate.tsx";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { fetchArticleById, BlogArticle } from "../API/Blog.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
 const ArticleDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
   // 記事データ用のstate
   const [article, setArticle] = useState<any>(null);
-
+  const { setError } = useError();
   useEffect(() => {
     if (id) {
-      fetchArticleById(id)
+      fetchArticleById(id, setError)
         .then((data) => {
           // HTMLをパース
-          console.log("取得した記事:", data);
           const parser = new DOMParser();
           const doc = parser.parseFromString(data.body, "text/html");
 

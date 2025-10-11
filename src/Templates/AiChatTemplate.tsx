@@ -64,7 +64,7 @@ const AiChatTemplate: React.FC = () => {
       <NavBar />
       <TagSelect variant="scroll" />
       <ScrollBoxContent style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
-        {messages.map((msg, idx) => (
+        {messages?.map((msg, idx) => (
           <ChatMessage
             key={idx}
             role={msg.role}

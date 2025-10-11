@@ -95,7 +95,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
           </div>
           <div className="col-8">
             <ScrollBoxContent id="scroll-box-content" style={{ flex: 1 }}>
-              {tags.map((tag) => (
+              {tags?.map((tag) => (
                 <span
                   key={tag.id}
                   className="badge text-bg-success m-2 py-2 px-5 rounded-pill"
@@ -124,7 +124,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
       ) : (
         // ===== 固定表示 =====
         <div className="container">
-          {tags.map((tag) => (
+          {tags?.map((tag) => (
             <span
               key={tag.id}
               onClick={() => toggleTag(tag.id)}

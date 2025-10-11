@@ -33,7 +33,14 @@ export const uploadFile = async (
   }
 };
 
-export const fetchFiles = async (): Promise<UploadedFile[]> => {
-  const response = await client.get<UploadedFile[]>("/files/");
-  return response.data;
+export const fetchFiles = async (
+  setError: Dispatch<SetStateAction<string>>
+): Promise<UploadedFile[] | null> => {
+  try {
+    const response = await client.get<UploadedFile[]>("/files/");
+    return response.data;
+  } catch (error) {
+    handleApiError(error, setError, "ファイルの取得に失敗しました。");
+    return null;
+  }
 };

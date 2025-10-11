@@ -10,21 +10,27 @@ import { FileProvider } from "./Context/FileContext.tsx";
 import { TagProvider } from "./Context/TagContext.tsx";
 import { TagSelectionProvider } from "./Context/TagSelectionContext.tsx";
 import { ChatProvider } from "./Context/ChatContext.tsx";
+import { BrowserRouter } from "react-router-dom";
+import { SuccessProvider } from "./Context/SuccessContext.tsx";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <ChatProvider>
-      <TagSelectionProvider>
-        <TagProvider>
-          <FileProvider>
-            <ErrorProvider>
-              <App />
-            </ErrorProvider>
-          </FileProvider>
-        </TagProvider>
-      </TagSelectionProvider>
-    </ChatProvider>
+    <BrowserRouter>
+      <ChatProvider>
+        <TagSelectionProvider>
+          <TagProvider>
+            <FileProvider>
+              <SuccessProvider>
+                <ErrorProvider>
+                  <App />
+                </ErrorProvider>
+              </SuccessProvider>
+            </FileProvider>
+          </TagProvider>
+        </TagSelectionProvider>
+      </ChatProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );

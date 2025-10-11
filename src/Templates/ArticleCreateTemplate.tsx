@@ -3,11 +3,15 @@ import BlogForm from "../Organisms/BlogForm.tsx";
 import UploadImgDisplay from "../Organisms/UploadImgDisplay.tsx";
 import NavBar from "../Organisms/NavBar.tsx";
 import Footer from "../Organisms/Footer.tsx";
+import Aleart from "../Organisms/Aleart.tsx";
+import AleartSuccess from "../Organisms/AleartSuccess.tsx";
 
 const ArticleCreateTemplate: React.FC = () => {
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
       <NavBar />
+      <Aleart />
+      <AleartSuccess />
       <div className="container">
         <h2 className="text-start">新規投稿</h2>
         <main className="flex-grow-1 pt-4">
