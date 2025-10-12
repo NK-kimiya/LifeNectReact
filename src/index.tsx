@@ -12,6 +12,7 @@ import { TagSelectionProvider } from "./Context/TagSelectionContext.tsx";
 import { ChatProvider } from "./Context/ChatContext.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { SuccessProvider } from "./Context/SuccessContext.tsx";
+import { AuthProvider } from "./Context/AuthContext.tsx";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -24,7 +25,9 @@ root.render(
             <FileProvider>
               <SuccessProvider>
                 <ErrorProvider>
-                  <App />
+                  <AuthProvider>
+                    <App />
+                  </AuthProvider>
                 </ErrorProvider>
               </SuccessProvider>
             </FileProvider>

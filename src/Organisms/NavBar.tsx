@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext.tsx";
 
 const NavBar: React.FC = () => {
   const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
 
+  const { isAuthenticated, logout, isLoggingOut } = useAuth();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -52,6 +54,26 @@ const NavBar: React.FC = () => {
                 </Link>
               </li>
             </ul>
+            {isAuthenticated ? (
+              <div className="d-flex justify-content-start">
+                <button
+                  className="btn btn btn-link  me-2 text-white"
+                  onClick={() => logout()}
+                  disabled={isLoggingOut}
+                >
+                  ログアウト
+                </button>
+              </div>
+            ) : (
+              <div className="d-flex justify-content-start">
+                <Link
+                  to="/admin-login"
+                  className="btn btn btn-link  me-2 text-white"
+                >
+                  管理者ログイン
+                </Link>
+              </div>
+            )}
             <form className="d-flex" role="search">
               <input
                 className="form-control me-2"

@@ -4,6 +4,7 @@ import axios, {
   AxiosError,
   InternalAxiosRequestConfig,
 } from "axios";
+import { getToken } from "../Auth/token.tsx";
 
 const client: AxiosInstance = axios.create({
   baseURL: "http://localhost:8000/api",
@@ -14,7 +15,7 @@ const client: AxiosInstance = axios.create({
 
 client.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token: string | null = localStorage.getItem("authToken");
+    const token = getToken();
     if (token && config.headers && config.headers.Authorization !== "none") {
       config.headers.Authorization = `Bearer ${token}`;
     }

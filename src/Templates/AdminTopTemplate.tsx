@@ -9,10 +9,13 @@ import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useSuccess } from "../Context/SuccessContext.tsx";
 import AleartSuccess from "../Organisms/AleartSuccess.tsx";
+import { useAuth } from "../Context/AuthContext.tsx";
+
 const AdminTopTemplate: React.FC = () => {
   const [rows, setRows] = useState<RowData[]>([]);
   const { setError } = useError();
   const { setSuccess } = useSuccess();
+  const { isAuthenticated } = useAuth();
   useEffect(() => {
     fetchArticles(setError)
       .then((data: BlogArticle[]) => {
@@ -49,26 +52,38 @@ const AdminTopTemplate: React.FC = () => {
       <NavBar />
       <AleartSuccess />
       <Aleart />
-      <div className="container text-start ">
-        <button
-          type="button"
-          className="btn btn-success rounded-circle d-flex align-items-center justify-content-center mt-5"
-          style={{ width: "60px", height: "60px" }} // 正方形にする
-        >
-          <Link
-            to="/article-create"
-            className="text-white text-decoration-none"
-          >
-            <i className="bi bi-file-earmark-plus fs-2"></i>{" "}
-            {/* アイコンを大きく */}
+
+      {isAuthenticated ? (
+        <>
+          <div className="container text-start ">
+            <button
+              type="button"
+              className="btn btn-success rounded-circle d-flex align-items-center justify-content-center mt-5"
+              style={{ width: "60px", height: "60px" }} // 正方形にする
+            >
+              <Link
+                to="/article-create"
+                className="text-white text-decoration-none"
+              >
+                <i className="bi bi-file-earmark-plus fs-2"></i>{" "}
+                {/* アイコンを大きく */}
+              </Link>
+            </button>
+          </div>
+          <div className="container flex-fill">
+            <h2 className="my-3">管理者ページ - 投稿一覧</h2>
+            {/* --- Tableを呼び出し、ページネーションを有効化 --- */}
+            <Table rows={rows} itemsPerPage={5} onDelete={handleDelete} />
+          </div>
+        </>
+      ) : (
+        <div className="d-flex min-vh-100 d-flex align-items-center justify-content-center">
+          <Link to="/admin-login" className="btn btn-outline-success ms-2 ">
+            このページは、管理者専用のページです。ログインしてください。
           </Link>
-        </button>
-      </div>
-      <div className="container flex-fill">
-        <h2 className="my-3">管理者ページ - 投稿一覧</h2>
-        {/* --- Tableを呼び出し、ページネーションを有効化 --- */}
-        <Table rows={rows} itemsPerPage={5} onDelete={handleDelete} />
-      </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
