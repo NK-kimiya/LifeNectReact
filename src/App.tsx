@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useError } from "./Context/ErrorContext.tsx";
 import "./App.css";
 import TopPage from "./Pages/TopPage.tsx";
@@ -16,6 +16,17 @@ const App: React.FC = () => {
   const location = useLocation();
   const { setError } = useError();
   const { setSuccess } = useSuccess();
+
+  const prevPathRef = useRef(location.pathname); // ★追加
+
+  // ★重要: 「前のURL」を保存 → その後に現在URLを前URLとして更新
+  useLayoutEffect(() => {
+    // 例）/article-update/10 → /article-search の遷移時は
+    // このタイミングで '/article-update/10' が保存される
+    sessionStorage.setItem("prevPath", prevPathRef.current); // ★追加（前のURLを保存）
+    prevPathRef.current = location.pathname; // ★追加（次回のため更新）
+  }, [location.pathname]);
+
   useEffect(() => {
     // ✅ ページ遷移のたびにリセット
     setError("");

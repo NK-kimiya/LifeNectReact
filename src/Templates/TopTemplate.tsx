@@ -7,14 +7,24 @@ import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useSuccess } from "../Context/SuccessContext.tsx";
+import { useLocation } from "react-router-dom";
+import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 
 const TopTemplate: React.FC = () => {
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const { setError } = useError();
+  const { pathname } = useLocation();
+  const { clearSelection } = useTagSelection();
 
   useEffect(() => {
     fetchArticles(setError).then((data) => setArticles(data));
   }, []);
+
+  useEffect(() => {
+    if (pathname === "/") {
+      clearSelection();
+    }
+  }, [pathname, clearSelection]);
   return (
     <div className="d-flex flex-column min-vh-100">
       <NavBar />

@@ -9,6 +9,9 @@ import { fetchRagAnswer, IdTitle } from "../API/RagChat.tsx";
 import { useChat } from "../Context/ChatContext.tsx";
 import { Modal } from "bootstrap";
 import Terms from "../Organisms/Terms.tsx";
+import { useLocation } from "react-router-dom";
+import { useTagSelection } from "../Context/TagSelectionContext.tsx";
+
 const ScrollBoxContent = styled.div`
   width: 100%;
 
@@ -28,9 +31,12 @@ const AiChatTemplate: React.FC = () => {
   const { messages, setMessages } = useChat();
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState<boolean>(false);
+  const { pathname } = useLocation();
+  const { clearSelection } = useTagSelection();
 
   const modalRef = useRef<HTMLDivElement | null>(null); // モーダル最上位<div>への参照
   const modalInstance = useRef<Modal | null>(null); //Bootstrap の Modalインスタンスを格納
+  const hiddenHandlerRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     let cancelled = false; // ← このフラグは「このエフェクトが無効化された（アンマウントされた）」ことを示すための安全スイッチ。
@@ -47,7 +53,17 @@ const AiChatTemplate: React.FC = () => {
       modalInstance.current = new Modal(modalRef.current, {
         backdrop: "static", // ← 背景クリックでは閉じない
         keyboard: false, // ← Esc キーでは閉じない
+        focus: true,
       });
+
+      const el = modalRef.current;
+
+      const onHidden = () => {
+        /* 必要ならここで setState 等 */
+      };
+      hiddenHandlerRef.current = onHidden;
+      el.addEventListener("hidden.bs.modal", onHidden);
+
       modalInstance.current.show(); // ←【ここで自動表示】
     };
 
@@ -55,11 +71,24 @@ const AiChatTemplate: React.FC = () => {
     return () => {
       cancelled = true; //クリーンアップ時に「このエフェクトは無効化された」と印を付ける。
       //← モーダルを確実に閉じ、イベントリスナ等を解放してリークを防ぐ。
+
+      const el = modalRef.current;
+      if (el && hiddenHandlerRef.current) {
+        el.removeEventListener("hidden.bs.modal", hiddenHandlerRef.current); // ★追加
+      }
+      hiddenHandlerRef.current = null;
+
       modalInstance.current?.hide();
       modalInstance.current?.dispose();
       modalInstance.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (pathname === "/chat") {
+      clearSelection();
+    }
+  }, [pathname, clearSelection]);
 
   const handleSend = async (text: string, allowSave: boolean) => {
     // ユーザーメッセージを追加

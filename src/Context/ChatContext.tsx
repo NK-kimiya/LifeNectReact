@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useMemo,
+} from "react";
 
 interface Message {
   role: "user" | "assistant";
@@ -18,11 +24,13 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
 
-  return (
-    <ChatContext.Provider value={{ messages, setMessages }}>
-      {children}
-    </ChatContext.Provider>
+  const value = useMemo(
+    // ★追加: valueオブジェクトの安定化
+    () => ({ messages, setMessages }),
+    [messages] // setMessages は安定参照なので依存不要
   );
+
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
 
 export const useChat = (): ChatContextType => {

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useMemo,
+} from "react";
 
 export type Tag = {
   id: number;
@@ -16,11 +22,13 @@ export const TagProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [tags, setTags] = useState<Tag[]>([]);
-  return (
-    <TagContext.Provider value={{ tags, setTags }}>
-      {children}
-    </TagContext.Provider>
+
+  const value = useMemo(
+    // ★追加
+    () => ({ tags, setTags }),
+    [tags]
   );
+  return <TagContext.Provider value={value}>{children}</TagContext.Provider>;
 };
 
 export const useTagContext = (): TagContextType => {

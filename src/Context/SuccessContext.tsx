@@ -5,6 +5,7 @@ import React, {
   useContext,
   Dispatch,
   SetStateAction,
+  useMemo,
 } from "react";
 
 type SuccessContextType = {
@@ -26,10 +27,14 @@ export const SuccessProvider: React.FC<SuccessProviderProps> = ({
 }) => {
   const [success, setSuccess] = useState("");
 
+  const value = useMemo(
+    // ★追加
+    () => ({ success, setSuccess }),
+    [success]
+  );
+
   return (
-    <SuccessContext.Provider value={{ success, setSuccess }}>
-      {children}
-    </SuccessContext.Provider>
+    <SuccessContext.Provider value={value}>{children}</SuccessContext.Provider>
   );
 };
 

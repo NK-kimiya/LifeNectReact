@@ -1,11 +1,12 @@
 import React from "react";
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { fetchTags } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 import { useNavigate } from "react-router-dom";
+import { useSearch } from "../Context/SearchContext.tsx";
 const ScrollBoxContent = styled.div`
   display: flex;
   flex-wrap: nowrap;
@@ -38,8 +39,27 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const [loading, setLoading] = useState(true);
   const [showButtons, setShowButtons] = useState(false);
   const { setError } = useError();
-  const { selectedTagIds, toggleTag } = useTagSelection();
+  const { selectedTagIds, toggleTag, selectOnlyTag } = useTagSelection();
+  const selectedSet = useMemo(() => new Set(selectedTagIds), [selectedTagIds]); //selectedTagIds が変わらない限り 同じ Set 参照を再利用
   const navigate = useNavigate();
+  const { setKeyword } = useSearch();
+
+  const handleSingleAndGo = useCallback(
+    (id: number, name: string) => {
+      setKeyword("");
+      selectOnlyTag(id); // ★単一選択に置換
+      navigate(`/article-search?tag=${encodeURIComponent(name)}`);
+    },
+    [selectOnlyTag, navigate]
+  );
+
+  // ★ static: 複数選択トグル（遷移不要ならそのまま）
+  const handleToggle = useCallback(
+    (id: number) => {
+      toggleTag(id);
+    },
+    [toggleTag]
+  );
 
   const handleClick = (tag: string) => {
     navigate(`/article-search?tag=${encodeURIComponent(tag)}`);
@@ -98,8 +118,13 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
               {tags?.map((tag) => (
                 <span
                   key={tag.id}
-                  className="badge text-bg-success m-2 py-2 px-5 rounded-pill"
-                  onClick={() => handleClick(tag.name)}
+                  onClick={() => handleSingleAndGo(tag.id, tag.name)} // ★修正: ここで使う
+                  className={`badge me-2 p-2 ${
+                    selectedSet.has(tag.id)
+                      ? "bg-secondary text-white"
+                      : "bg-success text-white"
+                  }`}
+                  style={{ cursor: "pointer" }}
                 >
                   {tag.name}
                 </span>
@@ -127,11 +152,11 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
           {tags?.map((tag) => (
             <span
               key={tag.id}
-              onClick={() => toggleTag(tag.id)}
-              className={`badge m-2 py-2 px-5 rounded-pill ${
-                selectedTagIds.includes(tag.id)
-                  ? "bg-secondary text-white" // ★ 選択時の背景色（青）
-                  : "bg-success text-white" // ★ 未選択時の背景色（グレー）
+              onClick={() => handleToggle(tag.id)} // ★修正: ここで使う
+              className={`badge me-2 p-2 ${
+                selectedSet.has(tag.id)
+                  ? "bg-secondary text-white"
+                  : "bg-success text-white"
               }`}
               style={{ cursor: "pointer" }}
             >

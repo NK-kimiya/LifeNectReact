@@ -5,6 +5,7 @@ import React, {
   useContext,
   Dispatch,
   SetStateAction,
+  useMemo,
 } from "react";
 
 type ErrorContextType = {
@@ -24,10 +25,14 @@ type ErrorProviderProps = {
 export const ErrorProvider: React.FC<ErrorProviderProps> = ({ children }) => {
   const [error, setError] = useState("");
 
+  const value = useMemo(
+    // ★追加
+    () => ({ error, setError }),
+    [error]
+  );
+
   return (
-    <ErrorContext.Provider value={{ error, setError }}>
-      {children}
-    </ErrorContext.Provider>
+    <ErrorContext.Provider value={value}>{children}</ErrorContext.Provider>
   );
 };
 

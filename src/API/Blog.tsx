@@ -29,6 +29,7 @@ export const createBlog = async (
       tag_ids: tagIds,
       eyecatch,
     });
+    invalidateBlogCaches();
     return response.data;
   } catch (error: any) {
     handleApiError(error, setError, "ブログ記事の作成に失敗しました。");
@@ -51,11 +52,36 @@ export type BlogArticleList = {
   tags: Tag[];
 };
 
+const BLOG_TTL_MS: number = 5 * 60 * 1000; // ★追加: 5分（300,000ms）
+let _listCache: { data: BlogArticle[] | null; ts: number } = {
+  data: null,
+  ts: 0,
+}; // ★追加
+const _detailCache = new Map<number, { data: BlogArticle; ts: number }>(); // ★追加
+const _searchCache = new Map<string, { data: BlogArticle[]; ts: number }>(); // ★追加
+
+export const invalidateBlogCaches = (): void => {
+  //一括無効化
+  _listCache = { data: null, ts: 0 };
+  _detailCache.clear();
+  _searchCache.clear();
+};
+
 export const fetchArticles = async (
-  setError: Dispatch<SetStateAction<string>>
+  setError: Dispatch<SetStateAction<string>>,
+  forceRefresh: boolean = false
 ): Promise<BlogArticle[]> => {
+  const now = Date.now();
+  const isValid = _listCache.data && now - _listCache.ts < BLOG_TTL_MS;
+
+  if (!forceRefresh && isValid) {
+    // ★追加
+    return _listCache.data as BlogArticle[]; // ★追加（nullでないと判断できる箇所）
+  }
+
   try {
     const response = await clientPublic.get<BlogArticle[]>("/articles/");
+    _listCache = { data: response.data, ts: now };
     return response.data;
   } catch (error) {
     handleApiError(error, setError, "ブログ記事の取得に失敗しました。");
@@ -65,10 +91,20 @@ export const fetchArticles = async (
 
 export const fetchArticleById = async (
   id: string,
-  setError: Dispatch<SetStateAction<string>>
+  setError: Dispatch<SetStateAction<string>>,
+  forceRefresh: boolean = false
 ): Promise<BlogArticle | null> => {
+  const now = Date.now();
+  const numericId = Number(id);
+  const cached = _detailCache.get(numericId); //キー numericId に対応する キャッシュ項目（{ data, ts }）を取得
+  const isValid = cached && now - cached.ts < BLOG_TTL_MS;
+  if (!forceRefresh && isValid && cached) {
+    // ★追加
+    return cached.data; // ★追加
+  }
   try {
     const res = await clientPublic.get(`/articles/${id}/`);
+    _detailCache.set(numericId, { data: res.data, ts: now });
     return res.data;
   } catch (error) {
     handleApiError(error, setError, "ブログ記事の取得に失敗しました。");
@@ -91,6 +127,7 @@ export const updateBlog = async (
       tag_ids: tagIds,
       eyecatch,
     });
+    invalidateBlogCaches();
     return response.data;
   } catch (error: any) {
     handleApiError(error, setError, "ブログ記事の更新に失敗しました。");
@@ -104,6 +141,7 @@ export const deleteBlog = async (
 ): Promise<boolean> => {
   try {
     await client.delete(`/articles/${id}/`);
+    invalidateBlogCaches();
     return true; // 成功したら true
   } catch (error: any) {
     handleApiError(error, setError, "記事の削除に失敗しました。");
@@ -114,8 +152,18 @@ export const deleteBlog = async (
 export const fetchFilteredArticles = async (
   keyword: string,
   tag: string,
-  setError: Dispatch<SetStateAction<string>>
+  setError: Dispatch<SetStateAction<string>>,
+  forceRefresh: boolean = false
 ): Promise<BlogArticle[]> => {
+  const now = Date.now();
+  const key = `${keyword}||${tag}`;
+  const hit = _searchCache.get(key);
+  const isValid = hit && now - hit.ts < BLOG_TTL_MS;
+
+  if (!forceRefresh && isValid && hit) {
+    // ★追加
+    return hit.data; // ★追加
+  }
   try {
     const response = await client.get<BlogArticle[]>("/articles-search/", {
       params: {
@@ -123,7 +171,7 @@ export const fetchFilteredArticles = async (
         tag: tag || undefined,
       },
     });
-    console.log("タグ" + tag + "を検索");
+    _searchCache.set(key, { data: response.data, ts: now });
     return response.data;
   } catch (error) {
     handleApiError(error, setError, "記事の検索に失敗しました。");
