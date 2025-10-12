@@ -9,10 +9,13 @@ import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import AleartSuccess from "../Organisms/AleartSuccess.tsx";
+import { useAuth } from "../Context/AuthContext.tsx";
+import { Link } from "react-router-dom";
 
 const ArticleUpdate: React.FC = () => {
   const { setSelectedTagIds } = useTagSelection();
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated } = useAuth();
 
   // 記事データ用のstate
   const [article, setArticle] = useState<any>(null);
@@ -39,28 +42,38 @@ const ArticleUpdate: React.FC = () => {
       <NavBar />
       <Aleart />
       <AleartSuccess />
-      <div className="container">
-        <h2 className="text-start">編集ページ</h2>
-        <main className="flex-grow-1 pt-4">
-          <div className="row">
-            {/* メインカラム */}
-            <div className="col-8">
-              <BlogForm
-                mode="edit"
-                initialData={article}
-                onUpdate={(updated) => setArticle(updated)}
-              />
-            </div>
-
-            {/* サイドバー */}
-            <div className="col-4">
+      <div className="container min-vh-100">
+        {isAuthenticated ? (
+          <>
+            <h2 className="text-start">編集ページ</h2>
+            <main className="flex-grow-1 pt-4">
               <div className="row">
-                {/* サイドバー内部2カラム */}
-                <UploadImgDisplay />
+                {/* メインカラム */}
+                <div className="col-8">
+                  <BlogForm
+                    mode="edit"
+                    initialData={article}
+                    onUpdate={(updated) => setArticle(updated)}
+                  />
+                </div>
+
+                {/* サイドバー */}
+                <div className="col-4">
+                  <div className="row">
+                    {/* サイドバー内部2カラム */}
+                    <UploadImgDisplay />
+                  </div>
+                </div>
               </div>
-            </div>
+            </main>
+          </>
+        ) : (
+          <div className="d-flex min-vh-100 d-flex align-items-center justify-content-center">
+            <Link to="/admin-login" className="btn btn-outline-success ms-2 ">
+              このページは、管理者専用のページです。ログインしてください。
+            </Link>
           </div>
-        </main>
+        )}
       </div>
       <Footer />
     </div>

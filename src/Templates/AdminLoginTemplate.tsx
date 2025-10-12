@@ -5,9 +5,11 @@ import Footer from "../Organisms/Footer.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import { useNavigate } from "react-router-dom";
 import { login } from "../API/Login.tsx";
+import { useAuth } from "../Context/AuthContext.tsx";
 const AdminLoginTemplate: React.FC = () => {
   const { setError } = useError();
   const navigate = useNavigate();
+  const { loginWithToken } = useAuth();
 
   const handleLogin = async (
     username: string,
@@ -15,6 +17,7 @@ const AdminLoginTemplate: React.FC = () => {
   ): Promise<void> => {
     const token: string | null = await login(username, password, setError);
     if (token) {
+      loginWithToken(token);
       navigate("/admin-top"); // ★ 成功したらここで遷移
     }
   };

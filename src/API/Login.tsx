@@ -2,6 +2,7 @@
 import { Dispatch, SetStateAction } from "react";
 import client from "./client.tsx";
 import { handleApiError } from "./errorHandler.tsx";
+import { setToken } from "../Auth/token.tsx";
 export const login = async (
   username: string,
   password: string,
@@ -16,7 +17,7 @@ export const login = async (
     const token = response.data.access;
 
     // ★ ローカルストレージに保存
-    localStorage.setItem("authToken", token);
+    setToken(token);
 
     return token;
   } catch (error: any) {
