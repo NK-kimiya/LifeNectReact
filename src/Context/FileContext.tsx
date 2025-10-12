@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useMemo,
+} from "react";
 import { UploadedFile } from "../API/File";
 
 type FileContextType = {
@@ -12,11 +18,13 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
-  return (
-    <FileContext.Provider value={{ files, setFiles }}>
-      {children}
-    </FileContext.Provider>
+
+  const value = useMemo(
+    // ★追加
+    () => ({ files, setFiles }),
+    [files]
   );
+  return <FileContext.Provider value={value}>{children}</FileContext.Provider>;
 };
 
 export const useFileContext = (): FileContextType => {

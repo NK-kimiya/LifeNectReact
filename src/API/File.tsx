@@ -12,6 +12,16 @@ export type UploadedFile = {
   file_url?: string;
 };
 
+let _filesCache: { data: UploadedFile[] | null; ts: number } = {
+  data: null,
+  ts: 0,
+};
+const FILES_TTL_MS: number = 5 * 60 * 1000;
+
+const invalidateFilesCache = (): void => {
+  _filesCache = { data: null, ts: 0 };
+};
+
 export const uploadFile = async (
   file: File,
   setError: Dispatch<SetStateAction<string>>
@@ -26,6 +36,7 @@ export const uploadFile = async (
       headers: { "Content-Type": "multipart/form-data" },
     });
 
+    invalidateFilesCache();
     return response.data;
   } catch (error: any) {
     handleApiError(error, setError, "ファイルアップロードに失敗しました。");
@@ -34,10 +45,21 @@ export const uploadFile = async (
 };
 
 export const fetchFiles = async (
-  setError: Dispatch<SetStateAction<string>>
+  setError: Dispatch<SetStateAction<string>>,
+  forceRefresh: boolean = false
 ): Promise<UploadedFile[] | null> => {
+  const now: number = Date.now();
+  const isValid: boolean =
+    !!_filesCache.data && now - _filesCache.ts < FILES_TTL_MS;
+
+  if (!forceRefresh && isValid) {
+    // ★追加
+    return _filesCache.data as UploadedFile[]; // ★追加（nullでないと分かる箇所）
+  }
+
   try {
     const response = await client.get<UploadedFile[]>("/files/");
+    _filesCache = { data: response.data, ts: now };
     return response.data;
   } catch (error) {
     handleApiError(error, setError, "ファイルの取得に失敗しました。");

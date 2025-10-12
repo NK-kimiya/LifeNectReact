@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.tsx";
-
+import { useSearch } from "../Context/SearchContext.tsx";
 const NavBar: React.FC = () => {
-  const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
+  const { keyword, setKeyword } = useSearch();
 
   const { isAuthenticated, logout, isLoggingOut } = useAuth();
   const handleSearch = (e: React.FormEvent) => {

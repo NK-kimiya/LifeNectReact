@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import NavBar from "../Organisms/NavBar.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
 import CardMolecule from "../Organisms/Card.tsx";
@@ -10,12 +10,8 @@ import { CardData } from "../Organisms/Card.tsx"; // ← 必ず1つに統一
 import { deleteBlog } from "../API/Blog.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
-interface Props {
-  showTable: boolean;
-  search: "tag" | "keyword";
-  tag: { id: number; name: string } | null;
-  keyword: { id: number; name: string } | null;
-}
+import { useLocation, useMatch, matchPath } from "react-router-dom";
+import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 
 // --- 型定義 ---
 type TagInfo = {
@@ -44,6 +40,21 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const { setError } = useError();
+  const { pathname } = useLocation();
+  const { clearSelection } = useTagSelection();
+  const isArticleSearch = useMatch({ path: "/article-search", end: true });
+
+  const [sp] = useSearchParams();
+  const tag_url: string = sp.get("tag") ?? "";
+  const search_url = sp.get("search") ?? "";
+  const keywordName = sp.get("keywordName") ?? "";
+
+  const prevRef = useRef<{ tag: string; search: string; keywordName: string }>({
+    tag: "",
+    search: "",
+    keywordName: "",
+  });
+
   useEffect(() => {
     console.log("タグは" + tag?.name);
     const fetchData = async () => {
@@ -76,6 +87,27 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
 
     fetchData();
   }, [search, tag, keyword]);
+
+  useEffect(() => {
+    if (!isArticleSearch) return;
+
+    const prev = prevRef.current;
+    const prevPath = sessionStorage.getItem("prevPath") || "";
+
+    // ★条件:
+    //  前回: tag があり（例: ?tag=Python）
+    //  今回: search または keywordName があり（例: ?search=keyword&keywordName=うつ病）
+    const changedFromTagToKeyword =
+      prev.tag !== "" && (search_url !== "" || keywordName !== "");
+
+    const prevWasArticleUpdate = /^\/article-update\/\d+$/.test(prevPath);
+    if (changedFromTagToKeyword || prevWasArticleUpdate) {
+      clearSelection();
+    }
+
+    // ★最後に今回値を保存（次回比較用）
+    prevRef.current = { tag: tag_url, search: search_url, keywordName };
+  }, [isArticleSearch, tag_url, search_url, keywordName, clearSelection]);
 
   // BlogArticle → Table用 RowData に変換
   const tableRows: RowData[] = articles.map((a) => ({
