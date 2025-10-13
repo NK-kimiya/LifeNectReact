@@ -16,9 +16,10 @@ const ScrollBoxContent = styled.div`
 
 interface ChatInputProps {
   onSend: (text: string, allowSave: boolean) => void;
+  loading: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
   const [text, setText] = useState("");
   const [showModal, setShowModal] = useState(false);
   const { setError } = useError();
@@ -137,6 +138,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
                   className="btn btn-success"
                   type="submit"
                   onClick={handleSubmit}
+                  disabled={loading}
                 >
                   <i className="bi bi-send"></i>
                 </button>

@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.tsx";
 import { useSearch } from "../Context/SearchContext.tsx";
+import { useNav } from "../Context/NavManage.tsx";
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { keyword, setKeyword } = useSearch();
-
+  const { isNavActive, toggleNav } = useNav();
   const { isAuthenticated, logout, isLoggingOut } = useAuth();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,13 +18,14 @@ const NavBar: React.FC = () => {
         keyword
       )}`
     );
+    setKeyword("");
   };
 
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-success">
         <div className="container-fluid">
-          <Link className="navbar-brand text-white" to="/">
+          <Link className="navbar-brand text-white" to="/" onClick={toggleNav}>
             LifeConnect
           </Link>
           <button
@@ -55,6 +57,19 @@ const NavBar: React.FC = () => {
               </li>
             </ul>
             {isAuthenticated ? (
+              <>
+                <Link
+                  to="/admin-top"
+                  type="button"
+                  className="btn btn-secondary  align-items-center rounded-pill bg-warning"
+                >
+                  管理者ページ
+                </Link>
+              </>
+            ) : (
+              <></>
+            )}
+            {isAuthenticated ? (
               <div className="d-flex justify-content-start">
                 <button
                   className="btn btn btn-link  me-2 text-white"
@@ -80,6 +95,7 @@ const NavBar: React.FC = () => {
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
+                value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               ></input>
               <button

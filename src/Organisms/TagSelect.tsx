@@ -1,12 +1,13 @@
 import React from "react";
 import styled from "styled-components";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { fetchTags } from "../API/Tag.tsx";
 import { useTagContext } from "../Context/TagContext.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSearch } from "../Context/SearchContext.tsx";
+import { useNav } from "../Context/NavManage.tsx";
 const ScrollBoxContent = styled.div`
   display: flex;
   flex-wrap: nowrap;
@@ -29,11 +30,6 @@ type TagSelectProps = {
   variant?: "scroll" | "static"; // ← 追加: 表示方法を切り替える
 };
 
-type Tag = {
-  id: number;
-  name: string;
-};
-
 const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const { tags, setTags } = useTagContext();
   const [loading, setLoading] = useState(true);
@@ -43,6 +39,10 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const selectedSet = useMemo(() => new Set(selectedTagIds), [selectedTagIds]); //selectedTagIds が変わらない限り 同じ Set 参照を再利用
   const navigate = useNavigate();
   const { setKeyword } = useSearch();
+  const location = useLocation();
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const [isClicked, setIsClicked] = useState(false);
+  const { isNavActive, toggleNav } = useNav();
 
   const handleSingleAndGo = useCallback(
     (id: number, name: string) => {
@@ -61,10 +61,6 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
     [toggleTag]
   );
 
-  const handleClick = (tag: string) => {
-    navigate(`/article-search?tag=${encodeURIComponent(tag)}`);
-  };
-
   useEffect(() => {
     const loadTags = async () => {
       try {
@@ -80,17 +76,29 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   }, []);
 
   useEffect(() => {
-    const el = document.getElementById("scroll-box-content");
-    if (!el) return;
-
+    let el: any = null;
     const checkOverflow = () => {
       setShowButtons(el.scrollWidth > el.clientWidth);
     };
+    requestAnimationFrame(() => {
+      el = document.getElementById("scroll-box-content");
+      if (!el) return;
 
-    checkOverflow();
-    window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
-  }, [tags]); // ← tags が変わったら再チェック
+      checkOverflow();
+      window.addEventListener("resize", checkOverflow);
+    });
+
+    return () => {
+      window.removeEventListener("resize", checkOverflow);
+    };
+  }, [isNavActive, tags]); // ← tags が変わったら再チェック // locationが変わるたびに実行  // locationの変更に反応// location変更後に実行 // ← tags が変わったら再チェック
+
+  useEffect(() => {
+    if (isClicked) {
+      console.log("遷移後に処理を実行");
+      // 遷移後に必要な処理をここに書く
+    }
+  }, [location, isClicked]);
 
   if (loading) return <p>読み込み中...</p>;
 
@@ -104,9 +112,10 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
               <button
                 className="btn btn-light w-5 text-end"
                 onClick={() =>
-                  document
-                    .getElementById("scroll-box-content")
-                    ?.scrollBy({ left: -150, behavior: "smooth" })
+                  scrollBoxRef.current?.scrollBy({
+                    left: -150,
+                    behavior: "smooth",
+                  })
                 }
               >
                 ◀
@@ -114,7 +123,11 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
             )}
           </div>
           <div className="col-8">
-            <ScrollBoxContent id="scroll-box-content" style={{ flex: 1 }}>
+            <ScrollBoxContent
+              id="scroll-box-content"
+              style={{ flex: 1 }}
+              ref={scrollBoxRef}
+            >
               {tags?.map((tag) => (
                 <span
                   key={tag.id}
@@ -136,9 +149,10 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
               <button
                 className="btn btn-light w-5 text-start"
                 onClick={() =>
-                  document
-                    .getElementById("scroll-box-content")
-                    ?.scrollBy({ left: 150, behavior: "smooth" })
+                  scrollBoxRef.current?.scrollBy({
+                    left: 150,
+                    behavior: "smooth",
+                  })
                 }
               >
                 ▶

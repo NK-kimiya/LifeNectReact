@@ -185,7 +185,7 @@ const AiChatTemplate: React.FC = () => {
         ))}
         {loading && <p>AIが考えています...</p>}
       </ScrollBoxContent>
-      <ChatInput onSend={handleSend} /> {/* ✅ 修正 */}
+      <ChatInput onSend={handleSend} loading={loading} /> {/* ✅ 修正 */}
       <Footer />
     </div>
   );
