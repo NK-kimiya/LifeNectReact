@@ -12,7 +12,7 @@ import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useLocation, useMatch, matchPath } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
-
+import { safeSession } from "../utils/safeStorage.tsx";
 // --- 型定義 ---
 type TagInfo = {
   id: number;
@@ -92,7 +92,10 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
     if (!isArticleSearch) return;
 
     const prev = prevRef.current;
-    const prevPath = sessionStorage.getItem("prevPath") || "";
+    const prevPath = (() => {
+      const r = safeSession.get("prevPath"); // 例外を投げない
+      return r.ok ? r.value ?? "" : "";
+    })();
 
     // ★条件:
     //  前回: tag があり（例: ?tag=Python）

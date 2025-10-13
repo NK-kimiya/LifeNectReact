@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Cookies from "js-cookie";
+import { useError } from "../Context/ErrorContext.tsx";
+import { safeCookie } from "../utils/safeStorage.tsx";
+import Aleart from "./Aleart.tsx";
 
 const ScrollBoxContent = styled.div`
   width: 100%;
@@ -18,11 +21,19 @@ interface ChatInputProps {
 const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [text, setText] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const { setError } = useError();
 
   useEffect(() => {
-    const consent = Cookies.get("allowChatSave");
-    if (consent === undefined) {
-      setShowModal(true); // cookieがない場合のみ表示
+    const r = safeCookie.get("allowChatSave");
+    if (!r.ok) {
+      // ← 追加（読み取り例外時は静かにフォールバック）
+      // 読み取りに失敗: モーダルを出してユーザーに選択させる
+      setShowModal(true);
+      return;
+    }
+    const consent = r.value; // ← 追加: "true"/"false" or null
+    if (consent === null) {
+      setShowModal(true); // cookieがない場合のみ表示（従来通り）
     }
   }, []);
 
@@ -30,15 +41,33 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     e.preventDefault();
     if (!text.trim()) return;
 
-    const consent = Cookies.get("allowChatSave");
+    const r = safeCookie.get("allowChatSave");
+    const consent = r.ok ? r.value : null;
     const allowSave = consent === "true";
 
     onSend(text, allowSave);
     setText("");
   };
 
+  const verifyWrite = (expected: string) => {
+    // ★追加: 書き込み後に読み直して検証（静かに失敗対策）
+    const vr = safeCookie.get("allowChatSave");
+    return vr.ok && vr.value === expected;
+  };
+
   const handleAllow = () => {
-    Cookies.set("allowChatSave", "true", { expires: 30 }); // 30日有効
+    const r = safeCookie.set("allowChatSave", "true", {
+      days: 30,
+      path: "/",
+      sameSite: "Lax",
+    });
+    if (!r.ok || !verifyWrite("true")) {
+      setError(
+        "Cookieが利用できません。サイトによるデバイスへのデータの保存を許可にして再度リロードして下さい。"
+      ); // ← 追加: 明示通知
+      // 失敗時でもUIは閉じず、ユーザーに再試行させたい場合は return で抜ける
+      // return;
+    }
     setShowModal(false);
   };
 
@@ -49,6 +78,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   };
   return (
     <>
+      <Aleart />
       {showModal && (
         <div
           style={{
