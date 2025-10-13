@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 interface ArticleProps {
   article: any; // TODO: 記事の型を定義できる場合は修正
 }
@@ -34,4 +34,4 @@ const Article: React.FC<ArticleProps> = ({ article }) => {
   );
 };
 
-export default Article;
+export default memo(Article);

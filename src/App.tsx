@@ -1,5 +1,4 @@
 // TODO：chrome://settings/content/siteData
-//優先２：チャットでAIが回答を生成中の時は、ボタンを押せないようにする。
 //Organisms,Template,Pageフォルダー内のファイルをメモ化する
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useError } from "./Context/ErrorContext.tsx";

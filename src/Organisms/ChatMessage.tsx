@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import styled from "styled-components";
 import { IdTitle } from "../API/RagChat.tsx";
 import { Link } from "react-router-dom";
@@ -80,4 +80,4 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 };
 
-export default ChatMessage;
+export default memo(ChatMessage);

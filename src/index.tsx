@@ -15,30 +15,33 @@ import { SuccessProvider } from "./Context/SuccessContext.tsx";
 import { AuthProvider } from "./Context/AuthContext.tsx";
 import { ClearTagsOnRouteChange } from "./Components/ClearTagsOnRouteChange.tsx";
 import { SearchProvider } from "./Context/SearchContext.tsx";
+import { NavProvider } from "./Context/NavManage.tsx";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <SearchProvider>
-        <ChatProvider>
-          <TagSelectionProvider>
-            <ClearTagsOnRouteChange />
-            <TagProvider>
-              <FileProvider>
-                <SuccessProvider>
-                  <ErrorProvider>
-                    <AuthProvider>
-                      <App />
-                    </AuthProvider>
-                  </ErrorProvider>
-                </SuccessProvider>
-              </FileProvider>
-            </TagProvider>
-          </TagSelectionProvider>
-        </ChatProvider>
-      </SearchProvider>
+      <NavProvider>
+        <SearchProvider>
+          <ChatProvider>
+            <TagSelectionProvider>
+              <ClearTagsOnRouteChange />
+              <TagProvider>
+                <FileProvider>
+                  <SuccessProvider>
+                    <ErrorProvider>
+                      <AuthProvider>
+                        <App />
+                      </AuthProvider>
+                    </ErrorProvider>
+                  </SuccessProvider>
+                </FileProvider>
+              </TagProvider>
+            </TagSelectionProvider>
+          </ChatProvider>
+        </SearchProvider>
+      </NavProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
