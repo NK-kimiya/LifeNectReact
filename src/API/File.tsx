@@ -3,6 +3,7 @@ import axios from "axios";
 import client from "./client.tsx";
 import { Dispatch, SetStateAction } from "react";
 import { handleApiError } from "./errorHandler.tsx";
+import { safeLocal } from "../utils/safeStorage.tsx";
 const BASE_URL: string = "http://localhost:8000";
 
 export type UploadedFile = {
@@ -30,7 +31,8 @@ export const uploadFile = async (
     const formData: FormData = new FormData();
     formData.append("file", file);
 
-    const token: string | null = localStorage.getItem("authToken");
+    const tokenRes = safeLocal.get("authToken");
+    const token: string | null = tokenRes.ok ? tokenRes.value : null;
 
     const response = await client.post<UploadedFile>("/files/", formData, {
       headers: { "Content-Type": "multipart/form-data" },

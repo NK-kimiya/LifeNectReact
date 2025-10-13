@@ -1,3 +1,6 @@
+// TODO：chrome://settings/content/siteData
+//優先２：チャットでAIが回答を生成中の時は、ボタンを押せないようにする。
+//Organisms,Template,Pageフォルダー内のファイルをメモ化する
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useError } from "./Context/ErrorContext.tsx";
 import "./App.css";
@@ -12,6 +15,7 @@ import AdminTopPage from "./Pages/AdminTopPage.tsx";
 import ArticleSearchPage from "./Pages/ArticleSearchPage.tsx";
 import { useLocation } from "react-router-dom";
 import { useSuccess } from "./Context/SuccessContext.tsx";
+import { safeSession } from "./utils/safeStorage.tsx";
 const App: React.FC = () => {
   const location = useLocation();
   const { setError } = useError();
@@ -23,8 +27,10 @@ const App: React.FC = () => {
   useLayoutEffect(() => {
     // 例）/article-update/10 → /article-search の遷移時は
     // このタイミングで '/article-update/10' が保存される
-    sessionStorage.setItem("prevPath", prevPathRef.current); // ★追加（前のURLを保存）
-    prevPathRef.current = location.pathname; // ★追加（次回のため更新）
+    const r = safeSession.set("prevPath", prevPathRef.current); // ← 例外を飲み込みフォールバック
+    // 失敗時の通知が必要なら（任意）:
+    // if (!r.ok) setError("ブラウザの保存領域（sessionStorage）にアクセスできません。設定をご確認ください");
+    prevPathRef.current = location.pathname;
   }, [location.pathname]);
 
   useEffect(() => {
