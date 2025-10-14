@@ -37,7 +37,6 @@ const ArticleDetailPage: React.FC = () => {
   }, [id]);
   return (
     <>
-      <p>記事ID: {id}</p>
       <ArticleDetailTemplate article={article} />
     </>
   );

@@ -39,7 +39,6 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
       setEyecatch(initialData.eyecatch || "");
     }
   }, [initialData]);
-  console.log("blogデータ" + initialData?.title);
   //タグ作成の処理
   const handleCreateTag = async () => {
     if (!tagName) return;

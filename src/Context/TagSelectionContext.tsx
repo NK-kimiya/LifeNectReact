@@ -43,9 +43,6 @@ export const TagSelectionProvider: React.FC<React.PropsWithChildren> = ({
       const parsed = JSON.parse(r.value) as number[];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      console.log(
-        "サイトデータ/ストレージがブロックされているため、選択状態を保存できません。Safariのプライベートブラウジングや、Cookieブロック設定を解除してご利用ください。"
-      );
       return [];
     }
   });

@@ -4,8 +4,6 @@ import { useSearchParams } from "react-router-dom";
 
 const ArticleSearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  console.log("ALL PARAMS:", searchParams.toString());
-  console.log("tag:", searchParams.get("tag"));
 
   // クエリから値を取得
   const showTable = searchParams.get("showTable") === "true";
