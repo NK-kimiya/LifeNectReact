@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.tsx";
+
 const Footer: React.FC = () => {
   const { isAuthenticated, logout, isLoggingOut } = useAuth();
   return (
@@ -8,18 +9,14 @@ const Footer: React.FC = () => {
       <footer className="bg-dark text-white">
         <ul className="nav justify-content-center ">
           <li className="nav-item">
-            <a
-              className="nav-link link-light active"
-              aria-current="page"
-              href="#"
-            >
-              プライバシーポリシー
-            </a>
+            <Link className="nav-link link-light" to="/policy">
+              プライバシーポリシー・Cookie
+            </Link>
           </li>
           <li className="nav-item">
-            <a className="nav-link link-light" href="#">
+            <Link className="nav-link link-light" to="/term">
               利用規約
-            </a>
+            </Link>
           </li>
           <li className="nav-item">
             <a className="nav-link link-light" href="">

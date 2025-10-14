@@ -15,6 +15,8 @@ import ArticleSearchPage from "./Pages/ArticleSearchPage.tsx";
 import { useLocation } from "react-router-dom";
 import { useSuccess } from "./Context/SuccessContext.tsx";
 import { safeSession } from "./utils/safeStorage.tsx";
+import TermTemplates from "./Templates/TermTemplates.tsx";
+import PolicyPage from "./Pages/PolicyPage.tsx";
 const App: React.FC = () => {
   const location = useLocation();
   const { setError } = useError();
@@ -49,6 +51,8 @@ const App: React.FC = () => {
         <Route path="/admin-top" element={<AdminTopPage />} />
         <Route path="/article-create" element={<ArticleCreateTemplate />} />
         <Route path="/article-update/:id" element={<ArticleUpdate />} />
+        <Route path="/term" element={<TermTemplates />} />
+        <Route path="/policy" element={<PolicyPage />} />
       </Routes>
     </div>
   );

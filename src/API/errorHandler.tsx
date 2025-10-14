@@ -11,7 +11,10 @@ export const handleApiError = (
         setError("入力が不正です。");
         break;
       case 401:
-        setError("認証エラー。ログインしてください。");
+        setError(
+          "トークンが無効です、ログインしてください。または、ログアウトして再度ログインして下さい。"
+        );
+
         break;
       case 500:
         setError("サーバーエラーが発生しました。");
