@@ -56,7 +56,6 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
   });
 
   useEffect(() => {
-    console.log("タグは" + tag?.name);
     const fetchData = async () => {
       setLoading(true);
       setError("");

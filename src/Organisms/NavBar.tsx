@@ -42,33 +42,43 @@ const NavBar: React.FC = () => {
           <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link text-white text-start" to="/">
+                <Link
+                  className="nav-link text-white text-start"
+                  to="/"
+                  onClick={toggleNav}
+                >
                   ブログ一覧
                 </Link>
               </li>
+
+              {isAuthenticated ? (
+                <>
+                  <li className="nav-item">
+                    <Link
+                      to="/admin-top"
+                      type="button"
+                      className="nav-link text-white text-start"
+                    >
+                      管理者ページ
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <></>
+              )}
+
               <li className="nav-item text-start">
                 <Link
                   to="/chat"
                   type="button"
                   className="btn btn-secondary  align-items-center rounded-pill bg-warning"
                 >
-                  AIチャット<i className="bi bi-chat-left "></i>
+                  AIチャット
+                  <i className="bi bi-chat-left " onClick={toggleNav}></i>
                 </Link>
               </li>
             </ul>
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/admin-top"
-                  type="button"
-                  className="btn btn-secondary  align-items-center rounded-pill bg-warning"
-                >
-                  管理者ページ
-                </Link>
-              </>
-            ) : (
-              <></>
-            )}
+
             {isAuthenticated ? (
               <div className="d-flex justify-content-start">
                 <button

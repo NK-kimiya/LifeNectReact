@@ -6,8 +6,10 @@ import axios, {
 } from "axios";
 import { getToken } from "../Auth/token.tsx";
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
 const client: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: `${apiUrl}/api`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -32,7 +34,7 @@ client.interceptors.response.use(
 );
 
 export const clientPublic: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: `${apiUrl}/api`,
   headers: { "Content-Type": "application/json" },
 });
 

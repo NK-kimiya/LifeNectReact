@@ -39,9 +39,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
   const selectedSet = useMemo(() => new Set(selectedTagIds), [selectedTagIds]); //selectedTagIds が変わらない限り 同じ Set 参照を再利用
   const navigate = useNavigate();
   const { setKeyword } = useSearch();
-  const location = useLocation();
   const scrollBoxRef = useRef<HTMLDivElement>(null);
-  const [isClicked, setIsClicked] = useState(false);
   const { isNavActive, toggleNav } = useNav();
 
   const handleSingleAndGo = useCallback(
@@ -89,16 +87,15 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
     });
 
     return () => {
+      console.log("[TagSelect] cleanup before next effect/unmount", {
+        isNavActive,
+        tagsLength: Array.isArray(tags) ? tags.length : undefined,
+        ts: Date.now(),
+      });
       window.removeEventListener("resize", checkOverflow);
+      console.log("[TagSelect] removeEventListener('resize') detached");
     };
   }, [isNavActive, tags]); // ← tags が変わったら再チェック // locationが変わるたびに実行  // locationの変更に反応// location変更後に実行 // ← tags が変わったら再チェック
-
-  useEffect(() => {
-    if (isClicked) {
-      console.log("遷移後に処理を実行");
-      // 遷移後に必要な処理をここに書く
-    }
-  }, [location, isClicked]);
 
   if (loading) return <p>読み込み中...</p>;
 

@@ -83,22 +83,12 @@ body {
 }
 
 /* App.css に追加 */
-@media (max-width: 767.98px) {
-  #simple-list-example {
-    background-color: var(
-      --bs-secondary-bg-subtle
-    ); /* Bootstrapのbg-secondary-subtle */
-    border-radius: 10px;
-    margin-bottom: 10px;
-    color: #198754;
-    position: static !important;
-  }
-}
 
-@media (min-width: 768px) {
-  #simple-list-example {
-    background-color: transparent; /* PC/タブレットでは背景なし */
-    position: fixed !important;
-    top: 200px; /* top-2 に相当 */
-  }
+#simple-list-example {
+  background-color: var(
+    --bs-secondary-bg-subtle
+  ); /* Bootstrapのbg-secondary-subtle */
+  border-radius: 10px;
+  margin-bottom: 10px;
+  color: #198754;
 }

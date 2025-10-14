@@ -4,7 +4,6 @@ import client from "./client.tsx";
 import { Dispatch, SetStateAction } from "react";
 import { handleApiError } from "./errorHandler.tsx";
 import { safeLocal } from "../utils/safeStorage.tsx";
-const BASE_URL: string = "http://localhost:8000";
 
 export type UploadedFile = {
   id: number;

@@ -30,10 +30,13 @@ const ArticleDetailTemplate: React.FC<ArticleDetailTemplateProps> = ({
       <TagSelect variant="scroll" />
       <div className="container pt-5">
         <div className="row">
-          <div className="col-12 col-md-4">
+          {/* <div className="col-12 col-md-4">
+            <div>
+
+            </div> 
+          </div> */}
+          <div className="col-12 col-md-12">
             <Contents headings={article?.headings || []} />
-          </div>
-          <div className="col-12 col-md-8">
             <Article article={article} />
           </div>
         </div>

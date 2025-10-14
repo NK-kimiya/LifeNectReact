@@ -8,6 +8,7 @@ export type CardData = {
   text: string;
   buttonText: string;
   buttonHref: string;
+  date: string;
 };
 
 type CardMoleculeProps = {
@@ -34,7 +35,8 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
             <div className="card">
               <img src={card.image} className="card-img-top" alt={card.title} />
               <div className="card-body">
-                <h5 className="card-title">{card.title}</h5>
+                <h5 className="card-title text-start">{card.title}</h5>
+                <p>作成日時：{new Date(card.date).toLocaleString()}</p>
 
                 <Link className="btn btn-success" to={card.buttonHref}>
                   {card.buttonText}
