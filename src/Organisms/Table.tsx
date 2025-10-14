@@ -31,7 +31,7 @@ const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5, onDelete }) => {
           <tr>
             <th scope="col">#</th>
             <th scope="col">タイトル</th>
-            <th scope="col">投稿者</th>
+
             <th scope="col">日付</th>
           </tr>
         </thead>
@@ -60,7 +60,6 @@ const Table: React.FC<TableProps> = ({ rows, itemsPerPage = 5, onDelete }) => {
                   </a>
                 </div>
               </td>
-              <td>{row.author}</td>
               <td>{row.date}</td>
             </tr>
           ))}
