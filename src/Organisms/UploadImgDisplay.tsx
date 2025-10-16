@@ -25,7 +25,7 @@ const UploadImgDisplay = () => {
     const loadFiles = async () => {
       try {
         const data = await fetchFiles(setError);
-        setFiles(data);
+        setFiles(data!);
       } catch {
         setError("ファイル一覧の取得に失敗しました");
       }

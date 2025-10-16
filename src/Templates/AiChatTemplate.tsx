@@ -39,6 +39,22 @@ const AiChatTemplate: React.FC = () => {
   const hiddenHandlerRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    // ★ 追加：後幕や body クラスを掃除するユーティリティ
+    // ✅ 追加/修正：スクロールロック解除を強化
+    const cleanBootstrapModalArtifacts = () => {
+      // 1) body のクラスとスタイルを確実に戻す
+      document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("padding-right");
+      document.body.style.removeProperty("overflow"); // ★ 追加：overflow を明示解除
+
+      // 2) html 側も保険で解除（環境/他ライブラリ対策）
+      document.documentElement.style.removeProperty("overflow"); // ★ 追加
+
+      // 3) 残っている backdrop を全削除
+      document.querySelectorAll(".modal-backdrop").forEach((bd) => {
+        bd.parentNode?.removeChild(bd);
+      });
+    };
     let cancelled = false; // ← このフラグは「このエフェクトが無効化された（アンマウントされた）」ことを示すための安全スイッチ。
     //非同期待機（await）の“後半処理”が動く前にコンポーネントが消えた場合、続きの処理を中断するために使う
     const showAsync = async () => {
@@ -59,6 +75,7 @@ const AiChatTemplate: React.FC = () => {
       const el = modalRef.current;
 
       const onHidden = () => {
+        cleanBootstrapModalArtifacts();
         /* 必要ならここで setState 等 */
       };
       hiddenHandlerRef.current = onHidden;
@@ -71,16 +88,33 @@ const AiChatTemplate: React.FC = () => {
     return () => {
       cancelled = true; //クリーンアップ時に「このエフェクトは無効化された」と印を付ける。
       //← モーダルを確実に閉じ、イベントリスナ等を解放してリークを防ぐ。
-
+      const inst = modalInstance.current;
       const el = modalRef.current;
       if (el && hiddenHandlerRef.current) {
-        el.removeEventListener("hidden.bs.modal", hiddenHandlerRef.current); // ★追加
+        el.removeEventListener("hidden.bs.modal", hiddenHandlerRef.current);
+        hiddenHandlerRef.current = null;
       }
-      hiddenHandlerRef.current = null;
+      if (inst && el) {
+        // ★ ポイント：hidden を待ってから dispose
+        const handleHiddenOnce = () => {
+          inst.dispose();
+          modalInstance.current = null;
+          el.removeEventListener("hidden.bs.modal", handleHiddenOnce);
+          cleanBootstrapModalArtifacts();
+        };
 
-      modalInstance.current?.hide();
-      modalInstance.current?.dispose();
-      modalInstance.current = null;
+        // once: true でワンタイム購読（二重dispose対策）
+        el.addEventListener("hidden.bs.modal", handleHiddenOnce, {
+          once: true,
+        });
+
+        // hide は最後に（イベント購読を済ませてから）
+        inst.hide();
+      } else {
+        // 念のため
+        modalInstance.current = null;
+        cleanBootstrapModalArtifacts();
+      }
     };
   }, []);
 
