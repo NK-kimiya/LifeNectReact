@@ -1,5 +1,3 @@
-// TODO：chrome://settings/content/siteData
-//Organisms,Template,Pageフォルダー内のファイルをメモ化する
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useError } from "./Context/ErrorContext.tsx";
 import "./App.css";

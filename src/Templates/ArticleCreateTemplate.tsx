@@ -22,12 +22,12 @@ const ArticleCreateTemplate: React.FC = () => {
             <main className="flex-grow-1 pt-4">
               <div className="row">
                 {/* メインカラム */}
-                <div className="col-8">
+                <div className="col-12 col-md-8">
                   <BlogForm mode="create" />
                 </div>
 
                 {/* サイドバー */}
-                <div className="col-4">
+                <div className="col-12 col-md-4">
                   <div>
                     {/* サイドバー内部2カラム */}
                     <UploadImgDisplay />

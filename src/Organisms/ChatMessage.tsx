@@ -49,7 +49,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div
         className="text-start"
         style={{
-          background: isUser ? "#007bff" : "#e9ecef",
+          background: isUser ? "#198754" : "#e9ecef",
           color: isUser ? "#fff" : "#000",
           padding: "8px 12px",
           borderRadius: "12px",

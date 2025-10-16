@@ -108,7 +108,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
               <button
                 onClick={handleAllow}
                 style={{ marginRight: "10px" }}
-                className="btn btn-primary"
+                className="btn btn-success"
               >
                 許可する
               </button>

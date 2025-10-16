@@ -3,9 +3,11 @@ import styled from "styled-components";
 import { uploadFile, fetchFiles, UploadedFile } from "../API/File.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import { useFileContext } from "../Context/FileContext.tsx";
+import "../App.css";
 
 const ScrollBox = styled.div`
   min-height: 100vh;
+  max-height: 100vh;
   overflow-y: scroll;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
@@ -54,12 +56,12 @@ const UploadImgDisplay = () => {
     <>
       <h3>ファイルアップロード</h3>
       <input type="file" onChange={handleFileChange}></input>
-      <button className="btn btn-primary ms-2" onClick={handleUpload}>
+      <button className="btn btn-success ms-2" onClick={handleUpload}>
         アップロード
       </button>
       <ScrollBox>
         {files?.map((file) => (
-          <div className="">
+          <div className="scrollbox">
             <div key={file.id} className="card mb-3">
               <img src={file.file_url} className="card-img-top" alt="" />
               <div className="card-body">

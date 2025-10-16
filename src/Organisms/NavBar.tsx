@@ -4,11 +4,26 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.tsx";
 import { useSearch } from "../Context/SearchContext.tsx";
 import { useNav } from "../Context/NavManage.tsx";
+import Collapse from "bootstrap/js/dist/collapse";
+
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const { keyword, setKeyword } = useSearch();
   const { isNavActive, toggleNav } = useNav();
   const { isAuthenticated, logout, isLoggingOut } = useAuth();
+
+  const closeNavbar = () => {
+    const el = document.getElementById("navbarTogglerDemo02");
+    if (!el) return;
+
+    // getOrCreateInstance がある場合はそれを使う
+    const instance = (Collapse as any).getOrCreateInstance
+      ? (Collapse as any).getOrCreateInstance(el, { toggle: false })
+      : new (Collapse as any)(el, { toggle: false });
+
+    instance.hide();
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -21,21 +36,36 @@ const NavBar: React.FC = () => {
     setKeyword("");
   };
 
+  const toggleNavbar = () => {
+    const el = document.getElementById("navbarTogglerDemo02");
+    if (!el) return;
+    const inst = (Collapse as any).getOrCreateInstance
+      ? (Collapse as any).getOrCreateInstance(el, { toggle: false })
+      : new (Collapse as any)(el, { toggle: false });
+    inst.toggle(); // ← ボタンを押すたびに開閉
+  };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-success">
         <div className="container-fluid">
-          <Link className="navbar-brand text-white" to="/" onClick={toggleNav}>
+          <Link
+            className="navbar-brand text-white"
+            to="/"
+            onClick={() => {
+              toggleNav();
+              closeNavbar();
+            }}
+          >
             LifeConnect
           </Link>
           <button
-            className="navbar-toggler   bg-success"
+            className="navbar-toggler bg-success"
             type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarTogglerDemo02"
             aria-controls="navbarTogglerDemo02"
             aria-expanded="false"
             aria-label="Toggle navigation"
+            onClick={toggleNavbar}
           >
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -45,7 +75,10 @@ const NavBar: React.FC = () => {
                 <Link
                   className="nav-link text-white text-start"
                   to="/"
-                  onClick={toggleNav}
+                  onClick={() => {
+                    toggleNav();
+                    closeNavbar();
+                  }}
                 >
                   ブログ一覧
                 </Link>
@@ -58,6 +91,7 @@ const NavBar: React.FC = () => {
                       to="/admin-top"
                       type="button"
                       className="nav-link text-white text-start"
+                      onClick={closeNavbar}
                     >
                       管理者ページ
                     </Link>
@@ -72,9 +106,13 @@ const NavBar: React.FC = () => {
                   to="/chat"
                   type="button"
                   className="btn btn-secondary  align-items-center rounded-pill bg-warning"
+                  onClick={() => {
+                    toggleNav();
+                    closeNavbar();
+                  }}
                 >
                   AIチャット
-                  <i className="bi bi-chat-left " onClick={toggleNav}></i>
+                  <i className="bi bi-chat-left "></i>
                 </Link>
               </li>
             </ul>
@@ -83,7 +121,10 @@ const NavBar: React.FC = () => {
               <div className="d-flex justify-content-start">
                 <button
                   className="btn btn btn-link  me-2 text-white"
-                  onClick={() => logout()}
+                  onClick={async () => {
+                    await logout();
+                    closeNavbar(); // 追加: ログアウト後に閉じる
+                  }}
                   disabled={isLoggingOut}
                 >
                   ログアウト
@@ -94,6 +135,7 @@ const NavBar: React.FC = () => {
                 <Link
                   to="/admin-login"
                   className="btn btn btn-link  me-2 text-white"
+                  onClick={closeNavbar}
                 >
                   管理者ログイン
                 </Link>

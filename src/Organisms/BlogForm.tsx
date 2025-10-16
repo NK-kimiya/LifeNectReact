@@ -144,7 +144,6 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
         ></textarea>
 
         <TagSelect variant="static" />
-        {initialData?.tags?.map((tag) => tag).join(", ")}
         <button
           type="button"
           className="btn text-bg-success white rounded-circle d-inline-flex align-items-center justify-content-center"
@@ -195,7 +194,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn btn-success"
                   onClick={handleCreateTag}
                 >
                   追加する

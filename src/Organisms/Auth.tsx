@@ -33,12 +33,13 @@ const Auth: React.FC<AuthProps> = ({ onSubmit }) => {
         <form onSubmit={handleSubmit}>
           <div className="mb-3 text-start">
             <label htmlFor="inputEmail3" className="col-form-label ">
-              Email
+              Username
             </label>
             <div className="">
               <input
                 type="text"
                 placeholder="ユーザー名"
+                className="form-control"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -51,6 +52,7 @@ const Auth: React.FC<AuthProps> = ({ onSubmit }) => {
             </label>
             <div className="">
               <input
+                className="form-control"
                 type="password"
                 placeholder="パスワード"
                 value={password}
@@ -59,7 +61,7 @@ const Auth: React.FC<AuthProps> = ({ onSubmit }) => {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary pt-2 pb-2 ps-5 pe-5">
+          <button type="submit" className="btn btn-success pt-2 pb-2 ps-5 pe-5">
             ログイン
           </button>
         </form>

@@ -92,3 +92,14 @@ body {
   margin-bottom: 10px;
   color: #198754;
 }
+
+.scrollbox {
+  max-height: 70vh; /* ← 必要に応じて調整 */
+  overflow: auto; /* ← Bootstrapのoverflow-autoでもOK */
+  -ms-overflow-style: none; /* ← IE/旧Edge: スクロールバー非表示 */
+  scrollbar-width: none; /* ← Firefox: スクロールバー非表示 */
+}
+.scrollbox::-webkit-scrollbar {
+  /* ← Chrome/Safari: スクロールバー非表示 */
+  display: none;
+}
