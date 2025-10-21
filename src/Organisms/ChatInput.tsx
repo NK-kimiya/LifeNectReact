@@ -79,7 +79,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
   };
   return (
     <>
-      <Aleart />
       {showModal && (
         <div
           style={{
