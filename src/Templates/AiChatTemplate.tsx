@@ -11,6 +11,8 @@ import { Modal } from "bootstrap";
 import Terms from "../Organisms/Terms.tsx";
 import { useLocation } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
+import Aleart from "../Organisms/Aleart.tsx";
+import { useError } from "../Context/ErrorContext.tsx";
 
 const ScrollBoxContent = styled.div`
   width: 100%;
@@ -37,6 +39,7 @@ const AiChatTemplate: React.FC = () => {
   const modalRef = useRef<HTMLDivElement | null>(null); // モーダル最上位<div>への参照
   const modalInstance = useRef<Modal | null>(null); //Bootstrap の Modalインスタンスを格納
   const hiddenHandlerRef = useRef<(() => void) | null>(null);
+  const { setError } = useError();
 
   useEffect(() => {
     // ★ 追加：後幕や body クラスを掃除するユーティリティ
@@ -143,7 +146,7 @@ const AiChatTemplate: React.FC = () => {
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      console.error(error);
+      setError(error.response.data.detail);
       // const errorMessage: Message = {
       //   role: "assistant",
       //   content: "エラーが発生しました。もう一度お試しください。",
@@ -160,6 +163,7 @@ const AiChatTemplate: React.FC = () => {
       style={{ height: "100vh", overflow: "hidden" }}
     >
       <NavBar />
+      <Aleart />
       {/* ====== ここにモーダルのJSXを組み込む（class → className, tabindex → tabIndex） ====== */}
       <div
         ref={modalRef}
