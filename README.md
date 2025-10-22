@@ -1,30 +1,38 @@
-# <LifeConnect>
+# LifeConnect
 
-<I experienced setbacks due to the side effects of childhood cancer. A major cause of this was loneliness. Drawing from that experience, I created an app aimed at reducing loneliness.>
+I experienced setbacks due to the side effects of childhood cancer.  
+A major cause of this was loneliness.  
+Drawing from that experience, I created an app aimed at reducing loneliness.
 
 
 
 ## Demo
-: <https://kimiyasu.com/2025/10/16/cmsrag%e3%82%a2%e3%83%97%e3%83%aa/> <!-- 任意 -->
+👉 [https://kimiyasu.com/2025/10/16/cmsrag%e3%82%a2%e3%83%97%e3%83%aa/](https://kimiyasu.com/2025/10/16/cmsrag%e3%82%a2%e3%83%97%e3%83%aa/) <!-- optional -->
+
+---
 
 ## Requirements
-- Node.js: >= 20.x
-- Package Manager: npm -> 10.9.2
-- Development Environment: Windows
+- **Node.js**: >= 20.x  
+- **Package Manager**: npm (v10.9.2)  
+- **Development Environment**: Windows  
 
-## Quick Start 
+---
 
-## .envファイルの設定 
-REACT_APP_API_URL=http://localhost:8000　→　Djangoプロジェクト
+## Environment Variables
+Create a `.env` file in the project root:
+
+```env
+REACT_APP_API_URL=http://localhost:8000　→　Django backend endpoint
+
 ```bash
-# 1) 依存関係のインストール
+# 1. Install dependencies
 npm install
 
-# 2) 開発サーバ起動
+# 2. Start development server
 npm run start
 
-# 3) ブラウザで確認
-# shown URL (例: http://localhost:3000)
+# 3. Open in browser
+# Example: http://localhost:3000
 
 
 
