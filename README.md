@@ -22,8 +22,7 @@ Drawing from that experience, I created an app aimed at reducing loneliness.
 Create a `.env` file in the project root:
 
 ```env
-REACT_APP_API_URL=http://localhost:8000
-Django backend endpoint: [Django backend endpoint](https://github.com/NK-kimiya/LifeNectDjango)
+REACT_APP_API_URL=http://localhost:8000　→Django backend endpoint(https://github.com/NK-kimiya/LifeNectDjango)
 
 ```bash
 # 1. Install dependencies
