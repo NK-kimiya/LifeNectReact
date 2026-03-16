@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { useError } from "../Context/ErrorContext.tsx";
 import { safeCookie } from "../utils/safeStorage.tsx";
 import Aleart from "./Aleart.tsx";
+import "./ChatInput.css";
 
 const ScrollBoxContent = styled.div`
   width: 100%;
@@ -64,7 +65,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
     });
     if (!r.ok || !verifyWrite("true")) {
       setError(
-        "Cookieが利用できません。サイトによるデバイスへのデータの保存を許可にして再度リロードして下さい。"
+        "Cookieが利用できません。サイトによるデバイスへのデータの保存を許可にして再度リロードして下さい。",
       ); // ← 追加: 明示通知
       // 失敗時でもUIは閉じず、ユーザーに再試行させたい場合は return で抜ける
       // return;
@@ -119,31 +120,29 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
         </div>
       )}
 
-      <div className="bg-white border-top">
-        <div className="container pb-2" style={{ maxWidth: "80%" }}>
-          <ScrollBoxContent>
-            <div className="row h-100 align-items-center">
-              <div className="col-10">
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  style={{ resize: "none" }}
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                ></textarea>
-              </div>
-              <div className="col-2 d-grid">
-                <button
-                  className="btn btn-success"
-                  type="submit"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                >
-                  <i className="bi bi-send"></i>
-                </button>
-              </div>
+      <div className="bg-white position-fixed bottom-0 w-100">
+        <div className="container pb-2">
+          <div className="row  align-items-center">
+            <div className="col-10">
+              <textarea
+                className="form-control"
+                style={{ resize: "none" }}
+                value={text}
+                rows={1}
+                onChange={(e) => setText(e.target.value)}
+              ></textarea>
             </div>
-          </ScrollBoxContent>
+            <div className="col-2 d-grid">
+              <button
+                className="btn btn-success"
+                type="submit"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                <i className="bi bi-send"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -6,7 +6,7 @@ import { useSearch } from "../Context/SearchContext.tsx";
 import { useNav } from "../Context/NavManage.tsx";
 import Collapse from "bootstrap/js/dist/collapse";
 
-const NavBar: React.FC = () => {
+const NavBarAi: React.FC = () => {
   const navigate = useNavigate();
   const { keyword, setKeyword } = useSearch();
   const { isNavActive, toggleNav } = useNav();
@@ -47,7 +47,7 @@ const NavBar: React.FC = () => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg ">
+      <nav className="navbar navbar-expand-lg navbar-light">
         <div className="container-fluid">
           <Link
             className="navbar-brand"
@@ -56,11 +56,17 @@ const NavBar: React.FC = () => {
               toggleNav();
               closeNavbar();
             }}
+            style={{ width: "200px" }}
           >
-            LifeConnect
+            <img
+              src="/title.svg"
+              alt="LifeConnect"
+              style={{ display: "block", width: "200px" }}
+            />
           </Link>
+
           <button
-            className="navbar-toggler bg-success"
+            className="navbar-toggler"
             type="button"
             aria-controls="navbarTogglerDemo02"
             aria-expanded="false"
@@ -69,6 +75,7 @@ const NavBar: React.FC = () => {
           >
             <span className="navbar-toggler-icon"></span>
           </button>
+
           <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
@@ -141,23 +148,6 @@ const NavBar: React.FC = () => {
                 </Link>
               </div>
             )}
-            <form className="d-flex" role="search">
-              <input
-                className="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              ></input>
-              <button
-                className="btn btn-outline-success bg-warning text-white"
-                type="submit"
-                onClick={handleSearch}
-              >
-                <i className="bi bi-search"></i>
-              </button>
-            </form>
           </div>
         </div>
       </nav>
@@ -165,4 +155,4 @@ const NavBar: React.FC = () => {
   );
 };
 
-export default NavBar;
+export default NavBarAi;
