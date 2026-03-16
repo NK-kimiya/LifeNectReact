@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import NavBar from "../Organisms/NavBar.tsx";
 import styled from "styled-components";
-import Footer from "../Organisms/Footer.tsx";
 import ChatMessage from "../Organisms/ChatMessage.tsx";
 import ChatInput from "../Organisms/ChatInput.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
@@ -13,6 +11,7 @@ import { useLocation } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
+import NavBarAi from "../Organisms/NavBarAi.tsx";
 
 const ScrollBoxContent = styled.div`
   width: 100%;
@@ -158,11 +157,8 @@ const AiChatTemplate: React.FC = () => {
   };
 
   return (
-    <div
-      className="d-flex flex-column"
-      style={{ height: "100vh", overflow: "hidden" }}
-    >
-      <NavBar />
+    <div className="d-flex flex-column">
+      <NavBarAi />
       <Aleart />
       {/* ====== ここにモーダルのJSXを組み込む（class → className, tabindex → tabIndex） ====== */}
       <div
@@ -212,19 +208,17 @@ const AiChatTemplate: React.FC = () => {
       </div>
       {/* ====== ここまで ====== */}
       <TagSelect variant="scroll" />
-      <ScrollBoxContent style={{ flex: 1, overflowY: "auto", padding: "10px" }}>
-        {messages?.map((msg, idx) => (
-          <ChatMessage
-            key={idx}
-            role={msg.role}
-            content={msg.content}
-            id_title_list={msg.unique_id_title_list}
-          />
-        ))}
-        {loading && <p>AIが考えています...</p>}
-      </ScrollBoxContent>
+      {messages?.map((msg, idx) => (
+        <ChatMessage
+          key={idx}
+          role={msg.role}
+          content={msg.content}
+          id_title_list={msg.unique_id_title_list}
+        />
+      ))}
+      <div className="container">{loading && <p>AIが考えています...</p>}</div>
       <ChatInput onSend={handleSend} loading={loading} /> {/* ✅ 修正 */}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 };
