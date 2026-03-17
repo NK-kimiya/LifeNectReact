@@ -12,7 +12,7 @@ import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import NavBarAi from "../Organisms/NavBarAi.tsx";
-
+import axios from "axios";
 const ScrollBoxContent = styled.div`
   width: 100%;
 
@@ -26,6 +26,17 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   unique_id_title_list: IdTitle[];
+
+  mode?: "normal" | "safety_only";
+  primary_support?: {
+    title: string;
+    name: string;
+    url: string;
+  } | null;
+  other_supports?: {
+    name: string;
+    url: string;
+  }[];
 }
 
 const AiChatTemplate: React.FC = () => {
@@ -141,16 +152,19 @@ const AiChatTemplate: React.FC = () => {
       const botMessage: Message = {
         role: "assistant",
         content: res.data.answer,
-        unique_id_title_list: res.data.article,
+        unique_id_title_list: res.data.article ?? [],
+
+        mode: res.data.mode,
+        primary_support: res.data.primary_support,
+        other_supports: res.data.other_supports,
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      setError(error.response.data.detail);
-      // const errorMessage: Message = {
-      //   role: "assistant",
-      //   content: "エラーが発生しました。もう一度お試しください。",
-      // };
-      // setMessages((prev) => [...prev, errorMessage]);
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.detail || "エラーが発生しました");
+      } else {
+        setError("不明なエラーが発生しました");
+      }
     } finally {
       setLoading(false);
     }
@@ -188,7 +202,7 @@ const AiChatTemplate: React.FC = () => {
                   id="flexSwitchCheckChecked"
                   onChange={(e) => setAgreed(e.target.checked)}
                 ></input>
-                <label className="" for="flexSwitchCheckChecked">
+                <label className="" htmlFor="flexSwitchCheckChecked">
                   同意する
                 </label>
               </div>
@@ -214,6 +228,9 @@ const AiChatTemplate: React.FC = () => {
           role={msg.role}
           content={msg.content}
           id_title_list={msg.unique_id_title_list}
+          mode={msg.mode}
+          primary_support={msg.primary_support}
+          other_supports={msg.other_supports}
         />
       ))}
       <div className="container">{loading && <p>AIが考えています...</p>}</div>

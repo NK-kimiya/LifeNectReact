@@ -12,12 +12,23 @@ export interface IdTitle {
 // レスポンス型を定義
 export interface RagResponse {
   answer: string;
-  id_title_list: IdTitle[];
+  article: IdTitle[];
+
+  mode: "normal" | "safety_only";
+  primary_support: {
+    title: string;
+    name: string;
+    url: string;
+  } | null;
+  other_supports: {
+    name: string;
+    url: string;
+  }[];
 }
 
 export const fetchRagAnswer = async (
   text: string,
-  allowSave: boolean
-): Promise<AxiosResponse<RagResponse> | null> => {
+  allowSave: boolean,
+): Promise<AxiosResponse<RagResponse>> => {
   return clientPublic.post<RagResponse>("/rag-answer/", { text, allowSave });
 };

@@ -10,6 +10,17 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   unique_id_title_list: { id: number; title: string }[];
+
+  mode?: "normal" | "safety_only";
+  primary_support?: {
+    title: string;
+    name: string;
+    url: string;
+  } | null;
+  other_supports?: {
+    name: string;
+    url: string;
+  }[];
 }
 
 interface ChatContextType {
@@ -27,7 +38,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({
   const value = useMemo(
     // ★追加: valueオブジェクトの安定化
     () => ({ messages, setMessages }),
-    [messages] // setMessages は安定参照なので依存不要
+    [messages], // setMessages は安定参照なので依存不要
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

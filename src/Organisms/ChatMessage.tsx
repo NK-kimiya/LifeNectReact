@@ -7,12 +7,26 @@ interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   id_title_list: IdTitle[];
+
+  mode?: "normal" | "safety_only";
+  primary_support?: {
+    title: string;
+    name: string;
+    url: string;
+  } | null;
+  other_supports?: {
+    name: string;
+    url: string;
+  }[];
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
   role,
   content,
   id_title_list,
+  mode,
+  primary_support,
+  other_supports,
 }) => {
   const TopTitleBlogFetch = () => {
     let tagQuery = "";
@@ -49,6 +63,34 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               ))}
             </>
           )}
+
+          <div className="mt-3">
+            <a href={primary_support?.url} target="_blank">
+              {primary_support?.name}
+            </a>
+          </div>
+
+          {primary_support && (
+            <div className="mt-3">
+              <a
+                href={primary_support.url}
+                target="_blank"
+                className="btn btn-danger"
+              >
+                {primary_support.name}
+              </a>
+            </div>
+          )}
+
+          <div className="mt-2">
+            {other_supports?.map((item, i) => (
+              <div key={i}>
+                <a href={item.url} target="_blank">
+                  {item.name}
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
