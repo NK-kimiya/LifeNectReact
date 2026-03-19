@@ -1,7 +1,12 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import styled from "styled-components";
 import { IdTitle } from "../API/RagChat.tsx";
 import { Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+
+let parsed;
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -28,6 +33,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   primary_support,
   other_supports,
 }) => {
+  let parsed;
+
+try {
+  parsed =
+    typeof content === "string"
+      ? JSON.parse(content)
+      : content;
+} catch {
+  parsed = {
+    answer: content // ← ここが重要
+  };
+}
   const TopTitleBlogFetch = () => {
     let tagQuery = "";
   };
@@ -47,21 +64,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         }
       >
         <div>
-          {content}
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+          >
+            {parsed.answer}
+          </ReactMarkdown>
           {id_title_list && id_title_list.length > 0 && (
             // style={{
             //   display: isUser ? "none" : "block",
             // }}
-            <>
+            <div className="pb-5">
               <h6>もっとも関連度の高い記事</h6>
               {id_title_list?.map((item) => (
-                <div>
-                  <Link key={item.id} className="" to={`/articles/${item.id}`}>
+                <div >
+                  <Link key={item.id} className="" to={`/articles/${item.id}`} >
                     {item.title}
                   </Link>
                 </div>
               ))}
-            </>
+            </div>
           )}
 
           <div className="mt-3">
