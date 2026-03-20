@@ -120,31 +120,30 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
         </div>
       )}
 
-      <div className="bg-white position-fixed bottom-0 w-100">
-        <div className="container pb-2">
-          <div className="row  align-items-center">
-            <div className="col-10">
-              <textarea
-                className="form-control"
-                style={{ resize: "none" }}
-                value={text}
-                rows={1}
-                onChange={(e) => setText(e.target.value)}
-              ></textarea>
-            </div>
-            <div className="col-2 d-grid">
-              <button
-                className="btn btn-success"
-                type="submit"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                <i className="bi bi-send"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="bg-white w-100">
+  <div className="container p-2">
+    <div className="position-relative  w-100">
+      
+      <textarea
+        className="form-control rounded-5 shadow p-3 pe-5"
+        style={{ resize: "none" }}
+        value={text}
+        rows={1}
+        onChange={(e) => setText(e.target.value)}
+      ></textarea>
+
+      <button
+        className="btn rounded-circle bg-dark text-white shadow position-absolute top-50 end-0 translate-middle-y me-2"
+        type="submit"
+        onClick={handleSubmit}
+        disabled={loading}
+      >
+        <i className="bi bi-send"></i>
+      </button>
+
+    </div>
+  </div>
+</div>
     </>
   );
 };

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
 import ChatMessage from "../Organisms/ChatMessage.tsx";
 import ChatInput from "../Organisms/ChatInput.tsx";
 import TagSelect from "../Organisms/TagSelect.tsx";
@@ -13,14 +12,7 @@ import Aleart from "../Organisms/Aleart.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import NavBarAi from "../Organisms/NavBarAi.tsx";
 import axios from "axios";
-const ScrollBoxContent = styled.div`
-  width: 100%;
 
-  @media (min-width: 992px) {
-    width: 70%;
-    margin: 0 auto;
-  }
-`;
 
 interface Message {
   role: "user" | "assistant";
@@ -222,19 +214,35 @@ const AiChatTemplate: React.FC = () => {
       </div>
       {/* ====== ここまで ====== */}
       <TagSelect variant="scroll" />
-      {messages?.map((msg, idx) => (
-        <ChatMessage
-          key={idx}
-          role={msg.role}
-          content={msg.content}
-          id_title_list={msg.unique_id_title_list}
-          mode={msg.mode}
-          primary_support={msg.primary_support}
-          other_supports={msg.other_supports}
-        />
-      ))}
+      {messages && messages.length > 0 ? (
+        <div>
+          {messages.map((msg, idx) => (
+            <ChatMessage
+              key={idx}
+              role={msg.role}
+              content={msg.content}
+              id_title_list={msg.unique_id_title_list}
+              mode={msg.mode}
+              primary_support={msg.primary_support}
+              other_supports={msg.other_supports}
+            />
+          ))}
+          <div className="position-fixed bottom-0 w-100">
+            <ChatInput onSend={handleSend} loading={loading} />
+          </div>
+        </div>
+      ) : (
+        <div className="d-flex flex-column justify-content-center align-items-center vh-50">
+          <h3>LifeConnect-AI</h3>
+          <p>当事者の体験をベースに、AIが質問に答えます。</p>
+          <div className="container">
+            <ChatInput onSend={handleSend} loading={loading} />
+            <p className="text-center">このサービスは、当事者の体験談を提供することを目的としています。当事者個人の体験であり個人差があります。診断や治療など重要なことは、専門機関にご相談ください。</p>
+          </div>
+        </div>
+      )}
       <div className="container">{loading && <p>AIが考えています...</p>}</div>
-      <ChatInput onSend={handleSend} loading={loading} /> {/* ✅ 修正 */}
+      {/* ✅ 修正 */}
       {/* <Footer /> */}
     </div>
   );
