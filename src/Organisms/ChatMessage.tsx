@@ -1,12 +1,10 @@
-import React, { memo, useEffect, useMemo } from "react";
-import styled from "styled-components";
+import React, { memo,} from "react";
+
 import { IdTitle } from "../API/RagChat.tsx";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
-
-let parsed;
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -45,9 +43,7 @@ try {
     answer: content // ← ここが重要
   };
 }
-  const TopTitleBlogFetch = () => {
-    let tagQuery = "";
-  };
+
   const isUser = role === "user";
   return (
     <div
@@ -86,27 +82,15 @@ try {
           )}
 
           <div className="mt-3">
-            <a href={primary_support?.url} target="_blank">
+            <a href={primary_support?.url} target="__blank">
               {primary_support?.name}
             </a>
           </div>
 
-          {primary_support && (
-            <div className="mt-3">
-              <a
-                href={primary_support.url}
-                target="_blank"
-                className="btn btn-danger"
-              >
-                {primary_support.name}
-              </a>
-            </div>
-          )}
-
           <div className="mt-2">
             {other_supports?.map((item, i) => (
               <div key={i}>
-                <a href={item.url} target="_blank">
+                <a href={item.url} target="__blank">
                   {item.name}
                 </a>
               </div>
