@@ -33,7 +33,6 @@ const NavBar: React.FC = () => {
         keyword,
       )}`,
     );
-    setKeyword("");
   };
 
   const toggleNavbar = () => {
@@ -47,31 +46,46 @@ const NavBar: React.FC = () => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg ">
-        <div className="container-fluid">
-          <Link
-            className="navbar-brand"
+    <div className="container">
+      <div className="a">
+        <div >
+        <Link
+            className="text-center"
             to="/"
             onClick={() => {
               toggleNav();
               closeNavbar();
             }}
           >
-            LifeConnect
+            <img src="/logo.svg" alt="Logo" className="navbar-logo me-2 text-center" style={{ display: "block", width: "200px" }}/>
           </Link>
-          <button
-            className="navbar-toggler bg-success"
-            type="button"
-            aria-controls="navbarTogglerDemo02"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-            onClick={toggleNavbar}
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
+          </div>
+        <div>
+          <form className="position-relative " role="search">
+            <input
+              className="form-control pe-5 rounded-5 shadow p-3 pe-5"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+
+            <button
+              className="btn position-absolute top-50 end-0 translate-middle-y me-2"
+              type="submit"
+              onClick={handleSearch}
+            >
+              <i className="bi bi-search"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      </div>
+      <div className="container p-3">
+        <div className="container-fluid">
+          <div className="row">
+              <div className="nav-item col-4">
                 <Link
                   className="nav-link text-start"
                   to="/"
@@ -80,13 +94,13 @@ const NavBar: React.FC = () => {
                     closeNavbar();
                   }}
                 >
-                  ブログ一覧
+                  すべて
                 </Link>
-              </li>
+              </div>
 
               {isAuthenticated ? (
                 <>
-                  <li className="nav-item">
+                  <div className="col-4">
                     <Link
                       to="/admin-top"
                       type="button"
@@ -95,13 +109,13 @@ const NavBar: React.FC = () => {
                     >
                       管理者ページ
                     </Link>
-                  </li>
+                  </div>
                 </>
               ) : (
                 <></>
               )}
 
-              <li className="nav-item text-start">
+              <div className="col-4">
                 <Link
                   to="/chat"
                   type="button"
@@ -114,11 +128,10 @@ const NavBar: React.FC = () => {
                   AIチャット
                   <i className="bi bi-chat-left "></i>
                 </Link>
-              </li>
-            </ul>
+              </div>
 
             {isAuthenticated ? (
-              <div className="d-flex justify-content-start">
+              <div className="col-4">
                 <button
                   className="btn btn btn-link  me-2 text-white"
                   onClick={async () => {
@@ -131,7 +144,7 @@ const NavBar: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="d-flex justify-content-start">
+              <div className="col-4">
                 <Link
                   to="/admin-login"
                   className="btn btn btn-link  me-2 text-white"
@@ -141,26 +154,9 @@ const NavBar: React.FC = () => {
                 </Link>
               </div>
             )}
-            <form className="d-flex" role="search">
-              <input
-                className="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              ></input>
-              <button
-                className="btn btn-outline-success bg-warning text-white"
-                type="submit"
-                onClick={handleSearch}
-              >
-                <i className="bi bi-search"></i>
-              </button>
-            </form>
           </div>
         </div>
-      </nav>
+      </div>
     </>
   );
 };

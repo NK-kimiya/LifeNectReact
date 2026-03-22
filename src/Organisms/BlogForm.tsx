@@ -27,6 +27,8 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
   const [content, setContent] = useState(initialData?.body || "");
   const [eyecatch, setEyecatch] = useState(initialData?.eyecatch || "");
 
+  const [contentType, setContentType] = useState<"blog" | "qa">("blog");
+
   useEffect(() => {
     if (mode === "create") {
       setSelectedTagIds([]);
@@ -70,6 +72,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
           content,
           selectedTagIds,
           eyecatch,
+          contentType,
           setError
         );
         if (newBlog) {
@@ -154,6 +157,14 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
         >
           ＋
         </button>
+
+        <select
+          value={contentType}
+          onChange={(e) => setContentType(e.target.value as "blog" | "qa")}
+        >
+          <option value="blog">ブログ記事</option>
+          <option value="qa">Q&A</option>
+        </select>
 
         <div
           className="modal fade"

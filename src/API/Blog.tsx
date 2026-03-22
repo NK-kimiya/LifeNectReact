@@ -13,6 +13,8 @@ export type BlogArticle = {
   created_at: string;
   updated_at: string;
   tags: { id: number; name: string }[]; // タグIDの配列
+
+  content_type: string;
 };
 
 export const createBlog = async (
@@ -20,6 +22,7 @@ export const createBlog = async (
   body: string,
   tagIds: number[],
   eyecatch: string,
+  content_type: string,
   setError: Dispatch<SetStateAction<string>>
 ): Promise<BlogArticle | null> => {
   try {
@@ -28,6 +31,7 @@ export const createBlog = async (
       body,
       tag_ids: tagIds,
       eyecatch,
+      content_type,
     });
     invalidateBlogCaches();
     return response.data;
@@ -50,6 +54,7 @@ export type BlogArticleList = {
   created_at: string;
   updated_at: string;
   tags: Tag[];
+  content_type: string,
 };
 
 const BLOG_TTL_MS: number = 5 * 60 * 1000; // ★追加: 5分（300,000ms）

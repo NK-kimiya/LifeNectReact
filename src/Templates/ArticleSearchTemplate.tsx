@@ -126,6 +126,7 @@ const ArticleSearchTemplate: React.FC<ArticleSearchTemplateProps> = ({
     text: a.body.substring(0, 100),
     buttonText: "続きを読む",
     buttonHref: `/articles/${a.id}`,
+    content_type: a.content_type,
   }));
   // --- 見出しを切り替え ---
   const renderHeading = (): React.ReactElement => {
