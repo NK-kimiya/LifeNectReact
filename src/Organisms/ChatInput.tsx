@@ -122,7 +122,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
 
       <div className="bg-white w-100">
   <div className="container p-2">
-    <div className="position-relative  w-100">
+    <div className="position-relative ">
       
       <textarea
         className="form-control rounded-5 shadow p-3 pe-5"

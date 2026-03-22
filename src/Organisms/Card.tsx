@@ -1,6 +1,9 @@
-import { div } from "@tensorflow/tfjs";
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Accordion from 'react-bootstrap/Accordion';
+import Card from 'react-bootstrap/Card';
+import Button from 'react-bootstrap/Button';
 export type CardData = {
   // ← 1枚のカードデータの型
   image: string;
@@ -9,6 +12,8 @@ export type CardData = {
   buttonText: string;
   buttonHref: string;
   date: string;
+
+  content_type: string;
 };
 
 type CardMoleculeProps = {
@@ -29,22 +34,42 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
   const currentItems = cards.slice(startIndex, startIndex + itemsPerPage);
   return (
     <div className="container">
-      <div className="row">
-        {currentItems?.map((card, i) => (
-          <div className="col-12 col-md-4 col-lg-3 mb-3" key={i}>
-            <div className="card">
-              <img src={card.image} className="card-img-top" alt={card.title} />
-              <div className="card-body">
-                <h5 className="card-title text-start">{card.title}</h5>
-                <p>作成日時：{new Date(card.date).toLocaleString()}</p>
+      <div className="">
+        {currentItems?.map((card, i) => {
+  return (
+    <div className="" key={i}>
+      <div className="">
+        {card.image && (
+          <img src={card.image} className="card-img-top" alt={card.title} />
+        )}
 
-                <Link className="btn btn-success" to={card.buttonHref}>
-                  {card.buttonText}
-                </Link>
-              </div>
-            </div>
+        {card.content_type === "qa" ? (
+          <div className="p-3">
+                <Accordion>
+  <Accordion.Item eventKey="0">
+    <Accordion.Header>Q＆A{card.title}</Accordion.Header>
+    <Accordion.Body>
+      {card.text}
+    </Accordion.Body>
+  </Accordion.Item>
+</Accordion>
           </div>
-        ))}
+        ) : (
+          <div className="p-3 ">
+                          <Link className="fs-6" to={card.buttonHref}>
+                  {card.title}
+                </Link>
+                <p>{card.text}</p>
+             {card.image && (
+          <img src={card.image} className="card-img-top" alt={card.title} />
+        )}
+        </div>
+
+        )}
+      </div>
+    </div>
+  );
+})}
       </div>
 
       <nav aria-label="..." className="d-flex justify-content-center">
@@ -53,7 +78,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
             {/* 前へ */}
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
               <button
-                className="page-link bg-warning"
+                className="page-link "
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} // ← ページ番号を1減らす
               >
                 Previous
@@ -87,7 +112,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
               return filtered?.map((p, i) =>
                 p === "..." ? (
                   // 「…」はクリックできない → disabled
-                  <li key={i} className="page-item disabled">
+                  <li key={i} className="page-item disabled bg-light">
                     <span className="page-link">…</span>
                   </li>
                 ) : (
@@ -99,7 +124,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
                     }`}
                   >
                     <button
-                      className="page-link bg-warning"
+                      className="page-link bg-light text-dark"
                       onClick={() => setCurrentPage(p as number)}
                     >
                       {p}
@@ -115,7 +140,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
               }`}
             >
               <button
-                className="page-link bg-warning"
+                className="page-link bg-light"
                 onClick={() =>
                   setCurrentPage((p) => Math.min(p + 1, totalPages))
                 } // ← ページ番号を1増やす
@@ -126,6 +151,9 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
           </ul>
         </div>
       </nav>
+
+
+
     </div>
   );
 };

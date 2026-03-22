@@ -6,7 +6,6 @@ import Footer from "../Organisms/Footer.tsx";
 import { fetchArticles, BlogArticle } from "../API/Blog.tsx";
 import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
-import { useSuccess } from "../Context/SuccessContext.tsx";
 import { useLocation } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 
@@ -34,12 +33,13 @@ const TopTemplate: React.FC = () => {
         {articles.length > 0 && (
           <CardMolecule
             cards={articles?.map((article) => ({
-              image: article.eyecatch || "https://via.placeholder.com/150",
+              image: article.eyecatch,
               title: article.title,
               text: article.body.slice(0, 100) + "...",
               buttonText: "詳細を見る",
               buttonHref: `/articles/${article.id}`,
               date: article.created_at,
+              content_type: article.content_type,
             }))}
             itemsPerPage={6}
           />

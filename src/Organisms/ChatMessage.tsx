@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import Accordion from 'react-bootstrap/Accordion';
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -73,9 +74,24 @@ try {
               <h6>もっとも関連度の高い記事</h6>
               {id_title_list?.map((item) => (
                 <div >
-                  <Link key={item.id} className="" to={`/articles/${item.id}`} >
+                  
+                  {/* TODO:記事をリンクで遷移ではなく、クリック遷移でモーダル表示にする */}
+                  {item.content_type === "qa" ? (
+                    <div>
+                    <Accordion>
+                      <Accordion.Item eventKey="0">
+                        <Accordion.Header>Q＆A{item.title}</Accordion.Header>
+                        <Accordion.Body>
+                          {item.text}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    </Accordion>
+</div>
+                  ) : (
+                    <Link key={item.id} className="" to={`/articles/${item.id}`} >
                     {item.title}
                   </Link>
+                  )}
                 </div>
               ))}
             </div>
