@@ -15,6 +15,15 @@ const TopTemplate: React.FC = () => {
   const { pathname } = useLocation();
   const { clearSelection } = useTagSelection();
 
+  const stripHtml = (html: string) => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+};
+
+const truncateText = (text: string, length: number) => {
+  return text.length > length ? text.slice(0, length) + "..." : text;
+};
+
   useEffect(() => {
     fetchArticles(setError).then((data) => setArticles(data));
   }, []);
@@ -35,7 +44,10 @@ const TopTemplate: React.FC = () => {
             cards={articles?.map((article) => ({
               image: article.eyecatch,
               title: article.title,
-              text: article.body.slice(0, 100) + "...",
+              text:
+              article.content_type === "qa"
+                ? article.body
+                : truncateText(stripHtml(article.body), 100),
               buttonText: "詳細を見る",
               buttonHref: `/articles/${article.id}`,
               date: article.created_at,
