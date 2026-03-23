@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChatMessage from "../Organisms/ChatMessage.tsx";
 import ChatInput from "../Organisms/ChatInput.tsx";
-import TagSelect from "../Organisms/TagSelect.tsx";
+// import TagSelect from "../Organisms/TagSelect.tsx";
 import { fetchRagAnswer, IdTitle } from "../API/RagChat.tsx";
 import { useChat } from "../Context/ChatContext.tsx";
 import { Modal } from "bootstrap";
@@ -213,7 +213,7 @@ const AiChatTemplate: React.FC = () => {
         </div>
       </div>
       {/* ====== ここまで ====== */}
-      <TagSelect variant="scroll" />
+      {/* <TagSelect variant="scroll" /> */}
       {messages && messages.length > 0 ? (
         <div>
           {messages.map((msg, idx) => (
