@@ -98,9 +98,18 @@ try {
           )}
 
           <div className="mt-3">
-            <a href={primary_support?.url} target="__blank">
-              {primary_support?.name}
-            </a>
+            
+         
+            {primary_support && primary_support.url && primary_support.name && (
+              <div>
+              <h3>{primary_support.name}</h3>
+              <p>こころの健康相談統一ダイヤル</p>
+              <p>時間: 都道府県によって異なります</p>
+              <a href="tel:09012345678" className="btn rounded text-primary bg-info-subtle p-3">📞0570-064-556</a>
+              <a href={primary_support.url} target="_blank" className="btn btn-outline-primary bg-white border-dark rounded p-3">🌐公式サイト</a>
+
+            </div>
+)}
           </div>
 
           <div className="mt-2">
