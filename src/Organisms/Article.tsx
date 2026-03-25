@@ -7,12 +7,9 @@ const Article: React.FC<ArticleProps> = ({ article }) => {
     <>
       {/* h2タグのタイトルにする */}
       {/* h3タグのIDはheading1,heading2...とする */}
+      
 
-      <h2 className="border-bottom border-success bg-success text-white p-3">
-        {article?.title}
-      </h2>
-
-      <img src={article?.eyecatch} className="img-fluid pt-3" alt="..."></img>
+      
 
       <div
         data-bs-spy="scroll"
@@ -20,10 +17,12 @@ const Article: React.FC<ArticleProps> = ({ article }) => {
         data-bs-offset="0"
         tabIndex={0}
         className="scrollspy-example position-relative"
-        style={{ minHeight: "90vh", scrollBehavior: "smooth" }}
+        style={{ minHeight: "90vh",scrollBehavior: "smooth" }}
       >
         <div className="text-start">
           {/* 記事本文 */}
+          {article?.content_type === "qa" && <p className="text-warning fs-2">A</p>}
+          
           <div
             className="text-start"
             dangerouslySetInnerHTML={{ __html: article?.body }}

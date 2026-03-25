@@ -20,11 +20,13 @@ const ArticleDetailPage: React.FC = () => {
           const doc = parser.parseFromString(data.body, "text/html");
 
           // h3タグに順番でidを付与
-          const headings: { id: string; title: string }[] = [];
-          doc.querySelectorAll("h3").forEach((el, index) => {
-            const headingId = `heading${index + 1}`;
+          const headings: { id: string; title: string; level: number }[] = [];
+          doc.querySelectorAll("h2, h3, h4, h5, h6").forEach((el, index) => {
+             const tag = el.tagName.toLowerCase();
+             const level = parseInt(tag.replace("h", "")); 
+            const headingId = `${tag}-heading${index + 1}`;
             el.setAttribute("id", headingId);
-            headings.push({ id: headingId, title: el.textContent || "" });
+            headings.push({ id: headingId, title: el.textContent || "", level: level });
           });
 
           data.body = doc.body.innerHTML;
