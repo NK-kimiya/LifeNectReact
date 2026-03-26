@@ -7,6 +7,7 @@ import TagSelect from "../Organisms/TagSelect.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useLocation, useMatch } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
+import Consultation from "../Organisms/Consultation.tsx";
 interface ArticleDetailTemplateProps {
   article: any; // TODO: 記事の型を定義できる場合は修正
 }
@@ -24,10 +25,13 @@ const ArticleDetailTemplate: React.FC<ArticleDetailTemplateProps> = ({
     }
   }, [pathname, clearSelection]);
   return (
-    <>
+    <div>
       <NavBar />
       <Aleart />
-      <TagSelect variant="scroll" />
+      <div className="container">
+      <div className="row container">
+        <div className="col-md-8">
+        <TagSelect variant="scroll" />
       <div className=" ">
       <div className="container pt-5">
         <div className="row">
@@ -40,7 +44,7 @@ const ArticleDetailTemplate: React.FC<ArticleDetailTemplateProps> = ({
       ) : 
       (
         <div>
-            <h2 className="border-bottom border-3 border-info pb-2 mb-4 .fs-1">
+            <h2 className="border-bottom pb-2 mb-4 .fs-1">
         {article?.title}
       </h2>
         </div>
@@ -56,8 +60,14 @@ const ArticleDetailTemplate: React.FC<ArticleDetailTemplateProps> = ({
         </div>
       </div>
       </div>
+        </div>
+        <div className="col-md-4">
+          <Consultation />
+          </div>
+      </div>
+      </div>
       <Footer />
-    </>
+    </div>
   );
 };
 

@@ -181,7 +181,7 @@ const AiChatTemplate: React.FC = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                利用規約
+                AIチャットのご利用にあたって
               </h1>
             </div>
             <div className="modal-body">
@@ -195,7 +195,7 @@ const AiChatTemplate: React.FC = () => {
                   onChange={(e) => setAgreed(e.target.checked)}
                 ></input>
                 <label className="" htmlFor="flexSwitchCheckChecked">
-                  同意する
+                  上記に理解し、同意する
                 </label>
               </div>
             </div>

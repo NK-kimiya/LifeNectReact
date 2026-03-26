@@ -15,13 +15,8 @@ const Footer: React.FC = () => {
           </li>
           <li className="nav-item">
             <Link className="nav-link link-light" to="/term">
-              利用規約
+              ご利用にあたって
             </Link>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link link-light" href="">
-              アンケート募集
-            </a>
           </li>
 
           {isAuthenticated ? (

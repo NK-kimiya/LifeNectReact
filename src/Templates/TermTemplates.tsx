@@ -7,8 +7,8 @@ const TermTemplates = () => {
   return (
     <div>
       <NavBar />
-      <div className="container bg-secondary-subtle rounded mt-3">
-        <h4 className="text-start">利用規約</h4>
+      <div className="container">
+        <h2 className="text-start">ご利用にあたって</h2>
         <Terms />
       </div>
 
