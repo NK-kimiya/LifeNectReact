@@ -47,7 +47,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
           <div className="p-3">
                 <Accordion>
   <Accordion.Item eventKey="0">
-    <Accordion.Header>Q＆A{card.title}</Accordion.Header>
+    <Accordion.Header><span className="text-danger fs-2" >Q</span>{card.title}</Accordion.Header>
     <Accordion.Body>
       {card.text}
     </Accordion.Body>

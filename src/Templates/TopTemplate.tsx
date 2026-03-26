@@ -8,6 +8,7 @@ import { useError } from "../Context/ErrorContext.tsx";
 import Aleart from "../Organisms/Aleart.tsx";
 import { useLocation } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
+import Consultation from "../Organisms/Consultation.tsx";
 
 const TopTemplate: React.FC = () => {
   const [articles, setArticles] = useState<BlogArticle[]>([]);
@@ -38,8 +39,10 @@ const truncateText = (text: string, length: number) => {
       <NavBar />
       <Aleart />
       <div className="container flex-fill">
-        <TagSelect variant="scroll" />
-        {articles.length > 0 && (
+        <div className="row">
+          <div className="col-md-8">
+            <TagSelect variant="scroll" />
+            {articles.length > 0 && (
           <CardMolecule
             cards={articles?.map((article) => ({
               image: article.eyecatch,
@@ -56,6 +59,11 @@ const truncateText = (text: string, length: number) => {
             itemsPerPage={6}
           />
         )}
+          </div>
+          <div className="col-md-4">
+            <Consultation />
+          </div>
+        </div>
       </div>
       <Footer />
     </div>

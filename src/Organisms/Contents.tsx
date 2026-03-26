@@ -31,8 +31,9 @@ const Contents: React.FC<ContentsProps> = ({ headings }) => {
 >
         {/* hrefにh3タグの番号をIDに指定
                 コンテンツをh3のタイトルにする */}
-        <p className="bg-info p-2 m-0 text-white">目次</p>
+        
         <div className="bg-light p-3">
+          <h5 className="border-bottom pb-2 mb-3">目次</h5>
                {headings?.map((heading) => (
           <p><a key={heading.id} href={`#${heading.id}`} className={`heading-link level-${heading.level}`}>
             {heading.title}

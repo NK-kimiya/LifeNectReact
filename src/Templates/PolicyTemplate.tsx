@@ -7,8 +7,7 @@ const PolicyTemplate = () => {
   return (
     <div>
       <NavBar />
-      <div className="container bg-secondary-subtle rounded mt-3">
-        <h4 className="text-start">プライバシーポリシー・Cookie</h4>
+      <div className="container">
         <Policy />
       </div>
       <Footer />
