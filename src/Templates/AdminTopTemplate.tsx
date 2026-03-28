@@ -10,6 +10,7 @@ import Aleart from "../Organisms/Aleart.tsx";
 import { useSuccess } from "../Context/SuccessContext.tsx";
 import AleartSuccess from "../Organisms/AleartSuccess.tsx";
 import { useAuth } from "../Context/AuthContext.tsx";
+import SimpleNav from "../Organisms/SimpleNav.tsx";
 
 const AdminTopTemplate: React.FC = () => {
   const [rows, setRows] = useState<RowData[]>([]);
@@ -49,7 +50,7 @@ const AdminTopTemplate: React.FC = () => {
   };
   return (
     <div className="d-flex flex-column min-vh-100">
-      <NavBar />
+      <SimpleNav />
       <AleartSuccess />
       <Aleart />
 

@@ -132,7 +132,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
                   className={`badge me-2 p-2 ${
                     selectedSet.has(tag.id)
                       ? "bg-secondary text-white"
-                      : "bg-success text-white"
+                      : "bg-dark text-white"
                   }`}
                   style={{ cursor: "pointer" }}
                 >
@@ -167,7 +167,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
               className={`badge me-2 p-2 ${
                 selectedSet.has(tag.id)
                   ? "bg-secondary text-white"
-                  : "bg-success text-white"
+                  : "bg-dark text-white"
               }`}
               style={{ cursor: "pointer" }}
             >

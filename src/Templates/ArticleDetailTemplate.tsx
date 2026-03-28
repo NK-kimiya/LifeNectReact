@@ -8,6 +8,7 @@ import Aleart from "../Organisms/Aleart.tsx";
 import { useLocation, useMatch } from "react-router-dom";
 import { useTagSelection } from "../Context/TagSelectionContext.tsx";
 import Consultation from "../Organisms/Consultation.tsx";
+import SimpleNav from "../Organisms/SimpleNav.tsx";
 interface ArticleDetailTemplateProps {
   article: any; // TODO: 記事の型を定義できる場合は修正
 }
@@ -26,7 +27,7 @@ const ArticleDetailTemplate: React.FC<ArticleDetailTemplateProps> = ({
   }, [pathname, clearSelection]);
   return (
     <div>
-      <NavBar />
+      <SimpleNav />
       <Aleart />
       <div className="container">
       <div className="row container">
