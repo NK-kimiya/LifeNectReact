@@ -61,7 +61,7 @@ const Auth: React.FC<AuthProps> = ({ onSubmit }) => {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-success pt-2 pb-2 ps-5 pe-5">
+          <button type="submit" className="btn btn-dark pt-2 pb-2 ps-5 pe-5">
             ログイン
           </button>
         </form>

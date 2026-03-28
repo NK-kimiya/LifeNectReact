@@ -23,7 +23,6 @@ const AdminLoginTemplate: React.FC = () => {
   };
   return (
     <div className="d-flex flex-column min-vh-100">
-      <NavBar />
 
       {/* メイン部分をflexで伸ばす */}
       <div className="flex-grow-1">

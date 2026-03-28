@@ -149,7 +149,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
         <TagSelect variant="static" />
         <button
           type="button"
-          className="btn text-bg-success white rounded-circle d-inline-flex align-items-center justify-content-center"
+          className="btn text-bg-dark white rounded-circle d-inline-flex align-items-center justify-content-center"
           style={{ width: "50px", height: "50px" }}
           data-bs-toggle="modal"
           data-bs-target="#exampleModal"
@@ -218,7 +218,7 @@ const BlogForm: React.FC<BlogFormProps> = ({ mode, initialData, onUpdate }) => {
 
       <button
         type="button"
-        className="btn btn-success"
+        className="btn btn-dark"
         onClick={handleSubmitBlog}
       >
         {mode === "create" ? "記事を作成" : "記事を更新"} {/* ★ 修正 */}

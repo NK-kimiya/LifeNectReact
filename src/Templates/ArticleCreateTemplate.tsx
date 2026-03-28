@@ -7,12 +7,13 @@ import Aleart from "../Organisms/Aleart.tsx";
 import AleartSuccess from "../Organisms/AleartSuccess.tsx";
 import { useAuth } from "../Context/AuthContext.tsx";
 import { Link } from "react-router-dom";
+import SimpleNav from "../Organisms/SimpleNav.tsx";
 
 const ArticleCreateTemplate: React.FC = () => {
   const { isAuthenticated } = useAuth();
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
-      <NavBar />
+      <SimpleNav />
       <Aleart />
       <AleartSuccess />
       <div className="container">
