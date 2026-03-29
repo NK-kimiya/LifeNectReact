@@ -1,12 +1,12 @@
 import React from "react";
-import NavBar from "../Organisms/NavBar.tsx";
 import Policy from "../Organisms/Policy.tsx";
 import Footer from "../Organisms/Footer.tsx";
+import SimpleNav from "../Organisms/SimpleNav.tsx";
 
 const PolicyTemplate = () => {
   return (
     <div>
-      <NavBar />
+      <SimpleNav />
       <div className="container">
         <Policy />
       </div>

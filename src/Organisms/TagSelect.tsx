@@ -129,10 +129,10 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
                 <span
                   key={tag.id}
                   onClick={() => handleSingleAndGo(tag.id, tag.name)} // ★修正: ここで使う
-                  className={`badge me-2 p-2 ${
+                  className={`badge me-2 p-2  ${
                     selectedSet.has(tag.id)
                       ? "bg-secondary text-white"
-                      : "bg-dark text-white"
+                      : "bg-primary text-white"
                   }`}
                   style={{ cursor: "pointer" }}
                 >
@@ -167,7 +167,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ variant = "scroll" }) => {
               className={`badge me-2 p-2 ${
                 selectedSet.has(tag.id)
                   ? "bg-secondary text-white"
-                  : "bg-dark text-white"
+                  : "bg-primary text-white"
               }`}
               style={{ cursor: "pointer" }}
             >

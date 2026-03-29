@@ -124,7 +124,7 @@ const CardMolecule: React.FC<CardMoleculeProps> = ({
                     }`}
                   >
                     <button
-                      className="page-link bg-light text-dark"
+                      className="page-link bg-light text-white"
                       onClick={() => setCurrentPage(p as number)}
                     >
                       {p}

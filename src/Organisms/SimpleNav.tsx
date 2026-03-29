@@ -35,33 +35,18 @@ const SimpleNav: React.FC = () => {
 
   return (
     <>
-      <nav className="navbar navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg bg-body-tertiary">
   <div className="container-fluid">
-    <a className="navbar-brand" href="#">
-      <img src="/title.svg" alt="" width="30" height="24" className="d-inline-block align-text-top"/>
-      Life Connect
+  <a className="navbar-brand" href="#">
+      <img src="/title.png" alt="" width="100" height="100" className="d-inline-block align-text-top"/>
     </a>
-  </div>
-</nav>
-      <nav className="navbar navbar-expand-lg navbar-light">
-        <div className="container-fluid">
-
-
-          <button
-            className="navbar-toggler"
-            type="button"
-            aria-controls="navbarTogglerDemo02"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-            onClick={toggleNavbar}
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-
-          <div className="collapse navbar-collapse" id="navbarTogglerDemo02">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <Link
+    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span className="navbar-toggler-icon"></span>
+    </button>
+    <div className="collapse navbar-collapse" id="navbarNav">
+      <ul className="navbar-nav">
+        <li className="nav-item">
+        <Link
                   className="nav-link text-start"
                   to="/"
                   onClick={() => {
@@ -69,29 +54,11 @@ const SimpleNav: React.FC = () => {
                     closeNavbar();
                   }}
                 >
-                  ブログ一覧
+                  すべて
                 </Link>
-              </li>
-
-              {isAuthenticated ? (
-                <>
-                  <li className="nav-item">
-                    <Link
-                      to="/admin-top"
-                      type="button"
-                      className="nav-link text-start"
-                      onClick={closeNavbar}
-                    >
-                      管理者ページ
-                    </Link>
-                  </li>
-                </>
-              ) : (
-                <></>
-              )}
-
-              <li className="nav-item text-start">
-                <Link
+        </li>
+        <li className="nav-item">
+        <Link
                   to="/chat"
                   type="button"
                   className="nav-link text-start"
@@ -103,13 +70,13 @@ const SimpleNav: React.FC = () => {
                   AIチャット
                   <i className="bi bi-chat-left "></i>
                 </Link>
-              </li>
-            </ul>
-
-            {isAuthenticated ? (
-              <div className="d-flex justify-content-start">
+        </li>
+  
+        {isAuthenticated ? (
+            <li className="nav-item">
                 <button
-                  className="btn btn btn-link  me-2 text-white"
+                  type="button"
+                  className="btn btn-primary  me-2"
                   onClick={async () => {
                     await logout();
                     closeNavbar(); // 追加: ログアウト後に閉じる
@@ -118,21 +85,26 @@ const SimpleNav: React.FC = () => {
                 >
                   ログアウト
                 </button>
-              </div>
+                </li>
+    
             ) : (
-              <div className="d-flex justify-content-start">
+              <li className="nav-item">
+              <button type="button" className="btn btn-link text-primary">
                 <Link
                   to="/admin-login"
-                  className="btn btn btn-link  me-2 text-white"
+                  className=" "
                   onClick={closeNavbar}
                 >
                   管理者ログイン
                 </Link>
-              </div>
+                </button>
+                </li>
             )}
-          </div>
-        </div>
-      </nav>
+      </ul>
+    </div>
+  </div>
+</nav>
+
     </>
   );
 };

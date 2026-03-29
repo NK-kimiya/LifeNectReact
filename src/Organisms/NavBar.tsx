@@ -57,9 +57,34 @@ const NavBar: React.FC = () => {
               closeNavbar();
             }}
           >
-            <img src="/logo.svg" alt="Logo" className="navbar-logo me-2 text-center" style={{ display: "block", width: "200px" }}/>
+            <img src="/title.png" alt="Logo" className="navbar-logo me-2 text-center" style={{ display: "block", width: "100px" }}/>
           </Link>
           </div>
+          {isAuthenticated ? (
+              <div className="col-4">
+                <button
+                  className="btn btn-primary  me-2 text-white mb-2"
+                  onClick={async () => {
+                    await logout();
+                    closeNavbar(); // 追加: ログアウト後に閉じる
+                  }}
+                  disabled={isLoggingOut}
+                >
+                  ログアウト
+                </button>
+              </div>
+            ) : (
+              <div className="col-4">
+                <Link
+                  to="/admin-login"
+                  className="btn btn btn-primary  me-2 text-white mb-2"
+                  onClick={closeNavbar}
+                >
+                  管理者ログイン
+                </Link>
+              </div>
+            )}
+
         <div>
           <form className="position-relative " role="search">
             <input
@@ -98,23 +123,6 @@ const NavBar: React.FC = () => {
                 </Link>
               </div>
 
-              {isAuthenticated ? (
-                <>
-                  <div className="col-4">
-                    <Link
-                      to="/admin-top"
-                      type="button"
-                      className="nav-link text-start"
-                      onClick={closeNavbar}
-                    >
-                      管理者ページ
-                    </Link>
-                  </div>
-                </>
-              ) : (
-                <></>
-              )}
-
               <div className="col-4">
                 <Link
                   to="/chat"
@@ -130,30 +138,7 @@ const NavBar: React.FC = () => {
                 </Link>
               </div>
 
-            {isAuthenticated ? (
-              <div className="col-4">
-                <button
-                  className="btn btn btn-link  me-2 text-white"
-                  onClick={async () => {
-                    await logout();
-                    closeNavbar(); // 追加: ログアウト後に閉じる
-                  }}
-                  disabled={isLoggingOut}
-                >
-                  ログアウト
-                </button>
-              </div>
-            ) : (
-              <div className="col-4">
-                <Link
-                  to="/admin-login"
-                  className="btn btn btn-link  me-2 text-white"
-                  onClick={closeNavbar}
-                >
-                  管理者ログイン
-                </Link>
-              </div>
-            )}
+            
           </div>
         </div>
       </div>

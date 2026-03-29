@@ -106,7 +106,7 @@ try {
               <p>こころの健康相談統一ダイヤル</p>
               <p>時間: 都道府県によって異なります</p>
               <a href="tel:09012345678" className="btn rounded text-primary bg-info-subtle p-3">📞0570-064-556</a>
-              <a href={primary_support.url} target="_blank" className="btn btn-outline-primary bg-white border-dark rounded p-3">🌐公式サイト</a>
+              <a href={primary_support.url} target="_blank" className="btn btn-outline-primary bg-white border-primary rounded p-3">🌐公式サイト</a>
 
             </div>
 )}
