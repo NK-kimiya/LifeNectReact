@@ -59,9 +59,9 @@ const NavBarAi: React.FC = () => {
             style={{ width: "200px" }}
           >
             <img
-              src="/title.svg"
+              src="/title.png"
               alt="LifeConnect"
-              style={{ display: "block", width: "200px" }}
+              style={{ display: "block", width: "100px", height: "100px" }}
             />
           </Link>
 
@@ -87,7 +87,7 @@ const NavBarAi: React.FC = () => {
                     closeNavbar();
                   }}
                 >
-                  ブログ一覧
+                  すべて
                 </Link>
               </li>
 
@@ -127,7 +127,7 @@ const NavBarAi: React.FC = () => {
             {isAuthenticated ? (
               <div className="d-flex justify-content-start">
                 <button
-                  className="btn btn btn-link  me-2 text-white"
+                  className="btn btn btn-primary  me-2 text-white"
                   onClick={async () => {
                     await logout();
                     closeNavbar(); // 追加: ログアウト後に閉じる

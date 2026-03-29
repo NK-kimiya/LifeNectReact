@@ -56,7 +56,7 @@ const UploadImgDisplay = () => {
     <>
       <h3>メディア</h3>
       <input type="file" onChange={handleFileChange}></input>
-      <button className="btn btn-dark ms-2" onClick={handleUpload}>
+      <button className="btn btn-primary ms-2" onClick={handleUpload}>
         アップロード
       </button>
       <ScrollBox>

@@ -34,3 +34,8 @@
   padding-left: 40px;
   font-size: 0.7rem;
 }
+
+.pagination .page-item.active .page-link {
+  background-color: blue!important;
+  border:solid 1px blue;
+}

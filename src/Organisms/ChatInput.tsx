@@ -108,12 +108,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
               <button
                 onClick={handleAllow}
                 style={{ marginRight: "10px" }}
-                className="btn btn-success"
+                className="btn btn-primary"
               >
-                許可する
+                許可
               </button>
               <button onClick={handleDeny} className="btn btn-secondary">
-                拒否する
+                拒否
               </button>
             </div>
           </div>
@@ -133,7 +133,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, loading }) => {
       ></textarea>
 
       <button
-        className="btn rounded-circle bg-dark text-white shadow position-absolute top-50 end-0 translate-middle-y me-2"
+        className="btn rounded-circle bg-primary text-white shadow position-absolute top-50 end-0 translate-middle-y me-2"
         type="submit"
         onClick={handleSubmit}
         disabled={loading}

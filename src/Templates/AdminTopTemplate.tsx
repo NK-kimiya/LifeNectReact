@@ -59,7 +59,7 @@ const AdminTopTemplate: React.FC = () => {
           <div className="container text-start ">
             <button
               type="button"
-              className="btn btn-success rounded-circle d-flex align-items-center justify-content-center mt-5"
+              className="btn btn-primary rounded-circle d-flex align-items-center justify-content-center mt-5"
               style={{ width: "60px", height: "60px" }} // 正方形にする
             >
               <Link
