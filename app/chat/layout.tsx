@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from "./provider";
-import "./globals.css";
+import "../globals.css";
 
 export const metadata: Metadata = {
   title: "Life Nect",
@@ -15,9 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className="min-h-screen flex flex-col">
-  <Providers>{children}</Providers>
-</body>
+      <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );
 }
