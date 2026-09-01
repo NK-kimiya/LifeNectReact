@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+
 export default function Home() {
   const [isLongTextArea, setIsLongTextArea] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);

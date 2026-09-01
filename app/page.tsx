@@ -1,10 +1,16 @@
 "use client";
 import { useState } from "react";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { useRouter } from "next/navigation";
+import { useAuth } from "./context/AuthContext";
+import Link from "next/link";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
 export default function Home() {
+  const router = useRouter();
+  const { login } = useAuth();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
@@ -12,7 +18,10 @@ export default function Home() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
+  const handleGuestStart = () => {
+    router.push("/posts");
+  };
   const isLogin = authMode === "login";
 
   const switchAuthMode = (mode: "login" | "signup") => {
@@ -25,12 +34,7 @@ export default function Home() {
     event.preventDefault();
     setMessage("");
 
-    if (isLogin) {
-      setMessage("ログイン処理は次のステップで実装します。");
-      return;
-    }
-
-    if (password !== passwordConfirm) {
+    if (!isLogin && password !== passwordConfirm) {
       setMessage("パスワードが一致しません。");
       return;
     }
@@ -38,33 +42,63 @@ export default function Home() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+      const endpoint = isLogin
+      ? `${API_BASE_URL}/auth/login/`
+      : `${API_BASE_URL}/auth/register/`;
+
+      const requestBody = isLogin
+      ? {
+          email,
+          password,
+        }
+      : {
+          email,
+          nickname,
+          password,
+        };
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          nickname,
-          password,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error("アカウント作成に失敗しました");
+        const errorMessage =
+          data?.detail ??
+          data?.message ??
+          (isLogin
+            ? "メールアドレスまたはパスワードが正しくありません。"
+            : "アカウント作成に失敗しました。");
+  
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      if (!data?.access || !data?.refresh) {
+        throw new Error("認証トークンを取得できませんでした。");
+      }
 
-      localStorage.setItem("accessToken", data.access);
-      localStorage.setItem("refreshToken", data.refresh);
+      login(data.access, data.refresh);
+
+      if (isLogin) {
+        router.push("/posts");
+      } else {
+        setMessage("アカウントを作成しました。");
+      }
 
       setMessage("アカウントを作成しました。");
     } catch (error) {
       setMessage(
         error instanceof Error
           ? error.message
-          : "アカウント作成に失敗しました",
+          : isLogin
+            ? "ログインに失敗しました。"
+            : "アカウント作成に失敗しました。",
       );
     } finally {
       setIsSubmitting(false);
@@ -100,10 +134,10 @@ export default function Home() {
   
       const data = await response.json();
   
-      localStorage.setItem("accessToken", data.access);
-      localStorage.setItem("refreshToken", data.refresh);
+      login(data.access, data.refresh);
   
       setMessage("Googleアカウントでログインしました。");
+      router.push("/posts");
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Google認証に失敗しました",
@@ -114,7 +148,13 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="relative min-h-screen bg-white">
+        <Link
+    href="/admin/login"
+    className="absolute right-6 top-6 text-sm font-medium text-gray-500 hover:text-gray-900"
+  >
+    管理者はこちら
+  </Link>
       <div className="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 md:grid-cols-10">
         <section className="flex min-h-[40vh] items-center justify-center bg-[#f5f5f5] p-8 md:col-span-4 md:min-h-screen">
           <div className="w-full max-w-md">
@@ -126,7 +166,7 @@ export default function Home() {
             <button
               type="button"
               className="mt-6 inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-white hover:text-gray-900"
-            >
+              onClick={handleGuestStart}>
               ログインせずに始める
             </button>
           </div>

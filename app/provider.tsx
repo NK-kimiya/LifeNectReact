@@ -1,6 +1,8 @@
 "use client";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { AuthProvider } from "./context/AuthContext";
+import { AdminAuthProvider } from "./context/AdminAuthContext";
 
 export default function Providers({
   children,
@@ -11,7 +13,9 @@ export default function Providers({
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
-      {children}
+      <AuthProvider>
+        <AdminAuthProvider>{children}</AdminAuthProvider>
+      </AuthProvider>
     </GoogleOAuthProvider>
   );
 }
