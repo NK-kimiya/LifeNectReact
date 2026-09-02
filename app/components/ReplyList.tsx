@@ -9,6 +9,7 @@ type User = {
   
   type Post = {
     id: string;
+    is_visible: boolean;
     user: User | null;
     title: string;
     comment: string;
@@ -56,8 +57,22 @@ type User = {
   
     return (
       <div className={depth === 0 ? "mt-4 grid gap-3" : "mt-3 grid gap-3 border-l-2 border-slate-200 pl-4"}>
-        {replies.map((reply) => (
+
+      {replies.map((reply) => {
+        if (!reply.is_visible) {
+          return (
+            <div key={reply.id} className="rounded-lg bg-slate-50 p-4">
+              <p className="text-sm font-bold text-slate-500">
+                このコメントは管理者によって非表示にされました。
+              </p>
+            </div>
+          );
+        }
+
+        return (
           <div key={reply.id} className="rounded-lg bg-slate-50 p-4">
+            {/* 既存のコメント表示 */}
+            <div key={reply.id} className="rounded-lg bg-slate-50 p-4">
             <p className="leading-7 text-slate-700">{reply.comment}</p>
             <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500">
               <div className="flex min-w-0 items-center gap-2">
@@ -167,8 +182,9 @@ type User = {
               />
             )}
           </div>
-        ))}
-  
+          </div>
+        );
+      })}
         {replies.length === 0 && (
           <p className="text-sm text-slate-500">まだ返信はありません。</p>
         )}

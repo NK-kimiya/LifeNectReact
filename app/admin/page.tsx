@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminAuth } from "../context/AdminAuthContext";
-import ReplyList from "../components/ReplyList";
 import UserAvatar from "../components/UserAvatar";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
@@ -22,6 +21,7 @@ type User = {
 
 type Post = {
   id: string;
+  is_visible: boolean;
   user: User | null;
   title: string;
   comment: string;
@@ -35,10 +35,6 @@ export default function AdminPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [postError, setPostError] = useState("");
-  const [openReplyIds, setOpenReplyIds] = useState<Record<string, boolean>>({});
-  const [repliesByPostId, setRepliesByPostId] = useState<Record<string, Post[]>>({});
-  const [isLoadingReplies, setIsLoadingReplies] = useState(false);
-  const [replyListError, setReplyListError] = useState("");
   const { adminAccessToken, isAdminLoggedIn, adminLogout } = useAdminAuth();
   const router = useRouter();
   const [tags, setTags] = useState<Tag[]>([]);
@@ -113,42 +109,6 @@ export default function AdminPage() {
 
     fetchTags();
   }, []);
-
-  const fetchReplies = async (postId: string) => {
-    try {
-      setIsLoadingReplies(true);
-      setReplyListError("");
-  
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`);
-      const data = await response.json().catch(() => []);
-  
-      if (!response.ok) {
-        throw new Error("返信一覧の取得に失敗しました。");
-      }
-  
-      setRepliesByPostId((current) => ({
-        ...current,
-        [postId]: data,
-      }));
-    } catch (error) {
-      setReplyListError(
-        error instanceof Error ? error.message : "返信一覧の取得に失敗しました。",
-      );
-    } finally {
-      setIsLoadingReplies(false);
-    }
-  };
-  
-  const toggleReplies = (postId: string) => {
-    setOpenReplyIds((current) => ({
-      ...current,
-      [postId]: !current[postId],
-    }));
-  
-    if (!repliesByPostId[postId]) {
-      fetchReplies(postId);
-    }
-  };
 
   const handleLogout = () => {
     adminLogout();
@@ -332,65 +292,59 @@ export default function AdminPage() {
       </p>
     )}
 
-    {posts.map((post) => (
-      <article key={post.id} className="rounded-lg border border-gray-200 p-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h3 className="font-bold text-gray-900">{post.title}</h3>
-            <p className="mt-2 leading-7 text-gray-600">{post.comment}</p>
-          </div>
+    {posts.map((post) => {
+      if (!post.is_visible) {
+        return (
+          <article
+            key={post.id}
+            className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-500"
+          >
+            この投稿は非表示です
+          </article>
+        );
+      }
 
-          <span className="text-xs text-gray-500">
-            {new Date(post.created_at).toLocaleString("ja-JP")}
-          </span>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between gap-3 text-sm text-gray-500">
-          <div className="flex min-w-0 items-center gap-2">
-            <UserAvatar
-              avatarUrl={post.user?.avatar_url}
-              name={post.user?.nickname}
-              size="sm"
-            />
-            <span className="truncate">
-              {post.user?.nickname ?? "匿名ユーザー"}
+      return (
+        <article
+        key={post.id}
+        onClick={() => router.push(`/admin/posts/${post.id}`)}
+        className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+      >
+          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900">{post.title}</h3>
+              <p className="mt-2 leading-7 text-gray-600">{post.comment}</p>
+            </div>
+  
+            <span className="text-xs text-gray-500">
+              {new Date(post.created_at).toLocaleString("ja-JP")}
             </span>
           </div>
-
-          {(post.comment_count ?? 0) > 0 && (
-            <button
-              type="button"
-              onClick={() => toggleReplies(post.id)}
-              className="shrink-0 font-bold text-[#ff4500] hover:text-[#e63e00]"
-            >
-              返信を見る（{post.comment_count}件）
-            </button>
-          )}
-        </div>
-
-        {openReplyIds[post.id] && (
-          <div className="mt-4 border-t border-gray-100 pt-4">
-            {isLoadingReplies && (
-              <p className="text-sm text-gray-500">返信を読み込み中...</p>
+  
+          <div className="mt-3 flex items-center justify-between gap-3 text-sm text-gray-500">
+            <div className="flex min-w-0 items-center gap-2">
+              <UserAvatar
+                avatarUrl={post.user?.avatar_url}
+                name={post.user?.nickname}
+                size="sm"
+              />
+              <span className="truncate">
+                {post.user?.nickname ?? "匿名ユーザー"}
+              </span>
+            </div>
+  
+            {(post.comment_count ?? 0) > 0 && (
+              <span className="shrink-0 text-sm font-bold text-gray-500">
+              コメント {post.comment_count ?? 0}件
+            </span>
             )}
+          </div>
+                </article>
+      );
+    }
+    
+    )}
 
-            {replyListError && (
-              <p className="text-sm font-bold text-red-600">
-                {replyListError}
-              </p>
-            )}
-
-            <ReplyList
-                      parentId={post.id}
-                      repliesByPostId={repliesByPostId}
-                      openReplyIds={openReplyIds}
-                      toggleReplies={toggleReplies}
-                      canReply={false}
-                    />
-                  </div>
-                )}
-              </article>
-            ))}
 
             {!isLoadingPosts && posts.length === 0 && (
               <p className="text-sm text-gray-500">投稿はまだありません。</p>
