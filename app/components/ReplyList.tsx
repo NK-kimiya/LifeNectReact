@@ -7,18 +7,25 @@ type User = {
   avatar_url?: string | null;
 };
   
-  type Post = {
-    id: string;
-    is_visible: boolean;
-    user: User | null;
-    title: string;
-    comment: string;
-    parent_post: string | null;
-    comment_count?: number;
-    created_at: string;
-  };
+type Post = {
+  id: string;
+  is_visible?: boolean;
+  user?: User | null;
+  title?: string;
+  comment?: string;
+  image_url?: string | null;
+  parent_post?: string | null;
+  comment_count?: number;
+  created_at?: string;
+  updated_at?: string;
+  tags?: {
+    id: number;
+    name: string;
+  }[];
+};
   
   type ReplyListProps = {
+    onToggleVisibility?: (post: Post) => void | Promise<void>;
     parentId: string;
     repliesByPostId: Record<string, Post[]>;
     openReplyIds: Record<string, boolean>;
@@ -36,6 +43,8 @@ type User = {
   
     depth?: number;
   };
+
+  
   
   export default function ReplyList({
     parentId,
@@ -51,6 +60,7 @@ type User = {
     setReplyMessage,
     isSubmittingReply = false,
     handleSubmitReply,
+    onToggleVisibility,
     depth = 0,
   }: ReplyListProps) {
     const replies = repliesByPostId[parentId] ?? [];
@@ -59,12 +69,24 @@ type User = {
       <div className={depth === 0 ? "mt-4 grid gap-3" : "mt-3 grid gap-3 border-l-2 border-slate-200 pl-4"}>
 
       {replies.map((reply) => {
-        if (!reply.is_visible) {
+        if (reply.is_visible === false) {
           return (
             <div key={reply.id} className="rounded-lg bg-slate-50 p-4">
-              <p className="text-sm font-bold text-slate-500">
-                このコメントは管理者によって非表示にされました。
-              </p>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-bold text-slate-500">
+                  このコメントは管理者によって非表示にされました。
+                </p>
+        
+                {onToggleVisibility && (
+                  <button
+                    type="button"
+                    onClick={() => onToggleVisibility(reply)}
+                    className="text-sm font-bold text-slate-700 hover:text-slate-900"
+                  >
+                    表示に戻す
+                  </button>
+                )}
+              </div>
             </div>
           );
         }
@@ -87,9 +109,19 @@ type User = {
               </div>
 
               <span className="shrink-0">
-                {new Date(reply.created_at).toLocaleString("ja-JP")}
+                {reply.created_at ? new Date(reply.created_at).toLocaleString("ja-JP") : ""}
               </span>
             </div>
+
+            {onToggleVisibility && (
+              <button
+                type="button"
+                onClick={() => onToggleVisibility(reply)}
+                className="font-bold text-red-600 hover:text-red-700"
+              >
+                非表示にする
+              </button>
+            )}
   
             <div className="mt-3 flex gap-4 text-sm">
               {canReply && setReplyingPostId && setReplyComment && setReplyMessage && (
@@ -178,6 +210,7 @@ type User = {
                 setReplyMessage={setReplyMessage}
                 isSubmittingReply={isSubmittingReply}
                 handleSubmitReply={handleSubmitReply}
+                onToggleVisibility={onToggleVisibility}
                 depth={depth + 1}
               />
             )}

@@ -1,0 +1,361 @@
+[1mdiff --git a/app/admin/posts/[postId]/page.tsx b/app/admin/posts/[postId]/page.tsx[m
+[1mindex 83f9a4a..9300ea4 100644[m
+[1m--- a/app/admin/posts/[postId]/page.tsx[m
+[1m+++ b/app/admin/posts/[postId]/page.tsx[m
+[36m@@ -39,8 +39,7 @@[m [mtype Post = {[m
+ export default function AdminPostDetailPage() {[m
+   const params = useParams<{ postId: string }>();[m
+   const router = useRouter();[m
+[31m-  const { isAdminLoggedIn, adminLogout } = useAdminAuth();[m
+[31m-[m
+[32m+[m[32m  const { adminAccessToken, isAdminLoggedIn, adminLogout } = useAdminAuth();[m
+   const [post, setPost] = useState<Post | null>(null);[m
+   const [isLoading, setIsLoading] = useState(true);[m
+   const [errorMessage, setErrorMessage] = useState("");[m
+[36m@@ -50,7 +49,9 @@[m [mexport default function AdminPostDetailPage() {[m
+   const [isLoadingReplies, setIsLoadingReplies] = useState(false);[m
+   const [replyListError, setReplyListError] = useState("");[m
+ [m
+[31m-  const fetchReplies = async (postId: string) => {[m
+[32m+[m[41m    [m
+[32m+[m
+[32m+[m[32m  const fetchReplies = useCallback(async (postId: string) => {[m
+     try {[m
+       setIsLoadingReplies(true);[m
+       setReplyListError("");[m
+[36m@@ -75,18 +76,7 @@[m [mexport default function AdminPostDetailPage() {[m
+     } finally {[m
+       setIsLoadingReplies(false);[m
+     }[m
+[31m-  };[m
+[31m-[m
+[31m-  const toggleReplies = (postId: string) => {[m
+[31m-    setOpenReplyIds((current) => ({[m
+[31m-      ...current,[m
+[31m-      [postId]: !current[postId],[m
+[31m-    }));[m
+[31m-  [m
+[31m-    if (!repliesByPostId[postId]) {[m
+[31m-      fetchReplies(postId);[m
+[31m-    }[m
+[31m-  };[m
+[32m+[m[32m  }, []);[m
+ [m
+   [m
+ [m
+[36m@@ -101,48 +91,119 @@[m [mexport default function AdminPostDetailPage() {[m
+     }[m
+   }, [isAdminLoggedIn, router]);[m
+ [m
+[31m-  useEffect(() => {[m
+[31m-    const fetchPost = async () => {[m
+[31m-      try {[m
+[31m-        setIsLoading(true);[m
+[31m-        setErrorMessage("");[m
+[31m-[m
+[31m-        const response = await fetch(`${API_BASE_URL}/posts/${params.postId}/`);[m
+[31m-        const data = await response.json().catch(() => null);[m
+[32m+[m[32m  const fetchPost = useCallback(async () => {[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      setIsLoading(true);[m
+[32m+[m[32m      setErrorMessage("");[m
+[32m+[m[41m  [m
+[32m+[m[32m      const response = await fetch(`${API_BASE_URL}/posts/${params.postId}/`);[m
+[32m+[m[32m      const data = await response.json().catch(() => null);[m
+[32m+[m[41m  [m
+[32m+[m[32m      if (response.status === 401) {[m
+[32m+[m[32m        handleAuthExpired();[m
+[32m+[m[32m        return;[m
+[32m+[m[32m      }[m
+[32m+[m[41m  [m
+[32m+[m[32m      if (!response.ok) {[m
+[32m+[m[32m        throw new Error(data?.detail ?? "投稿詳細の取得に失敗しました。");[m
+[32m+[m[32m      }[m
+[32m+[m[41m  [m
+[32m+[m[32m      setPost(data);[m
+[32m+[m[41m  [m
+[32m+[m[32m      if (data.is_visible) {[m
+[32m+[m[32m        fetchReplies(data.id);[m
+[32m+[m[32m        setOpenReplyIds((current) => ({[m
+[32m+[m[32m          ...current,[m
+[32m+[m[32m          [data.id]: true,[m
+[32m+[m[32m        }));[m
+[32m+[m[32m      }[m
+[32m+[m[32m    } catch (error) {[m
+[32m+[m[32m      setErrorMessage([m
+[32m+[m[32m        error instanceof Error[m
+[32m+[m[32m          ? error.message[m
+[32m+[m[32m          : "投稿詳細の取得に失敗しました。",[m
+[32m+[m[32m      );[m
+[32m+[m[32m    } finally {[m
+[32m+[m[32m      setIsLoading(false);[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }, [params.postId, handleAuthExpired, fetchReplies]);[m
+ [m
+[31m-        if (response.status === 401) {[m
+[31m-          handleAuthExpired();[m
+[31m-          return;[m
+[31m-        }[m
+[32m+[m[41m  [m
+[32m+[m[32m  useEffect(() => {[m
+[32m+[m[32m    if (!params.postId) {[m
+[32m+[m[32m      return;[m
+[32m+[m[32m    }[m
+[32m+[m[41m  [m
+[32m+[m[32m    const timeoutId = window.setTimeout(() => {[m
+[32m+[m[32m      fetchPost();[m
+[32m+[m[32m    }, 0);[m
+[32m+[m[41m  [m
+[32m+[m[32m    return () => {[m
+[32m+[m[32m      window.clearTimeout(timeoutId);[m
+[32m+[m[32m    };[m
+[32m+[m[32m  }, [fetchPost, params.postId]);[m
+ [m
+[31m-        if (!response.ok) {[m
+[31m-          throw new Error(data?.detail ?? "投稿詳細の取得に失敗しました。");[m
+[31m-        }[m
+ [m
+[31m-        setPost(data);[m
+[31m-          [m
+[31m-        if (data.is_visible) {[m
+[31m-          fetchReplies(data.id);[m
+[31m-          setOpenReplyIds((current) => ({[m
+[31m-            ...current,[m
+[31m-            [data.id]: true,[m
+[31m-          }));[m
+[31m-        }[m
+[31m-      } catch (error) {[m
+[31m-        setErrorMessage([m
+[31m-          error instanceof Error[m
+[31m-            ? error.message[m
+[31m-            : "投稿詳細の取得に失敗しました。",[m
+[31m-        );[m
+[31m-      } finally {[m
+[31m-        setIsLoading(false);[m
+[32m+[m[32m  const handleToggleVisibility = async (targetPost: { id: string; is_visible?: boolean }) => {[m
+[32m+[m[32m    if (!adminAccessToken) {[m
+[32m+[m[32m      handleAuthExpired();[m
+[32m+[m[32m      return;[m
+[32m+[m[32m    }[m
+[32m+[m[41m  [m
+[32m+[m[32m    try {[m
+[32m+[m[32m      setErrorMessage("");[m
+[32m+[m[41m  [m
+[32m+[m[32m      const response = await fetch(`${API_BASE_URL}/posts/${targetPost.id}/`, {[m
+[32m+[m[32m        method: "PATCH",[m
+[32m+[m[32m        headers: {[m
+[32m+[m[32m          Authorization: `Bearer ${adminAccessToken}`,[m
+[32m+[m[32m          "Content-Type": "application/json",[m
+[32m+[m[32m        },[m
+[32m+[m[32m        body: JSON.stringify({[m
+[32m+[m[32m          is_visible: !targetPost.is_visible,[m
+[32m+[m[32m        }),[m
+[32m+[m[32m      });[m
+[32m+[m[41m  [m
+[32m+[m[32m      const data = await response.json().catch(() => null);[m
+[32m+[m[41m  [m
+[32m+[m[32m      if (response.status === 401) {[m
+[32m+[m[32m        handleAuthExpired();[m
+[32m+[m[32m        return;[m
+       }[m
+[31m-    };[m
+[31m-[m
+[31m-    if (params.postId) {[m
+[32m+[m[41m  [m
+[32m+[m[32m      if (!response.ok) {[m
+[32m+[m[32m        throw new Error(data?.detail ?? "表示状態の更新に失敗しました。");[m
+[32m+[m[32m      }[m
+[32m+[m[41m  [m
+[32m+[m[32m      // 投稿本体を再取得[m
+       fetchPost();[m
+[32m+[m[41m  [m
+[32m+[m[32m      // 開いているコメント一覧も再取得[m
+[32m+[m[32m      Object.entries(openReplyIds)[m
+[32m+[m[32m        .filter(([, isOpen]) => isOpen)[m
+[32m+[m[32m        .forEach(([postId]) => {[m
+[32m+[m[32m          fetchReplies(postId);[m
+[32m+[m[32m        });[m
+[32m+[m[32m    } catch (error) {[m
+[32m+[m[32m      setErrorMessage([m
+[32m+[m[32m        error instanceof Error[m
+[32m+[m[32m          ? error.message[m
+[32m+[m[32m          : "表示状態の更新に失敗しました。",[m
+[32m+[m[32m      );[m
+     }[m
+[31m-  }, [params.postId, handleAuthExpired]);[m
+[32m+[m[32m  };[m
+[32m+[m
+[32m+[m[32m  const toggleReplies = (postId: string) => {[m
+[32m+[m[32m    setOpenReplyIds((current) => ({[m
+[32m+[m[32m      ...current,[m
+[32m+[m[32m      [postId]: !current[postId],[m
+[32m+[m[32m    }));[m
+[32m+[m[41m  [m
+[32m+[m[32m    if (!repliesByPostId[postId]) {[m
+[32m+[m[32m      fetchReplies(postId);[m
+[32m+[m[32m    }[m
+[32m+[m[32m  };[m
+[32m+[m[41m  [m
+ [m
+   return ([m
+     <main className="min-h-screen bg-gray-50 px-6 py-8">[m
+[36m@@ -170,12 +231,28 @@[m [mexport default function AdminPostDetailPage() {[m
+             <p className="text-sm font-bold text-gray-600">[m
+               この投稿は管理者によって非表示にされました。[m
+             </p>[m
+[32m+[m[32m            <button[m
+[32m+[m[32m            type="button"[m
+[32m+[m[32m            onClick={() => handleToggleVisibility(post)}[m
+[32m+[m[32m            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50"[m
+[32m+[m[32m          >[m
+[32m+[m[32m            表示に戻す[m
+[32m+[m[32m      </button>[m
+           </article>[m
+         )}[m
+ [m
+         {post && post.is_visible && ([m
+           <article className="rounded-lg border border-gray-200 bg-white p-6">[m
+             <article className="rounded-lg border border-gray-200 bg-white p-6">[m
+[32m+[m[32m            <div className="mb-4 flex justify-end">[m
+[32m+[m[32m              <button[m
+[32m+[m[32m                type="button"[m
+[32m+[m[32m                onClick={() => handleToggleVisibility(post)}[m
+[32m+[m[32m                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-red-200 px-4 text-sm font-semibold text-red-600 hover:bg-red-50"[m
+[32m+[m[32m              >[m
+[32m+[m[32m                非表示にする[m
+[32m+[m[32m              </button>[m
+[32m+[m[32m            </div>[m
+             <div className="flex flex-col gap-3 border-b border-gray-100 pb-5 sm:flex-row sm:items-start sm:justify-between">[m
+               <div>[m
+                 <h1 className="text-2xl font-bold text-gray-900">[m
+[36m@@ -248,6 +325,7 @@[m [mexport default function AdminPostDetailPage() {[m
+                   {replyListError}[m
+                 </p>[m
+               )}[m
+[32m+[m[41m            [m
+ [m
+               <ReplyList[m
+                 parentId={post.id}[m
+[36m@@ -255,6 +333,7 @@[m [mexport default function AdminPostDetailPage() {[m
+                 openReplyIds={openReplyIds}[m
+                 toggleReplies={toggleReplies}[m
+                 canReply={false}[m
+[32m+[m[32m                onToggleVisibility={handleToggleVisibility}[m
+               />[m
+             </section>[m
+           </article>[m
+[1mdiff --git a/app/components/ReplyList.tsx b/app/components/ReplyList.tsx[m
+[1mindex ce5b245..1c6a23e 100644[m
+[1m--- a/app/components/ReplyList.tsx[m
+[1m+++ b/app/components/ReplyList.tsx[m
+[36m@@ -7,18 +7,25 @@[m [mtype User = {[m
+   avatar_url?: string | null;[m
+ };[m
+   [m
+[31m-  type Post = {[m
+[31m-    id: string;[m
+[31m-    is_visible: boolean;[m
+[31m-    user: User | null;[m
+[31m-    title: string;[m
+[31m-    comment: string;[m
+[31m-    parent_post: string | null;[m
+[31m-    comment_count?: number;[m
+[31m-    created_at: string;[m
+[31m-  };[m
+[32m+[m[32mtype Post = {[m
+[32m+[m[32m  id: string;[m
+[32m+[m[32m  is_visible?: boolean;[m
+[32m+[m[32m  user?: User | null;[m
+[32m+[m[32m  title?: string;[m
+[32m+[m[32m  comment?: string;[m
+[32m+[m[32m  image_url?: string | null;[m
+[32m+[m[32m  parent_post?: string | null;[m
+[32m+[m[32m  comment_count?: number;[m
+[32m+[m[32m  created_at?: string;[m
+[32m+[m[32m  updated_at?: string;[m
+[32m+[m[32m  tags?: {[m
+[32m+[m[32m    id: number;[m
+[32m+[m[32m    name: string;[m
+[32m+[m[32m  }[];[m
+[32m+[m[32m};[m
+   [m
+   type ReplyListProps = {[m
+[32m+[m[32m    onToggleVisibility?: (post: Post) => void | Promise<void>;[m
+     parentId: string;[m
+     repliesByPostId: Record<string, Post[]>;[m
+     openReplyIds: Record<string, boolean>;[m
+[36m@@ -36,6 +43,8 @@[m [mtype User = {[m
+   [m
+     depth?: number;[m
+   };[m
+[32m+[m
+[32m+[m[41m  [m
+   [m
+   export default function ReplyList({[m
+     parentId,[m
+[36m@@ -51,6 +60,7 @@[m [mtype User = {[m
+     setReplyMessage,[m
+     isSubmittingReply = false,[m
+     handleSubmitReply,[m
+[32m+[m[32m    onToggleVisibility,[m
+     depth = 0,[m
+   }: ReplyListProps) {[m
+     const replies = repliesByPostId[parentId] ?? [];[m
+[36m@@ -59,12 +69,24 @@[m [mtype User = {[m
+       <div className={depth === 0 ? "mt-4 grid gap-3" : "mt-3 grid gap-3 border-l-2 border-slate-200 pl-4"}>[m
+ [m
+       {replies.map((reply) => {[m
+[31m-        if (!reply.is_visible) {[m
+[32m+[m[32m        if (reply.is_visible === false) {[m
+           return ([m
+             <div key={reply.id} className="rounded-lg bg-slate-50 p-4">[m
+[31m-              <p className="text-sm font-bold text-slate-500">[m
+[31m-                このコメントは管理者によって非表示にされました。[m
+[31m-              </p>[m
+[32m+[m[32m              <div className="flex items-center justify-between gap-4">[m
+[32m+[m[32m                <p className="text-sm font-bold text-slate-500">[m
+[32m+[m[32m                  このコメントは管理者によって非表示にされました。[m
+[32m+[m[32m                </p>[m
+[32m+[m[41m        [m
+[32m+[m[32m                {onToggleVisibility && ([m
+[32m+[m[32m                  <button[m
+[32m+[m[32m                    type="button"[m
+[32m+[m[32m                    onClick={() => onToggleVisibility(reply)}[m
+[32m+[m[32m                    className="text-sm font-bold text-slate-700 hover:text-slate-900"[m
+[32m+[m[32m                  >[m
+[32m+[m[32m                    表示に戻す[m
+[32m+[m[32m                  </button>[m
+[32m+[m[32m                )}[m
+[32m+[m[32m              </div>[m
+             </div>[m
+           );[m
+         }[m
+[36m@@ -87,9 +109,19 @@[m [mtype User = {[m
+               </div>[m
+ [m
+               <span className="shrink-0">[m
+[31m-                {new Date(reply.created_at).toLocaleString("ja-JP")}[m
+[32m+[m[32m                {reply.created_at ? new Date(reply.created_at).toLocaleString("ja-JP") : ""}[m
+               </span>[m
+             </div>[m
+[32m+[m
+[32m+[m[32m            {onToggleVisibility && ([m
+[32m+[m[32m              <button[m
+[32m+[m[32m                type="button"[m
+[32m+[m[32m                onClick={() => onToggleVisibility(reply)}[m
+[32m+[m[32m                className="font-bold text-red-600 hover:text-red-700"[m
+[32m+[m[32m              >[m
+[32m+[m[32m                非表示にする[m
+[32m+[m[32m              </button>[m
+[32m+[m[32m            )}[m
+   [m
+             <div className="mt-3 flex gap-4 text-sm">[m
+               {canReply && setReplyingPostId && setReplyComment && setReplyMessage && ([m
+[36m@@ -178,6 +210,7 @@[m [mtype User = {[m
+                 setReplyMessage={setReplyMessage}[m
+                 isSubmittingReply={isSubmittingReply}[m
+                 handleSubmitReply={handleSubmitReply}[m
+[32m+[m[32m                onToggleVisibility={onToggleVisibility}[m
+                 depth={depth + 1}[m
+               />[m
+             )}[m
