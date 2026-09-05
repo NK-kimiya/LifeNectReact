@@ -31,10 +31,21 @@ type Post = {
   tags: Tag[];
 };
 
+type PaginatedPostsResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Post[];
+};
+
 export default function AdminPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [postError, setPostError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postCount, setPostCount] = useState(0);
+  const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
+  const [previousPageUrl, setPreviousPageUrl] = useState<string | null>(null);
   const { adminAccessToken, isAdminLoggedIn, adminLogout } = useAdminAuth();
   const router = useRouter();
   const [tags, setTags] = useState<Tag[]>([]);
@@ -44,20 +55,24 @@ export default function AdminPage() {
   const [isLoadingTags, setIsLoadingTags] = useState(false);
   const [isCreatingTag, setIsCreatingTag] = useState(false);
 
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setIsLoadingPosts(true);
         setPostError("");
   
-        const response = await fetch(`${API_BASE_URL}/posts/`);
-        const data = await response.json().catch(() => []);
+        const response = await fetch(`${API_BASE_URL}/posts/?page=${currentPage}`);
+        const data: PaginatedPostsResponse = await response.json();
   
         if (!response.ok) {
           throw new Error("投稿一覧の取得に失敗しました。");
         }
   
-        setPosts(data);
+        setPosts(data.results);
+        setPostCount(data.count);
+        setNextPageUrl(data.next);
+        setPreviousPageUrl(data.previous);
       } catch (error) {
         setPostError(
           error instanceof Error ? error.message : "投稿一覧の取得に失敗しました。",
@@ -68,7 +83,7 @@ export default function AdminPage() {
     };
   
     fetchPosts();
-  }, []);
+  }, [currentPage]);
 
 
   const handleAuthExpired = useCallback(() => {
@@ -344,6 +359,32 @@ export default function AdminPage() {
     }
     
     )}
+
+{postCount > 0 && (
+  <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+    <button
+      type="button"
+      disabled={!previousPageUrl}
+      onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      前へ
+    </button>
+
+    <span className="text-sm text-gray-500">
+      {currentPage}ページ目 / 全{postCount}件
+    </span>
+
+    <button
+      type="button"
+      disabled={!nextPageUrl}
+      onClick={() => setCurrentPage((page) => page + 1)}
+      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      次へ
+    </button>
+  </div>
+)}
 
 
             {!isLoadingPosts && posts.length === 0 && (

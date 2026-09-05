@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect,useState } from "react";
 import Link from "next/link";
 import "./posts.css";
 import { useAuth } from "../context/AuthContext";
@@ -9,6 +9,13 @@ import UserAvatar from "../components/UserAvatar";
 import Image from "next/image";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+
+type PaginatedPostsResponse = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Post[];
+};
 
 type User = {
     id: number;
@@ -24,13 +31,14 @@ type User = {
   
   type Post = {
     id: string;
-    title: string;
-    comment: string;
-    parent_post: string | null;
+    is_visible?: boolean;
+    title?: string;
+    comment?: string;
+    parent_post?: string | null;
     type?: "post" | "reply";
     comment_count?: number;
-    created_at: string;
-    user: User | null;
+    created_at?: string;
+    user?: User | null;
     tags?: Tag[];
     score?: number | null;
     excerpt?: string | null;
@@ -64,21 +72,21 @@ export default function PostsPage() {
   const [isLoadingTags, setIsLoadingTags] = useState(true);
   const [tagError, setTagError] = useState("");
 
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [postError, setPostError] = useState("");
 
   //返信フォーム用state
-  const [replyingPostId, setReplyingPostId] = useState<string | null>(null);
-  const [replyComment, setReplyComment] = useState("");
-  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
-  const [replyMessage, setReplyMessage] = useState("");
-
   //返信一覧
   const [openReplyIds, setOpenReplyIds] = useState<Record<string, boolean>>({});
   const [repliesByPostId, setRepliesByPostId] = useState<Record<string, Post[]>>({});
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
   const [replyListError, setReplyListError] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postCount, setPostCount] = useState(0);
+  const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
+  const [previousPageUrl, setPreviousPageUrl] = useState<string | null>(null);
 
   const { accessToken, isLoggedIn } = useAuth();
 
@@ -111,15 +119,35 @@ export default function PostsPage() {
       try {
         setIsLoadingPosts(true);
         setPostError("");
+        
+        //URLのクエリパラメータを作成
+        const searchParams = new URLSearchParams();
+        searchParams.set("page", String(currentPage));
+        
+        //キーワードが入力されていれば
+        if (keyword.trim()) {
+          searchParams.set("keyword", keyword.trim());//?keyword=入力値
+        }
+        
+        //タグが選択されていれば、
+        if (tag) {//?tag=タグ名
+          searchParams.set("tag", tag);
+        }
+        
+
+
   
-        const response = await fetch(`${API_BASE_URL}/posts/`);
-        const data = await response.json().catch(() => []);
+        const response = await fetch(`${API_BASE_URL}/posts/?${searchParams.toString()}`);
+        const data: PaginatedPostsResponse = await response.json();
   
         if (!response.ok) {
           throw new Error("投稿一覧の取得に失敗しました。");
         }
   
-        setPosts(data);
+        setPosts(data.results);
+        setPostCount(data.count);
+        setNextPageUrl(data.next);
+        setPreviousPageUrl(data.previous);
       } catch (error) {
         setPostError("投稿を読み込めませんでした。");
       } finally {
@@ -128,7 +156,7 @@ export default function PostsPage() {
     };
   
     fetchPosts();
-  }, []);
+  },  [keyword, tag, currentPage]);
 
   const handleSendAiMessage = async () => {
     const text = aiMessage.trim();
@@ -182,84 +210,6 @@ export default function PostsPage() {
     }
   };
 
-  const filteredPosts = useMemo(() => {
-    return posts.filter((post: Post) => {
-      const keywordMatch =
-        keyword.trim() === "" ||
-        post.title.includes(keyword) ||
-        post.comment.includes(keyword);
-
-      const tagMatch = tag === "" || (post.tags ?? []).some((postTag) => postTag.name === tag);
-
-      return keywordMatch && tagMatch;
-    });
-  }, [posts, keyword, tag]);
-
-  const handleSubmitReply = async (post: Post) => {
-    setReplyMessage("");
-  
-    const comment = replyComment.trim();
-  
-    if (!comment) {
-      setReplyMessage("コメントを入力してください。");
-      return;
-    }
-  
-    if (!isLoggedIn || !accessToken) {
-      setReplyMessage("コメントするにはログインが必要です。");
-      return;
-    }
-  
-    try {
-      setIsSubmittingReply(true);
-  
-      const response = await fetch(`${API_BASE_URL}/posts/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: `Re: ${post.title}`,
-          comment,
-          image_url: null,
-          tag_ids: [],
-          parent_post: post.id,
-        }),
-      });
-  
-      const data = await response.json().catch(() => null);
-  
-      if (response.status === 401) {
-        setReplyMessage("ログインの有効期限が切れています。再ログインしてください。");
-        return;
-      }
-  
-      if (!response.ok) {
-        const errorMessage =
-          data?.detail ??
-          data?.comment?.[0] ??
-          data?.parent_post?.[0] ??
-          "コメントの投稿に失敗しました。";
-  
-        throw new Error(errorMessage);
-      }
-  
-      setReplyComment("");
-      setReplyingPostId(null);
-  
-      // 投稿一覧を再取得する関数があるならここで呼ぶ
-      // fetchPosts();
-    } catch (error) {
-      setReplyMessage(
-        error instanceof Error
-          ? error.message
-          : "コメントの投稿に失敗しました。",
-      );
-    } finally {
-      setIsSubmittingReply(false);
-    }
-  };
 
   const fetchReplies = async (postId: string) => {
     try {
@@ -376,7 +326,7 @@ export default function PostsPage() {
                            <div className="relative mt-4 h-80 w-full overflow-hidden rounded-lg">
                           <Image
                             src={boardPost.image_url}
-                            alt={boardPost.title}
+                            alt={boardPost.title ?? "投稿画像"}
                             unoptimized
                             className="mt-4 max-h-96 w-full rounded-lg object-cover"
                           />
@@ -388,7 +338,9 @@ export default function PostsPage() {
                       </div>
 
                       <span className="shrink-0 text-xs text-slate-500">
-                        {new Date(boardPost.created_at).toLocaleString("ja-JP")}
+                      {boardPost.created_at
+                        ? new Date(boardPost.created_at).toLocaleString("ja-JP")
+                        : ""}
                       </span>
                     </div>
 
@@ -468,7 +420,10 @@ export default function PostsPage() {
                   ? "bg-blue-600 text-white"
                   : "text-slate-600 hover:bg-blue-50 hover:text-blue-700",
               ].join(" ")}
-              onClick={() => setTag("")}
+              onClick={() => {
+                setTag("");
+                setCurrentPage(1);
+              }}
             >
               すべて
             </button>
@@ -495,7 +450,10 @@ export default function PostsPage() {
                     ? "bg-blue-600 text-white"
                     : "text-slate-600 hover:bg-blue-50 hover:text-blue-700",
                 ].join(" ")}
-                onClick={() => setTag(tagItem.name)}
+                onClick={() => {
+                  setTag(tagItem.name);
+                  setCurrentPage(1);
+                }}
               >
                 {tagItem.name}
               </button>
@@ -516,178 +474,83 @@ export default function PostsPage() {
               type="text"
               placeholder="タイトル・本文で検索"
               value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              onChange={(e) => {
+                setKeyword(e.target.value);
+                setCurrentPage(1);
+              }}
               className="h-11 w-full rounded-lg border border-slate-300 px-3 text-[15px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </section>
   
           <section className="grid gap-4">
-            {filteredPosts.map((post: Post) => (
-              <article
-                className="rounded-lg border border-slate-200 bg-white p-5"
-                key={post.id}
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900">
-                      {post.title}
-                    </h2>
-
-                    <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                      <UserAvatar
-                        avatarUrl={post.user?.avatar_url}
-                        name={post.user?.nickname}
-                        size="sm"
-                      />
-                      <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
-                    </div>
-                  </div>
-
-                  <span className="text-sm text-slate-500">
-                    {new Date(post.created_at).toLocaleDateString("ja-JP")}
-                  </span>
-                </div>
-                {post.image_url && (
-                    <div className="relative mt-4 h-80 w-full overflow-hidden rounded-lg">
-                        <Image
-                          unoptimized
-                          src={post.image_url}
-                          alt={post.title}
-                          fill
-                          className="object-cover"
-                        />
-                    </div>
-                  )}
-  
-                <p className="mt-3 leading-7 text-slate-600">
-                  {post.comment}
-                </p>
-  
-                <div className="mt-4 flex flex-wrap gap-2">
-                {post.tags?.map((tagItem) => (
-                  <span
-                    key={tagItem.id}
-                    className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700"
+            {posts.map((post: Post) => {
+              if (post.is_visible === false) {
+                return (
+                  <article
+                    key={post.id}
+                    className="rounded-lg border border-slate-200 bg-white p-5"
                   >
-                    {tagItem.name}
-                  </span>
-                ))}
-                </div>
-  
-                <span>返信 {post.comment_count ?? 0}件</span>
-                {isLoadingPosts && (
-                  <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
-                    投稿を読み込み中...
-                  </div>
-                )}
+                    <p className="text-sm font-bold text-slate-500">
+                      この投稿は管理者によって非表示にされました。
+                    </p>
+                  </article>
+                );
+              }
 
-                {postError && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center text-red-600">
-                    {postError}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setReplyingPostId(post.id);
-                    setReplyComment("");
-                    setReplyMessage("");
-                  }}
-                  className="font-bold text-blue-600 hover:text-blue-700"
+              return (
+                <Link
+                  key={post.id}
+                  href={`/posts/${post.id}`}
+                  className="block rounded-lg border border-slate-200 bg-white p-5 hover:bg-slate-50"
                 >
-                  コメントする
-                </button>
-
-                {replyingPostId === post.id && (
-                  <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                    <label className="mb-2 block text-sm font-bold text-slate-700">
-                      コメント
-                    </label>
-
-                    <textarea
-                      rows={4}
-                      value={replyComment}
-                      onChange={(e) => setReplyComment(e.target.value)}
-                      placeholder="コメントを入力してください"
-                      className="w-full resize-y rounded-lg border border-slate-300 px-3 py-3 text-[15px] leading-7 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-
-                    {replyMessage && (
-                      <p className="mt-2 text-sm font-bold text-red-600">
-                        {replyMessage}
-                      </p>
-                    )}
-
-                    <div className="">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReplyingPostId(null);
-                          setReplyComment("");
-                          setReplyMessage("");
-                        }}
-                        className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                      >
-                        キャンセル
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={isSubmittingReply}
-                        onClick={() => handleSubmitReply(post)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-                      >
-                        {isSubmittingReply ? "投稿中..." : "投稿する"}
-                      </button>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">
+                        {post.title}
+                      </h2>
+            
+                      <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+                        <UserAvatar
+                          avatarUrl={post.user?.avatar_url}
+                          name={post.user?.nickname}
+                          size="sm"
+                        />
+                        <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
+                      </div>
                     </div>
+            
+                    <span className="text-sm text-slate-500">
+                      {post.created_at
+                        ? new Date(post.created_at).toLocaleDateString("ja-JP")
+                        : ""}
+                    </span>
                   </div>
-                )}
-
-                {(post.comment_count ?? 0) > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => toggleReplies(post.id)}
-                    className="font-bold text-slate-600 hover:text-blue-700"
-                  >
-                    返信を見る（{post.comment_count}件）
-                  </button>
-                )}
-
-                {openReplyIds[post.id] && (
-  <div className="mt-4 border-t border-slate-100 pt-4">
-    {isLoadingReplies && (
-      <p className="text-sm text-slate-500">
-        返信を読み込み中...
-      </p>
-    )}
-
-    {replyListError && (
-      <p className="text-sm font-bold text-red-600">
-        {replyListError}
-      </p>
-    )}
-
-<ReplyList
-  parentId={post.id}
-  repliesByPostId={repliesByPostId}
-  openReplyIds={openReplyIds}
-  toggleReplies={toggleReplies}
-  canReply={true}
-  replyingPostId={replyingPostId}
-  setReplyingPostId={setReplyingPostId}
-  replyComment={replyComment}
-  setReplyComment={setReplyComment}
-  replyMessage={replyMessage}
-  setReplyMessage={setReplyMessage}
-  isSubmittingReply={isSubmittingReply}
-  handleSubmitReply={handleSubmitReply}
-/>
-  </div>
-                        )}
-                   
-              </article>
-            ))}
+            
+                  <p className="mt-3 line-clamp-3 leading-7 text-slate-600">
+                    {post.comment}
+                  </p>
+            
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {(post.tags ?? []).map((tagItem) => (
+                        <span
+                          key={tagItem.id}
+                          className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700"
+                        >
+                          {tagItem.name}
+                        </span>
+                      ))}
+                    </div>
+            
+                    <span className="text-sm text-slate-500">
+                      コメント {post.comment_count ?? 0}件
+                    </span>
+                  </div>
+                </Link>
+              );
+              
+             
+    })}
   
             {/* {filteredPosts.length === 0 && (
               <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
@@ -695,6 +558,30 @@ export default function PostsPage() {
               </div>
             )} */}
           </section>
+
+          <div className="mt-6 flex items-center justify-between">
+  <button
+    type="button"
+    disabled={!previousPageUrl}
+    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    前へ
+  </button>
+
+  <span className="text-sm text-slate-500">
+    {currentPage}ページ目 / 全{postCount}件
+  </span>
+
+  <button
+    type="button"
+    disabled={!nextPageUrl}
+    onClick={() => setCurrentPage((page) => page + 1)}
+    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    次へ
+  </button>
+</div>
         </div>
   </div>
 )}
