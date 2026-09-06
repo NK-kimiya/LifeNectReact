@@ -54,9 +54,14 @@ export default function AdminPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
   const [isCreatingTag, setIsCreatingTag] = useState(false);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+  const [isAdminAllowed, setIsAdminAllowed] = useState(false);
 
 
   useEffect(() => {
+    if (!isAdminAllowed) {
+      return;
+    }
     const fetchPosts = async () => {
       try {
         setIsLoadingPosts(true);
@@ -83,7 +88,7 @@ export default function AdminPage() {
     };
   
     fetchPosts();
-  }, [currentPage]);
+  }, [isAdminAllowed, currentPage]);
 
 
   const handleAuthExpired = useCallback(() => {
@@ -92,12 +97,54 @@ export default function AdminPage() {
   }, [adminLogout, router]);
 
   useEffect(() => {
-    if (!isAdminLoggedIn) {
-      router.replace("/admin/login");
-    }
-  }, [isAdminLoggedIn, router]);
+    const verifyAdmin = async () => {
+      if (!adminAccessToken) {
+        adminLogout();
+        router.replace("/admin/login");
+        return;
+      }
+  
+      try {
+        setIsCheckingAdmin(true);
+  
+        const response = await fetch(`${API_BASE_URL}/me/`, {
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+          },
+        });
+  
+        const data = await response.json().catch(() => null);
+  
+        if (!response.ok) {
+          adminLogout();
+          router.replace("/admin/login");
+          return;
+        }
+  
+        const isAdmin = data?.role === "admin" || data?.is_staff === true;
+  
+        if (!isAdmin) {
+          adminLogout();
+          router.replace("/admin/login");
+          return;
+        }
+  
+        setIsAdminAllowed(true);
+      } catch (error) {
+        adminLogout();
+        router.replace("/admin/login");
+      } finally {
+        setIsCheckingAdmin(false);
+      }
+    };
+  
+    verifyAdmin();
+  }, [adminAccessToken, adminLogout, router]);
 
   useEffect(() => {
+    if (!isAdminAllowed) {
+      return;
+    }
     const fetchTags = async () => {
       try {
         setIsLoadingTags(true);
@@ -123,7 +170,7 @@ export default function AdminPage() {
     };
 
     fetchTags();
-  }, []);
+  }, [isAdminAllowed]);
 
   const handleLogout = () => {
     adminLogout();
@@ -201,7 +248,20 @@ export default function AdminPage() {
     }
   };
 
+  if (isCheckingAdmin) {
+    return (
+      <main className="min-h-screen bg-gray-50 px-6 py-8">
+        <p className="text-sm text-gray-500">管理者権限を確認中...</p>
+      </main>
+    );
+  }
+  
+  if (!isAdminAllowed) {
+    return null;
+  }
+
   return (
+    
     <main className="min-h-screen bg-gray-50 px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-col gap-4 border-b border-gray-200 pb-6 md:flex-row md:items-center md:justify-between">

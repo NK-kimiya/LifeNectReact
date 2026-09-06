@@ -44,6 +44,9 @@ export default function AdminPostDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+  const [isAdminAllowed, setIsAdminAllowed] = useState(false);
+
   const [openReplyIds, setOpenReplyIds] = useState<Record<string, boolean>>({});
   const [repliesByPostId, setRepliesByPostId] = useState<Record<string, Post[]>>({});
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
@@ -91,11 +94,49 @@ export default function AdminPostDetailPage() {
   }, [adminLogout, router]);
 
   useEffect(() => {
-    if (!isAdminLoggedIn) {
-      router.replace("/admin/login");
-    }
-  }, [isAdminLoggedIn, router]);
-
+    const verifyAdmin = async () => {
+      if (!adminAccessToken) {
+        adminLogout();
+        router.replace("/admin/login");
+        return;
+      }
+  
+      try {
+        setIsCheckingAdmin(true);
+  
+        const response = await fetch(`${API_BASE_URL}/me/`, {
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+          },
+        });
+  
+        const data = await response.json().catch(() => null);
+  
+        if (!response.ok) {
+          adminLogout();
+          router.replace("/admin/login");
+          return;
+        }
+  
+        const isAdmin = data?.role === "admin" || data?.is_staff === true;
+  
+        if (!isAdmin) {
+          adminLogout();
+          router.replace("/admin/login");
+          return;
+        }
+  
+        setIsAdminAllowed(true);
+      } catch (error) {
+        adminLogout();
+        router.replace("/admin/login");
+      } finally {
+        setIsCheckingAdmin(false);
+      }
+    };
+  
+    verifyAdmin();
+  }, [adminAccessToken, adminLogout, router]);
   //現在開いている詳細ページの投稿データを取得
   const fetchPost = useCallback(async () => {
     try {
@@ -139,22 +180,18 @@ export default function AdminPostDetailPage() {
 
   
   useEffect(() => {
-    //URLパラメータにpostIdがない場合は、投稿詳細を取得しない
-    if (!params.postId) {
+    if (!isAdminAllowed || !params.postId) {
       return;
     }
-    
-    //fetchPost() をすぐ直接呼ばずに、少し後で呼ぶように予約
+  
     const timeoutId = window.setTimeout(() => {
       fetchPost();
     }, 0);
-    
-    //コンポーネントが消えたり、postId が変わったりしたときに、予約済みの setTimeout をキャンセル
+  
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [fetchPost, params.postId]);
-
+  }, [isAdminAllowed, fetchPost, params.postId]);
 　//投稿の表示状態を切り替える関数
   const handleToggleVisibility = async (targetPost: { id: string; is_visible?: boolean }) => {
     //管理者トークンが無ければ、ログイン切れとしてログイン画面へ
@@ -224,6 +261,18 @@ export default function AdminPostDetailPage() {
       fetchReplies(postId);
     }
   };
+
+  if (isCheckingAdmin) {
+    return (
+      <main className="min-h-screen bg-gray-50 px-6 py-8">
+        <p className="text-sm text-gray-500">管理者権限を確認中...</p>
+      </main>
+    );
+  }
+  
+  if (!isAdminAllowed) {
+    return null;
+  }
   
 
   return (
