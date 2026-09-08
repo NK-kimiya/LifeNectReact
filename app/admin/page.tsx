@@ -38,6 +38,16 @@ type PaginatedPostsResponse = {
   results: Post[];
 };
 
+type AccountApplication = {
+  id: number;
+  nickname: string;
+  email: string;
+  condition: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  reviewed_at: string | null;
+};
+
 export default function AdminPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
@@ -56,6 +66,9 @@ export default function AdminPage() {
   const [isCreatingTag, setIsCreatingTag] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
   const [isAdminAllowed, setIsAdminAllowed] = useState(false);
+  const [applications, setApplications] = useState<AccountApplication[]>([]);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true);
+  const [applicationError, setApplicationError] = useState("");
 
 
   useEffect(() => {
@@ -172,6 +185,8 @@ export default function AdminPage() {
     fetchTags();
   }, [isAdminAllowed]);
 
+
+
   const handleLogout = () => {
     adminLogout();
     router.push("/admin/login");
@@ -248,6 +263,56 @@ export default function AdminPage() {
     }
   };
 
+  const fetchApplications = useCallback(async () => {
+    if (!adminAccessToken) {
+      handleAuthExpired();
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/account-applications/`, {
+        headers: {
+          Authorization: `Bearer ${adminAccessToken}`,
+        },
+      });
+  
+      const data = await response.json().catch(() => []);
+  
+      if (response.status === 401) {
+        handleAuthExpired();
+        return;
+      }
+  
+      if (!response.ok) {
+        throw new Error(data?.detail ?? "申請一覧の取得に失敗しました。");
+      }
+  
+      setApplications(data);
+      setApplicationError("");
+    } catch (error) {
+      setApplicationError(
+        error instanceof Error ? error.message : "申請一覧の取得に失敗しました。",
+      );
+    } finally {
+      setIsLoadingApplications(false);
+    }
+  }, [adminAccessToken, handleAuthExpired]);
+
+  
+  useEffect(() => {
+    if (!isAdminAllowed) {
+      return;
+    }
+  
+    const timerId = window.setTimeout(() => {
+      void fetchApplications();
+    }, 0);
+  
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [isAdminAllowed, fetchApplications]);
+
   if (isCheckingAdmin) {
     return (
       <main className="min-h-screen bg-gray-50 px-6 py-8">
@@ -255,6 +320,51 @@ export default function AdminPage() {
       </main>
     );
   }
+
+  const handleUpdateApplicationStatus = async (
+    applicationId: number,
+    action: "approve" | "reject",
+  ) => {
+    if (!adminAccessToken) {
+      handleAuthExpired();
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/admin/account-applications/${applicationId}/${action}/`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+          },
+        },
+      );
+  
+      const data = await response.json().catch(() => null);
+  
+      if (response.status === 401) {
+        handleAuthExpired();
+        return;
+      }
+  
+      if (!response.ok) {
+        throw new Error(data?.detail ?? "申請ステータスの更新に失敗しました。");
+      }
+  
+      setApplications((currentApplications) =>
+        currentApplications.map((application) =>
+          application.id === applicationId ? data : application,
+        ),
+      );
+    } catch (error) {
+      setApplicationError(
+        error instanceof Error
+          ? error.message
+          : "申請ステータスの更新に失敗しました。",
+      );
+    }
+  };
   
   if (!isAdminAllowed) {
     return null;
@@ -452,6 +562,87 @@ export default function AdminPage() {
             )}
           </div>
         </section>
+
+        <section className="mt-8 rounded-lg border border-gray-200 bg-white">
+  <div className="border-b border-gray-200 p-5">
+    <h2 className="text-xl font-bold text-gray-900">申請管理</h2>
+    <p className="mt-1 text-sm text-gray-500">
+      アカウント作成申請を確認し、承認または却下できます。
+    </p>
+  </div>
+
+  <div className="grid gap-4 p-5">
+    {isLoadingApplications && (
+      <p className="text-sm text-gray-500">申請を読み込み中...</p>
+    )}
+
+    {applicationError && (
+      <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+        {applicationError}
+      </p>
+    )}
+
+    {applications.map((application) => (
+      <article
+        key={application.id}
+        className="rounded-lg border border-gray-200 p-4"
+      >
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-gray-900">
+                {application.nickname}
+              </h3>
+              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                {application.status}
+              </span>
+            </div>
+
+            <p className="mt-1 text-sm text-gray-600">
+              {application.email}
+            </p>
+
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+              {application.condition}
+            </p>
+
+            <p className="mt-3 text-xs text-gray-400">
+              申請日: {new Date(application.created_at).toLocaleString("ja-JP")}
+            </p>
+          </div>
+
+          {application.status === "pending" && (
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  handleUpdateApplicationStatus(application.id, "approve")
+                }
+                className="rounded-lg bg-[#ff4500] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e63e00]"
+              >
+                承認
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleUpdateApplicationStatus(application.id, "reject")
+                }
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                却下
+              </button>
+            </div>
+          )}
+        </div>
+      </article>
+    ))}
+
+    {!isLoadingApplications && applications.length === 0 && (
+      <p className="text-sm text-gray-500">申請はまだありません。</p>
+    )}
+  </div>
+</section>
       </div>
 
       {isModalOpen && (
@@ -509,6 +700,8 @@ export default function AdminPage() {
               </div>
             </form>
           </section>
+
+
 
           
         </div>
