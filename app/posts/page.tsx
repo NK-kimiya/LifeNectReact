@@ -87,6 +87,7 @@ export default function PostsPage() {
   const [postCount, setPostCount] = useState(0);
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
   const [previousPageUrl, setPreviousPageUrl] = useState<string | null>(null);
+  
 
   const { accessToken, isLoggedIn } = useAuth();
 
