@@ -30,6 +30,8 @@ type User = {
   };
   
   type Post = {
+    like_count?: number;
+    is_liked?: boolean;
     id: string;
     is_visible?: boolean;
     title?: string;
@@ -138,7 +140,11 @@ export default function PostsPage() {
 
 
   
-        const response = await fetch(`${API_BASE_URL}/posts/?${searchParams.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/posts/?${searchParams.toString()}`, {
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : {},
+        });
         const data: PaginatedPostsResponse = await response.json();
   
         if (!response.ok) {
@@ -157,7 +163,34 @@ export default function PostsPage() {
     };
   
     fetchPosts();
-  },  [keyword, tag, currentPage]);
+  },  [keyword, tag, currentPage, accessToken]);
+
+  const handleToggleLike = async (postId: string) => {
+    if (!isLoggedIn || !accessToken) {
+      return;
+    }
+  
+    const response = await fetch(`${API_BASE_URL}/posts/${postId}/like/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  
+    const data = await response.json();
+  
+    if (!response.ok) {
+      return;
+    }
+  
+    setPosts((current) =>
+      current.map((post) =>
+        post.id === postId
+          ? { ...post, is_liked: data.is_liked, like_count: data.like_count }
+          : post,
+      ),
+    );
+  };
 
   const handleSendAiMessage = async () => {
     const text = aiMessage.trim();
@@ -542,6 +575,18 @@ export default function PostsPage() {
                         </span>
                       ))}
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        handleToggleLike(post.id);
+                      }}
+                      disabled={!isLoggedIn}
+                      className="text-sm font-bold text-pink-600 hover:text-pink-700 disabled:text-slate-400"
+                    >
+                      {post.is_liked ? "いいね済み" : "いいね"} {post.like_count ?? 0}
+                    </button>
             
                     <span className="text-sm text-slate-500">
                       コメント {post.comment_count ?? 0}件

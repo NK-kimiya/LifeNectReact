@@ -1,6 +1,7 @@
 "use client";
 //APIから返ってくるデータ型
 type Me = {
+    profile_text?: string;
     id: number;
     email: string;
     nickname: string;
@@ -34,41 +35,59 @@ export default function ProfilePage() {
     const [message, setMessage] = useState("");//エラーや成功メッセージ
     const [isLoading, setIsLoading] = useState(false);//ユーザー情報取得中かどうか
     const [isSaving, setIsSaving] = useState(false);//画像保存・削除中かどうか
+    const [profileText, setProfileText] = useState("");
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
     
-
-    //プロフィール取得
-    const fetchMe = useCallback(async () => {
-        if (!accessToken) {
-          return;
-        }
-      
-        const response = await fetch(`${API_BASE_URL}/me/`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-      
-        const data = await response.json().catch(() => null);
-
-        console.log("me response", data);
-        console.log("avatar_url", data?.avatar_url);
-      
-        if (!response.ok) {
-          throw new Error(data?.detail ?? "プロフィール情報の取得に失敗しました。");
-        }
-      
-        setMe(data);
-  
-      }, [accessToken]);
-
-    //初回表示時のログイン確認・me取得
     useEffect(() => {
-        if (!isLoggedIn || !accessToken) {
-          router.replace("/");
-          return;
+      if (!isLoggedIn || !accessToken) {
+        router.replace("/");
+        return;
+      }
+    
+      let isCancelled = false;
+    
+      const loadMe = async () => {
+        setIsLoading(true);
+    
+        try {
+          const response = await fetch(`${API_BASE_URL}/me/`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+    
+          const data = await response.json().catch(() => null);
+    
+          if (!response.ok) {
+            throw new Error(data?.detail ?? "プロフィール情報の取得に失敗しました。");
+          }
+    
+          if (!isCancelled) {
+            setMe(data);
+            setProfileText(data?.profile_text ?? "");
+          }
+        } catch (error) {
+          if (!isCancelled) {
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : "プロフィール情報の取得に失敗しました。",
+            );
+          }
+        } finally {
+          if (!isCancelled) {
+            setIsLoading(false);
+          }
         }
-        fetchMe();
-    }, [isLoggedIn, accessToken, router, fetchMe]);
+      };
+    
+      void loadMe();
+    
+      return () => {
+        isCancelled = true;
+      };
+    }, [isLoggedIn, accessToken, router]);
+    
 
 
     //ファイル選択処理
@@ -152,13 +171,19 @@ export default function ProfilePage() {
           if (!saveResponse.ok) {
             throw new Error(saveData?.detail ?? "プロフィール画像の保存に失敗しました。");
           }
-
+          const newAvatarUrl = previewUrl;
       
           setSelectedFile(null);
           setPreviewUrl(null);
           setMessage("プロフィール画像を更新しました。");
+
+          
+          setMe((current) =>
+            current
+              ? { ...current, avatar_url: newAvatarUrl }
+              : current,
+          );
       
-          await fetchMe();
         } catch (error) {
           setMessage(
             error instanceof Error
@@ -195,8 +220,14 @@ export default function ProfilePage() {
           setSelectedFile(null);
           setPreviewUrl(null);
           setMessage("プロフィール画像を削除しました。");
+
+          setMe((current) =>
+            current
+              ? { ...current, avatar_url: null }
+              : current,
+          );
       
-          await fetchMe();
+
         } catch (error) {
           setMessage(
             error instanceof Error
@@ -205,6 +236,46 @@ export default function ProfilePage() {
           );
         } finally {
           setIsSaving(false);
+        }
+      };
+
+      const handleSaveProfile = async () => {
+        if (!accessToken) {
+          return;
+        }
+      
+        try {
+          setIsSavingProfile(true);
+          setMessage("");
+      
+          const response = await fetch(`${API_BASE_URL}/me/`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              profile_text: profileText,
+            }),
+          });
+      
+          const data = await response.json().catch(() => null);
+      
+          if (!response.ok) {
+            throw new Error(data?.detail ?? "プロフィール文の保存に失敗しました。");
+          }
+      
+          setMe(data);
+          setProfileText(data?.profile_text ?? "");
+          setMessage("プロフィール文を保存しました。");
+        } catch (error) {
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : "プロフィール文の保存に失敗しました。",
+          );
+        } finally {
+          setIsSavingProfile(false);
         }
       };
     
@@ -284,7 +355,43 @@ export default function ProfilePage() {
                     削除する
                   </button>
                 </div>
-              </div>
+
+                <div className="grid gap-2">
+                    <label
+                      htmlFor="profileText"
+                      className="text-sm font-bold text-slate-700"
+                    >
+                      プロフィール文
+                    </label>
+
+                    <textarea
+                      id="profileText"
+                      rows={5}
+                      value={profileText}
+                      onChange={(e) => setProfileText(e.target.value)}
+                      maxLength={1000}
+                      className="w-full resize-y rounded-lg border border-slate-300 px-3 py-3 text-sm"
+                    />
+
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-slate-500">
+                        自己紹介や相談したいことを書けます。
+                      </p>
+                      <span className="text-xs text-slate-400">
+                        {profileText.length}/1000
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      disabled={isSavingProfile}
+                      className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                    >
+                      {isSavingProfile ? "保存中..." : "プロフィール文を保存"}
+                    </button>
+                  </div>
+                                </div>
             )}
           </section>
         </main>
