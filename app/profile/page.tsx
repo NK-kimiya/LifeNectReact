@@ -15,6 +15,34 @@ type AvatarUploadUrlResponse = {
     upload_url: string;
     content_type: string;
   };
+
+  type User = {
+    id: number;
+    nickname: string;
+    email: string;
+    avatar_url?: string | null;
+  };
+  
+  type Tag = {
+    id: number;
+    name: string;
+  };
+  
+  type Post = {
+    id: string;
+    is_visible?: boolean;
+    title?: string;
+    comment?: string;
+    parent_post?: string | null;
+    comment_count?: number;
+    like_count?: number;
+    is_liked?: boolean;
+    created_at?: string;
+    user?: User | null;
+    tags?: Tag[];
+    image_url?: string | null;
+  };
+
 //許可する画像形式ブロック
 const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
@@ -22,6 +50,7 @@ import { useState,useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import UserAvatar from "../components/UserAvatar";
+import Link from "next/link";
 const API_BASE_URL =process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 export default function ProfilePage() {
     
@@ -37,6 +66,9 @@ export default function ProfilePage() {
     const [isSaving, setIsSaving] = useState(false);//画像保存・削除中かどうか
     const [profileText, setProfileText] = useState("");
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+    const [myPosts, setMyPosts] = useState<Post[]>([]);
+    const [likedPosts, setLikedPosts] = useState<Post[]>([]);
+    const [postListError, setPostListError] = useState("");
     
     useEffect(() => {
       if (!isLoggedIn || !accessToken) {
@@ -48,23 +80,43 @@ export default function ProfilePage() {
     
       const loadMe = async () => {
         setIsLoading(true);
-    
+      
         try {
-          const response = await fetch(`${API_BASE_URL}/me/`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
-    
-          const data = await response.json().catch(() => null);
-    
-          if (!response.ok) {
-            throw new Error(data?.detail ?? "プロフィール情報の取得に失敗しました。");
+          const [meResponse, myPostsResponse, likedPostsResponse] = await Promise.all([
+            fetch(`${API_BASE_URL}/me/`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }),
+            fetch(`${API_BASE_URL}/posts/my-posts/`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }),
+            fetch(`${API_BASE_URL}/posts/liked/`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }),
+          ]);
+      
+          const meData = await meResponse.json().catch(() => null);
+          const myPostsData = await myPostsResponse.json().catch(() => []);
+          const likedPostsData = await likedPostsResponse.json().catch(() => []);
+      
+          if (!meResponse.ok) {
+            throw new Error(meData?.detail ?? "プロフィール情報の取得に失敗しました。");
           }
-    
+      
+          if (!myPostsResponse.ok || !likedPostsResponse.ok) {
+            setPostListError("投稿一覧の取得に失敗しました。");
+          }
+      
           if (!isCancelled) {
-            setMe(data);
-            setProfileText(data?.profile_text ?? "");
+            setMe(meData);
+            setProfileText(meData?.profile_text ?? "");
+            setMyPosts(Array.isArray(myPostsData) ? myPostsData : []);
+            setLikedPosts(Array.isArray(likedPostsData) ? likedPostsData : []);
           }
         } catch (error) {
           if (!isCancelled) {
@@ -278,6 +330,86 @@ export default function ProfilePage() {
           setIsSavingProfile(false);
         }
       };
+
+      const renderPostList = (title: string, posts: Post[]) => (
+        <section className="grid gap-4">
+          <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+      
+          {posts.length === 0 ? (
+            <p className="rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-500">
+              投稿はありません。
+            </p>
+          ) : (
+            posts.map((post) => {
+              if (post.is_visible === false) {
+                return (
+                  <article
+                    key={post.id}
+                    className="rounded-lg border border-slate-200 bg-white p-5"
+                  >
+                    <p className="text-sm font-bold text-slate-500">
+                      この投稿は非表示です。
+                    </p>
+                  </article>
+                );
+              }
+      
+              return (
+                <Link
+                  key={post.id}
+                  href={`/posts/${post.id}`}
+                  className="block rounded-lg border border-slate-200 bg-white p-5 hover:bg-slate-50"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">
+                        {post.title}
+                      </h3>
+      
+                      <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+                        <UserAvatar
+                          avatarUrl={post.user?.avatar_url}
+                          name={post.user?.nickname}
+                          size="sm"
+                        />
+                        <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
+                      </div>
+                    </div>
+      
+                    <span className="text-sm text-slate-500">
+                      {post.created_at
+                        ? new Date(post.created_at).toLocaleDateString("ja-JP")
+                        : ""}
+                    </span>
+                  </div>
+      
+                  <p className="mt-3 line-clamp-3 leading-7 text-slate-600">
+                    {post.comment}
+                  </p>
+      
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {(post.tags ?? []).map((tagItem) => (
+                        <span
+                          key={tagItem.id}
+                          className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700"
+                        >
+                          {tagItem.name}
+                        </span>
+                      ))}
+                    </div>
+      
+                    <div className="flex gap-4 text-sm text-slate-500">
+                      <span>いいね {post.like_count ?? 0}件</span>
+                      <span>コメント {post.comment_count ?? 0}件</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          )}
+        </section>
+      );
     
       return (
         <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-800">
@@ -298,6 +430,15 @@ export default function ProfilePage() {
               </p>
             ) : (
               <div className="mt-6 grid gap-6">
+              {postListError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {postListError}
+                </p>
+              )}
+
+              {renderPostList("作成した投稿", myPosts)}
+
+              {renderPostList("いいねした投稿", likedPosts)}
                 <div className="flex items-center gap-4">
                   <UserAvatar
                     avatarUrl={previewUrl ?? me?.avatar_url}
