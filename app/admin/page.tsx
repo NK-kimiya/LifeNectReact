@@ -17,6 +17,7 @@ type User = {
   email: string;
   nickname: string;
   avatar_url?: string | null;
+  account_status: "active" | "suspended" | "banned";
 };
 
 type Post = {
@@ -69,6 +70,9 @@ export default function AdminPage() {
   const [applications, setApplications] = useState<AccountApplication[]>([]);
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [applicationError, setApplicationError] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [userError, setUserError] = useState("");
 
 
   useEffect(() => {
@@ -298,6 +302,43 @@ export default function AdminPage() {
     }
   }, [adminAccessToken, handleAuthExpired]);
 
+  const fetchUsers = useCallback(async () => {
+    if (!adminAccessToken) {
+      handleAuthExpired();
+      return;
+    }
+  
+    try {
+      setIsLoadingUsers(true);
+  
+      const response = await fetch(`${API_BASE_URL}/admin/users/`, {
+        headers: {
+          Authorization: `Bearer ${adminAccessToken}`,
+        },
+      });
+  
+      const data = await response.json().catch(() => []);
+  
+      if (response.status === 401) {
+        handleAuthExpired();
+        return;
+      }
+  
+      if (!response.ok) {
+        throw new Error(data?.detail ?? "ユーザー一覧の取得に失敗しました。");
+      }
+  
+      setUsers(Array.isArray(data) ? data : data.results ?? []);
+      setUserError("");
+    } catch (error) {
+      setUserError(
+        error instanceof Error ? error.message : "ユーザー一覧の取得に失敗しました。",
+      );
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, [adminAccessToken, handleAuthExpired]);
+
   
   useEffect(() => {
     if (!isAdminAllowed) {
@@ -312,6 +353,21 @@ export default function AdminPage() {
       window.clearTimeout(timerId);
     };
   }, [isAdminAllowed, fetchApplications]);
+
+  useEffect(() => {
+    if (!isAdminAllowed) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      void fetchUsers();
+    }, 0);
+  
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  
+  }, [isAdminAllowed, fetchUsers]);
 
   if (isCheckingAdmin) {
     return (
@@ -365,6 +421,8 @@ export default function AdminPage() {
       );
     }
   };
+
+  
   
   if (!isAdminAllowed) {
     return null;
@@ -640,6 +698,61 @@ export default function AdminPage() {
 
     {!isLoadingApplications && applications.length === 0 && (
       <p className="text-sm text-gray-500">申請はまだありません。</p>
+    )}
+  </div>
+</section>
+
+<section className="mt-8 rounded-lg border border-gray-200 bg-white">
+  <div className="border-b border-gray-200 p-5">
+    <h2 className="text-xl font-bold text-gray-900">ユーザー管理</h2>
+    <p className="mt-1 text-sm text-gray-500">
+      登録済みユーザーの状態を確認できます。
+    </p>
+  </div>
+
+  <div className="grid gap-4 p-5">
+    {isLoadingUsers && (
+      <p className="text-sm text-gray-500">ユーザーを読み込み中...</p>
+    )}
+
+    {userError && (
+      <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+        {userError}
+      </p>
+    )}
+
+    {users.map((user) => (
+      <article
+      key={user.id}
+      onClick={() => router.push(`/admin/users/${user.id}`)}
+      className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+    >
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <UserAvatar
+              avatarUrl={user.avatar_url}
+              name={user.nickname}
+              size="md"
+            />
+            <div className="min-w-0">
+              <p className="truncate font-bold text-gray-900">{user.nickname}</p>
+              <p className="truncate text-sm text-gray-500">{user.email}</p>
+            </div>
+          </div>
+
+          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+            user.account_status === "active"
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
+          }`}>
+            {user.account_status === "active" ? "通常利用" : "凍結中"}
+          </span>
+        </div>
+      </article>
+    ))}
+
+    {!isLoadingUsers && users.length === 0 && (
+      <p className="text-sm text-gray-500">ユーザーはまだいません。</p>
     )}
   </div>
 </section>
