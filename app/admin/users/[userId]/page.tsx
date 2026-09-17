@@ -8,6 +8,7 @@ import UserAvatar from "../../../components/UserAvatar";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
+//投稿データの型
 type Post = {
   id: string;
   is_visible: boolean;
@@ -17,6 +18,7 @@ type Post = {
   created_at: string;
 };
 
+//ユーザー詳細データの型
 type AdminUserDetail = {
   id: number;
   email: string;
@@ -37,20 +39,24 @@ type AdminUserDetail = {
 };
 
 export default function AdminUserDetailPage() {
-  const params = useParams<{ userId: string }>();
-  const router = useRouter();
-  const { adminAccessToken, adminLogout } = useAdminAuth();
+  const params = useParams<{ userId: string }>();//URL上の userId
+  const router = useRouter();//画面遷移
+  const { adminAccessToken, adminLogout } = useAdminAuth();//管理者用アクセストークンとログアウト処理を取得
 
-  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
-  const [isAdminAllowed, setIsAdminAllowed] = useState(false);
-  const [user, setUser] = useState<AdminUserDetail | null>(null);
-  const [error, setError] = useState("");
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);//管理者確認中かどうか
+  const [isAdminAllowed, setIsAdminAllowed] = useState(false);//管理者として許可されたかどうか
+  const [user, setUser] = useState<AdminUserDetail | null>(null);//取得したユーザー詳細情報
+  const [error, setError] = useState("");//エラーメッセージ
 
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  
+  //管理者ログアウト処理
   const handleAuthExpired = useCallback(() => {
     adminLogout();
     router.replace("/admin/login");
   }, [adminLogout, router]);
-
+  
+  //現在のログインユーザーが管理者かどうかを確認
   useEffect(() => {
     const verifyAdmin = async () => {
       if (!adminAccessToken) {
@@ -89,7 +95,8 @@ export default function AdminUserDetailPage() {
 
     verifyAdmin();
   }, [adminAccessToken, handleAuthExpired]);
-
+  
+  //管理者確認が通ったあとに対象ユーザーの詳細情報を取得
   useEffect(() => {
     if (!isAdminAllowed || !params.userId || !adminAccessToken) {
       return;
@@ -129,6 +136,60 @@ export default function AdminUserDetailPage() {
 
     fetchUser();
   }, [isAdminAllowed, params.userId, adminAccessToken, handleAuthExpired]);
+
+  const handleUpdateAccountStatus = async (
+    accountStatus: "active" | "suspended" | "banned",
+  ) => {
+    if (!adminAccessToken || !user) {
+      handleAuthExpired();
+      return;
+    }
+  
+    try {
+      setIsUpdatingStatus(true);
+  
+      const response = await fetch(
+        `${API_BASE_URL}/admin/users/${user.id}/account-status/`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            account_status: accountStatus,
+          }),
+        },
+      );
+  
+      const data = await response.json().catch(() => null);
+  
+      if (response.status === 401) {
+        handleAuthExpired();
+        return;
+      }
+  
+      if (!response.ok) {
+        throw new Error(data?.detail ?? "アカウント状態の変更に失敗しました。");
+      }
+
+      console.log("返されたデータは" + data.context);
+      setUser((current) =>
+        current
+          ? { ...current, account_status: data.account_status }
+          : current,
+      );
+      setError("");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "アカウント状態の変更に失敗しました。",
+      );
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   // 管理者確認中・管理者でない場合はレイアウトも表示しない
   if (isCheckingAdmin || !isAdminAllowed) {
@@ -176,6 +237,35 @@ export default function AdminUserDetailPage() {
               </p>
             </div>
           </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+                type="button"
+                disabled={isUpdatingStatus || user.account_status === "active"}
+                onClick={() => handleUpdateAccountStatus("active")}
+                className="rounded-lg border border-green-300 px-4 py-2 text-sm font-semibold text-green-700 disabled:opacity-50"
+            >
+                通常利用に戻す
+            </button>
+
+            <button
+                type="button"
+                disabled={isUpdatingStatus || user.account_status === "suspended"}
+                onClick={() => handleUpdateAccountStatus("suspended")}
+                className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"
+            >
+                凍結する
+            </button>
+
+            <button
+                type="button"
+                disabled={isUpdatingStatus || user.account_status === "banned"}
+                onClick={() => handleUpdateAccountStatus("banned")}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+                永久停止にする
+            </button>
+        </div>
 
           <dl className="mt-6 grid gap-4 text-sm md:grid-cols-2">
             <div>

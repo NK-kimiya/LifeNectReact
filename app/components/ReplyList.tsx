@@ -95,7 +95,7 @@ type Post = {
           <div key={reply.id} className="rounded-lg bg-slate-50 p-4">
             {/* 既存のコメント表示 */}
             <div key={reply.id} className="rounded-lg bg-slate-50 p-4">
-            <p className="leading-7 text-slate-700">{reply.comment}</p>
+            
             <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500">
               <div className="flex min-w-0 items-center gap-2">
                 <UserAvatar
@@ -107,11 +107,11 @@ type Post = {
                   {reply.user?.nickname ?? "匿名ユーザー"}
                 </span>
               </div>
-
               <span className="shrink-0">
                 {reply.created_at ? new Date(reply.created_at).toLocaleString("ja-JP") : ""}
               </span>
             </div>
+            <p className="leading-7 text-slate-700">{reply.comment}</p>
 
             {onToggleVisibility && (
               <button

@@ -21,9 +21,51 @@ export default function NewPostPage() {
   const [tags, setTags] = useState([]);
   const [isLoadingTags, setIsLoadingTags] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [tagError, setTagError] = useState("");
+  const [message,setMessage] = useState("");
+  const [postCreateError, setPostCreateError] = useState(null);
+  const [tagError, setTagError] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
+
+  const getTagFetchError = (status) => {
+    switch (status) {
+      case 400:
+        return {
+          code: 400,
+          title: "リクエストエラー",
+          message: "タグ一覧の取得条件に問題があります。",
+        };
+      case 401:
+        return {
+          code: 401,
+          title: "認証エラー",
+          message: "ログイン情報が無効です。再ログインしてください。",
+        };
+      case 403:
+        return {
+          code: 403,
+          title: "アクセス権限エラー",
+          message: "タグ一覧を取得する権限がありません。",
+        };
+      case 404:
+        return {
+          code: 404,
+          title: "タグ取得APIが見つかりません",
+          message: "APIのURLが正しいか確認してください。",
+        };
+      case 500:
+        return {
+          code: 500,
+          title: "サーバーエラー",
+          message: "サーバー側で問題が発生しています。",
+        };
+      default:
+        return {
+          code: status,
+          title: "タグ一覧の取得に失敗しました",
+          message: `予期しないエラーが発生しました。HTTP ${status}`,
+        };
+    }
+  };
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -31,15 +73,25 @@ export default function NewPostPage() {
         setIsLoadingTags(true);
         setTagError("");
 
-        const response = await fetch(`${API_BASE_URL}/tags/`);
+        const response = await fetch(`${API_BASE_URL}/tags/`,{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          }});
         const data = await response.json().catch(() => []);
         if (!response.ok) {
-          throw new Error("タグ一覧の取得に失敗しました。");
+          setTagError(getTagFetchError(response.status));
+          return;
         }
 
         setTags(data);
       } catch (error) {
-        setTagError("タグを読み込めませんでした。");
+        setTagError({
+          code: "network",
+          title: "通信エラー",
+          message: "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
+        });
       } finally {
         setIsLoadingTags(false);
       }
@@ -90,25 +142,102 @@ export default function NewPostPage() {
     });
   };
 
+  const getPostCreateError = (status, data) => {
+    switch (status) {
+      case 400:
+        return {
+          code: 400,
+          title: "入力エラー",
+          message:
+            data?.detail ??
+            data?.title?.[0] ??
+            data?.comment?.[0] ??
+            data?.tag_ids?.[0] ??
+            data?.image_key?.[0] ??
+            "入力内容に問題があります。",
+        };
+      case 401:
+        return {
+          code: 401,
+          title: "認証エラー",
+          message: "ログイン情報が無効です。再ログインしてください。",
+        };
+      case 403:
+        return {
+          code: 403,
+          title: "アクセス権限エラー",
+          message: "投稿を作成する権限がありません。",
+        };
+      case 404:
+        return {
+          code: 404,
+          title: "投稿作成APIが見つかりません",
+          message: "APIのURLが正しいか確認してください。",
+        };
+      case 413:
+        return {
+          code: 413,
+          title: "ファイルサイズエラー",
+          message: "投稿画像のサイズが大きすぎます。",
+        };
+      case 415:
+        return {
+          code: 415,
+          title: "画像形式エラー",
+          message: "対応していない画像形式です。",
+        };
+      case 429:
+        return {
+          code: 429,
+          title: "リクエスト制限",
+          message: "短時間に投稿しすぎています。時間をおいて再度お試しください。",
+        };
+      case 500:
+        return {
+          code: 500,
+          title: "サーバーエラー",
+          message: "サーバー側で問題が発生しています。",
+        };
+      default:
+        return {
+          code: status,
+          title: "投稿作成に失敗しました",
+          message: `予期しないエラーが発生しました。HTTP ${status}`,
+        };
+    }
+  };
+
   const handleSubmit = async(event) => {
     event.preventDefault();
     setMessage("");
-
+    setPostCreateError(null);
     const title = form.title.trim();
     const comment = form.comment.trim();
 
     if (!title) {
-      setMessage("タイトルを入力してください。");
+      setPostCreateError({
+        code: 400,
+        title: "入力エラー",
+        message: "タイトルを入力してください。",
+      });
       return;
     }
 
     if (!comment) {
-      setMessage("本文を入力してください。");
+      setPostCreateError({
+        code: 400,
+        title: "入力エラー",
+        message: "本文を入力してください。",
+      });
       return;
     }
 
     if (!isLoggedIn || !accessToken) {
-      setMessage("投稿するにはログインが必要です。");
+      setPostCreateError({
+        code: 401,
+        title: "認証エラー",
+        message: "投稿するにはログインが必要です。",
+      });
       return;
     }
 
@@ -179,29 +308,18 @@ export default function NewPostPage() {
 
       const data = await response.json().catch(() => null);
 
-      if (response.status === 401) {
-        setMessage("ログインの有効期限が切れています。再ログインしてください。");
-        return;
-      }
-
       if (!response.ok) {
-        const errorMessage =
-          data?.detail ??
-          data?.title?.[0] ??
-          data?.comment?.[0] ??
-          data?.parent_post?.[0] ??
-          "投稿の作成に失敗しました。";
-
-        throw new Error(errorMessage);
+        setPostCreateError(getPostCreateError(response.status, data));
+        return;
       }
 
       router.push("/posts");
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "投稿の作成に失敗しました。",
-      );
+      setPostCreateError({
+        code: "network",
+        title: "通信エラー",
+        message: "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -304,6 +422,28 @@ export default function NewPostPage() {
 
           <fieldset className="grid gap-3">
             <legend className="text-sm font-bold text-slate-700">タグ</legend>
+              {isLoadingTags && (
+              <p className="text-sm text-slate-500">タグを読み込み中...</p>
+            )}
+
+            {tagError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                <p className="text-sm font-bold">エラー番号: {tagError.code}</p>
+                <p className="mt-1 text-sm font-bold">{tagError.title}</p>
+                <p className="mt-1 text-sm">{tagError.message}</p>
+
+                {(tagError.code === 401 || tagError.code === 403) && (
+                  <p className="mt-3 text-sm">
+                    <Link
+                      href="/auth"
+                      className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                    >
+                      ログインページへ移動する
+                    </Link>
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-2">
             {tags.map((tag) => {
@@ -350,10 +490,23 @@ export default function NewPostPage() {
           </div>
         </form>
 
-        {message && (
-          <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
-            {message}
-          </p>
+        {postCreateError && (
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+            <p className="text-sm font-bold">エラー番号: {postCreateError.code}</p>
+            <p className="mt-1 text-sm font-bold">{postCreateError.title}</p>
+            <p className="mt-1 text-sm">{postCreateError.message}</p>
+
+            {(postCreateError.code === 401 || postCreateError.code === 403) && (
+              <p className="mt-3 text-sm">
+                <Link
+                  href="/auth"
+                  className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                >
+                  ログインページへ移動する
+                </Link>
+              </p>
+            )}
+          </div>
         )}
 
       </div>

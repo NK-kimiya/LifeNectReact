@@ -84,7 +84,11 @@ export default function AdminPage() {
         setIsLoadingPosts(true);
         setPostError("");
   
-        const response = await fetch(`${API_BASE_URL}/posts/?page=${currentPage}`);
+        const response = await fetch(`${API_BASE_URL}/posts/?page=${currentPage}`, {
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+          },
+        });
         const data: PaginatedPostsResponse = await response.json();
   
         if (!response.ok) {
@@ -105,7 +109,7 @@ export default function AdminPage() {
     };
   
     fetchPosts();
-  }, [isAdminAllowed, currentPage]);
+  }, [isAdminAllowed, currentPage,adminAccessToken]);
 
 
   const handleAuthExpired = useCallback(() => {
@@ -167,7 +171,11 @@ export default function AdminPage() {
         setIsLoadingTags(true);
         setMessage("");
 
-        const response = await fetch(`${API_BASE_URL}/tags/`);
+        const response = await fetch(`${API_BASE_URL}/tags/`, {
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+          },
+        });
         const data = await response.json().catch(() => []);
 
         if (!response.ok) {
@@ -187,7 +195,7 @@ export default function AdminPage() {
     };
 
     fetchTags();
-  }, [isAdminAllowed]);
+  }, [isAdminAllowed,adminAccessToken]);
 
 
 

@@ -38,6 +38,12 @@ type Post = {
   image_url?: string | null;
 };
 
+type PostDetailError = {
+  code: number | "network" | "unknown";
+  title: string;
+  message: string;
+};
+
 export default function PostDetailPage() {
   const params = useParams<{ postId: string }>();
   const { accessToken, isLoggedIn } = useAuth();
@@ -47,7 +53,7 @@ export default function PostDetailPage() {
   const [openReplyIds, setOpenReplyIds] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [postError, setPostError] = useState<PostDetailError | null>(null);
   const [replyingPostId, setReplyingPostId] = useState<string | null>(null);
   const [replyComment, setReplyComment] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
@@ -82,7 +88,12 @@ export default function PostDetailPage() {
     try {
       setIsLoadingReplies(true);
 
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`);
+      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`,{
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const data = await response.json().catch(() => []);
 
       if (!response.ok) {
@@ -98,16 +109,63 @@ export default function PostDetailPage() {
     }
   }, []);
 
+  const getPostDetailError = (status: number): PostDetailError => {
+    switch (status) {
+      case 400:
+        return {
+          code: 400,
+          title: "リクエストエラー",
+          message: "投稿詳細の取得条件に問題があります。",
+        };
+      case 401:
+        return {
+          code: 401,
+          title: "認証エラー",
+          message: "ログイン情報が無効です。再ログインしてください。",
+        };
+      case 403:
+        return {
+          code: 403,
+          title: "アクセス権限エラー",
+          message: "この投稿を表示する権限がありません。",
+        };
+      case 404:
+        return {
+          code: 404,
+          title: "投稿が見つかりません",
+          message: "投稿が削除されたか、URLが正しくない可能性があります。",
+        };
+      case 500:
+        return {
+          code: 500,
+          title: "サーバーエラー",
+          message: "サーバー側で問題が発生しています。",
+        };
+      default:
+        return {
+          code: status,
+          title: "投稿詳細の取得に失敗しました",
+          message: `予期しないエラーが発生しました。HTTP ${status}`,
+        };
+    }
+  };
+
   const fetchPost = useCallback(async () => {
     try {
       setIsLoading(true);
-      setErrorMessage("");
+      setPostError(null);
 
-      const response = await fetch(`${API_BASE_URL}/posts/${params.postId}/`);
+      const response = await fetch(`${API_BASE_URL}/posts/${params.postId}/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data?.detail ?? "投稿詳細の取得に失敗しました。");
+        setPostError(getPostDetailError(response.status));
+        return;
       }
 
       setPost(data);
@@ -120,13 +178,15 @@ export default function PostDetailPage() {
         }));
       }
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "投稿詳細の取得に失敗しました。",
-      );
+      setPostError({
+        code: "network",
+        title: "通信エラー",
+        message: "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [fetchReplies, params.postId]);
+  }, [fetchReplies, params.postId,accessToken]);
 
   useEffect(() => {
     if (!params.postId) return;
@@ -207,12 +267,22 @@ export default function PostDetailPage() {
 
         {isLoading && <p className="text-sm text-slate-500">読み込み中...</p>}
 
-        {errorMessage && (
-          <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-            {errorMessage}
-          </p>
-        )}
+        {postError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+            <p className="text-sm font-bold">エラー番号: {postError.code}</p>
+            <p className="mt-2 text-base font-bold">{postError.title}</p>
+            <p className="mt-1 text-sm">{postError.message}</p>
 
+            {(postError.code === 401 || postError.code === 403) && (
+          <Link
+            href="/auth"
+            className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700 p-2"
+          >
+            ログインページへ
+          </Link>
+    )}
+          </div>
+        )}
         {post && post.is_visible === false && (
           <article className="rounded-lg border border-slate-200 bg-white p-6">
             <p className="text-sm font-bold text-slate-500">

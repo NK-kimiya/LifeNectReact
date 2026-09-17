@@ -56,6 +56,13 @@ type User = {
     answer: string;
     references: ChatReference[];
   };
+
+  
+  type PostError = {
+    code: number | "network" | "unknown";
+    title: string;
+    message: string;
+  };
   
   
 
@@ -76,7 +83,7 @@ export default function PostsPage() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
-  const [postError, setPostError] = useState("");
+  const [postError, setPostError] = useState<PostError | null>(null);
 
   //返信フォーム用state
   //返信一覧
@@ -99,7 +106,11 @@ export default function PostsPage() {
         setIsLoadingTags(true);
         setTagError("");
   
-        const response = await fetch(`${API_BASE_URL}/tags/`);
+        const response = await fetch(`${API_BASE_URL}/tags/`,{
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : {},
+        });
         const data = await response.json().catch(() => []);
   
         if (!response.ok) {
@@ -118,10 +129,50 @@ export default function PostsPage() {
   }, []);
 
   useEffect(() => {
+    const getPostError = (status: number): PostError => {
+      switch (status) {
+        case 400:
+          return {
+            code: 400,
+            title: "リクエストエラー",
+            message: "投稿一覧の取得条件に問題があります。",
+          };
+        case 401:
+          return {
+            code: 401,
+            title: "認証エラー",
+            message: "ログイン情報が無効です。再ログインしてください。",
+          };
+        case 403:
+          return {
+            code: 403,
+            title: "アカウントの凍結",
+            message: "このアカウントは管理者により凍結されました。",
+          };
+        case 404:
+          return {
+            code: 404,
+            title: "投稿一覧が見つかりません",
+            message: "APIのURLが正しいか確認してください。",
+          };
+        case 500:
+          return {
+            code: 500,
+            title: "サーバーエラー",
+            message: "サーバー側で問題が発生しています。",
+          };
+        default:
+          return {
+            code: status,
+            title: "投稿一覧の取得に失敗しました",
+            message: `予期しないエラーが発生しました。HTTP ${status}`,
+          };
+      }
+    };
     const fetchPosts = async () => {
       try {
         setIsLoadingPosts(true);
-        setPostError("");
+        setPostError(null);
         
         //URLのクエリパラメータを作成
         const searchParams = new URLSearchParams();
@@ -138,7 +189,6 @@ export default function PostsPage() {
         }
         
 
-
   
         const response = await fetch(`${API_BASE_URL}/posts/?${searchParams.toString()}`, {
           headers: accessToken
@@ -148,7 +198,8 @@ export default function PostsPage() {
         const data: PaginatedPostsResponse = await response.json();
   
         if (!response.ok) {
-          throw new Error("投稿一覧の取得に失敗しました。");
+          setPostError(getPostError(response.status));
+          return;
         }
   
         setPosts(data.results);
@@ -156,7 +207,11 @@ export default function PostsPage() {
         setNextPageUrl(data.next);
         setPreviousPageUrl(data.previous);
       } catch (error) {
-        setPostError("投稿を読み込めませんでした。");
+        setPostError({
+          code: "network",
+          title: "通信エラー",
+          message: "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
+        });
       } finally {
         setIsLoadingPosts(false);
       }
@@ -517,6 +572,31 @@ export default function PostsPage() {
           </section>
   
           <section className="grid gap-4">
+
+            {isLoadingPosts && (
+              <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
+                投稿を読み込み中...
+              </div>
+            )}
+
+            {postError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+                <p className="text-sm font-bold">エラー番号: {postError.code}</p>
+                <p className="mt-2 text-base font-bold">{postError.title}</p>
+                <p className="mt-1 text-sm">{postError.message}</p>
+                {(postError.code === 401 || postError.code === 403) && (
+                  <p className="mt-4 text-sm">
+                    <Link
+                      href="/auth"
+                      className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                    >
+                      ログインページへ移動する
+                    </Link>
+                  </p>
+                )}
+                
+              </div>
+            )}
             {posts.map((post: Post) => {
               if (post.is_visible === false) {
                 return (
