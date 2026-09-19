@@ -54,7 +54,7 @@ import Link from "next/link";
 const API_BASE_URL =process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 export default function ProfilePage() {
     
-    const { accessToken, isLoggedIn } = useAuth();
+    const { accessToken, isLoggedIn,logout } = useAuth();
     const router = useRouter();
 
     /* State定義*/
@@ -69,6 +69,9 @@ export default function ProfilePage() {
     const [myPosts, setMyPosts] = useState<Post[]>([]);
     const [likedPosts, setLikedPosts] = useState<Post[]>([]);
     const [postListError, setPostListError] = useState("");
+    const [deleteConfirmText, setDeleteConfirmText] = useState("");
+    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+    const canDeleteAccount = Boolean(me?.email) && deleteConfirmText === me?.email;
     
     useEffect(() => {
       if (!isLoggedIn || !accessToken) {
@@ -331,6 +334,41 @@ export default function ProfilePage() {
         }
       };
 
+      const handleDeleteAccount = async () => {
+        if (!accessToken || !canDeleteAccount) {
+          return;
+        }
+      
+        try {
+          setIsDeletingAccount(true);
+          setMessage("");
+      
+          const response = await fetch(`${API_BASE_URL}/me/`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+      
+          const data = await response.json().catch(() => null);
+      
+          if (!response.ok) {
+            throw new Error(data?.detail ?? "アカウント削除に失敗しました。");
+          }
+      
+          logout();
+          router.replace("/");
+        } catch (error) {
+          setMessage(
+            error instanceof Error
+              ? error.message
+              : "アカウント削除に失敗しました。",
+          );
+        } finally {
+          setIsDeletingAccount(false);
+        }
+      };
+
       const renderPostList = (title: string, posts: Post[]) => (
         <section className="grid gap-4">
           <h2 className="text-xl font-bold text-slate-900">{title}</h2>
@@ -534,6 +572,36 @@ export default function ProfilePage() {
                   </div>
                                 </div>
             )}
+          </section>
+
+          <section className="mt-8 rounded-lg border border-red-200 bg-red-50 p-5">
+            <h2 className="text-lg font-bold text-red-700">アカウント削除</h2>
+
+            <p className="mt-2 text-sm text-red-700">
+              アカウントを削除すると、投稿やプロフィール情報も削除されます。
+              この操作は取り消せません。
+            </p>
+
+            <p className="mt-4 text-sm text-red-700">
+              削除するには、登録メールアドレスを入力してください。
+            </p>
+
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(event) => setDeleteConfirmText(event.target.value)}
+              className="mt-2 w-full rounded-lg border border-red-300 px-4 py-3 text-sm outline-none focus:border-red-500"
+              placeholder={me?.email ?? "登録メールアドレス"}
+            />
+
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={!canDeleteAccount || isDeletingAccount}
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-red-600 px-5 font-bold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            >
+              {isDeletingAccount ? "削除中..." : "アカウントを削除"}
+            </button>
           </section>
         </main>
       );

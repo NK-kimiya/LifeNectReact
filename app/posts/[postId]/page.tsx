@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useAuth } from "../../context/AuthContext";
+import { useCallback, useEffect, useState } from "react";
 import ReplyList from "../../components/ReplyList";
 import UserAvatar from "../../components/UserAvatar";
+import { useAuth } from "../../context/AuthContext";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
@@ -49,7 +49,9 @@ export default function PostDetailPage() {
   const { accessToken, isLoggedIn } = useAuth();
 
   const [post, setPost] = useState<Post | null>(null);
-  const [repliesByPostId, setRepliesByPostId] = useState<Record<string, Post[]>>({});
+  const [repliesByPostId, setRepliesByPostId] = useState<
+    Record<string, Post[]>
+  >({});
   const [openReplyIds, setOpenReplyIds] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
@@ -63,20 +65,20 @@ export default function PostDetailPage() {
     if (!isLoggedIn || !accessToken) {
       return;
     }
-  
+
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/like/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-  
+
     const data = await response.json();
-  
+
     if (!response.ok) {
       return;
     }
-  
+
     setPost((current) =>
       current && current.id === postId
         ? { ...current, is_liked: data.is_liked, like_count: data.like_count }
@@ -88,7 +90,7 @@ export default function PostDetailPage() {
     try {
       setIsLoadingReplies(true);
 
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`,{
+      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -181,12 +183,13 @@ export default function PostDetailPage() {
       setPostError({
         code: "network",
         title: "通信エラー",
-        message: "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
+        message:
+          "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [fetchReplies, params.postId,accessToken]);
+  }, [fetchReplies, params.postId, accessToken]);
 
   useEffect(() => {
     if (!params.postId) return;
@@ -251,7 +254,9 @@ export default function PostDetailPage() {
       fetchReplies(targetPost.id);
     } catch (error) {
       setReplyMessage(
-        error instanceof Error ? error.message : "コメントの投稿に失敗しました。",
+        error instanceof Error
+          ? error.message
+          : "コメントの投稿に失敗しました。",
       );
     } finally {
       setIsSubmittingReply(false);
@@ -261,7 +266,10 @@ export default function PostDetailPage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-800 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-4xl">
-        <Link href="/posts" className="mb-6 inline-flex text-sm font-bold text-blue-600">
+        <Link
+          href="/posts"
+          className="mb-6 inline-flex text-sm font-bold text-blue-600"
+        >
           一覧に戻る
         </Link>
 
@@ -274,13 +282,13 @@ export default function PostDetailPage() {
             <p className="mt-1 text-sm">{postError.message}</p>
 
             {(postError.code === 401 || postError.code === 403) && (
-          <Link
-            href="/auth"
-            className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700 p-2"
-          >
-            ログインページへ
-          </Link>
-    )}
+              <Link
+                href="/auth"
+                className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700 p-2"
+              >
+                ログインページへ
+              </Link>
+            )}
           </div>
         )}
         {post && post.is_visible === false && (
@@ -317,6 +325,7 @@ export default function PostDetailPage() {
                   fill
                   unoptimized
                   className="object-contain"
+                  sizes="(max-width: 768px) 100vw, 768px"
                 />
               </div>
             )}
@@ -346,7 +355,9 @@ export default function PostDetailPage() {
               </button>
 
               {isLoadingReplies && (
-                <p className="text-sm text-slate-500">コメントを読み込み中...</p>
+                <p className="text-sm text-slate-500">
+                  コメントを読み込み中...
+                </p>
               )}
 
               <button

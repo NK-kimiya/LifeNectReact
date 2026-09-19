@@ -1,79 +1,67 @@
 "use client";
 
-import { useEffect,useState } from "react";
 import Link from "next/link";
-import "./posts.css";
-import { useAuth } from "../context/AuthContext";
-import ReplyList from "../components/ReplyList";
+import { useEffect, useState } from "react";
 import UserAvatar from "../components/UserAvatar";
-import Image from "next/image";
+import { useAuth } from "../context/AuthContext";
+import "./posts.css";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
 type PaginatedPostsResponse = {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Post[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Post[];
 };
 
 type User = {
-    id: number;
-    nickname: string;
-    email: string;
-    avatar_url?: string | null;
+  id: number;
+  nickname: string;
+  email: string;
+  avatar_url?: string | null;
 };
-  
-  type Tag = {
-    id: number;
-    name: string;
-  };
-  
-  type Post = {
-    like_count?: number;
-    is_liked?: boolean;
-    id: string;
-    is_visible?: boolean;
-    title?: string;
-    comment?: string;
-    parent_post?: string | null;
-    type?: "post" | "reply";
-    comment_count?: number;
-    created_at?: string;
-    user?: User | null;
-    tags?: Tag[];
-    score?: number | null;
-    excerpt?: string | null;
-    image_url?: string | null;
-  };
-  
-  type ChatReference = {
-    matched_message: Post;
-    board_post: Post;
-  };
-  
-  type AiResponse = {
-    answer: string;
-    references: ChatReference[];
-  };
 
-  
-  type PostError = {
-    code: number | "network" | "unknown";
-    title: string;
-    message: string;
-  };
-  
-  
+type Tag = {
+  id: number;
+  name: string;
+};
+
+type Post = {
+  like_count?: number;
+  is_liked?: boolean;
+  id: string;
+  is_visible?: boolean;
+  title?: string;
+  comment?: string;
+  parent_post?: string | null;
+  type?: "post" | "reply";
+  comment_count?: number;
+  created_at?: string;
+  user?: User | null;
+  tags?: Tag[];
+  score?: number | null;
+  excerpt?: string | null;
+  image_url?: string | null;
+};
+
+type ChatReference = {
+  matched_message: Post;
+  board_post: Post;
+};
+
+type AiResponse = {
+  answer: string;
+  references: ChatReference[];
+};
+
+type PostError = {
+  code: number | "network" | "unknown";
+  title: string;
+  message: string;
+};
 
 export default function PostsPage() {
-  
-  const [aiMessage, setAiMessage] = useState("");
-  const [aiResponse, setAiResponse] = useState<AiResponse | null>(null);
-  const [isSendingAiMessage, setIsSendingAiMessage] = useState(false);
-  const [aiError, setAiError] = useState("");
-
-  const [isAiChatMode, setIsAiChatMode] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [tag, setTag] = useState("");
 
@@ -88,7 +76,9 @@ export default function PostsPage() {
   //返信フォーム用state
   //返信一覧
   const [openReplyIds, setOpenReplyIds] = useState<Record<string, boolean>>({});
-  const [repliesByPostId, setRepliesByPostId] = useState<Record<string, Post[]>>({});
+  const [repliesByPostId, setRepliesByPostId] = useState<
+    Record<string, Post[]>
+  >({});
   const [isLoadingReplies, setIsLoadingReplies] = useState(false);
   const [replyListError, setReplyListError] = useState("");
 
@@ -96,7 +86,6 @@ export default function PostsPage() {
   const [postCount, setPostCount] = useState(0);
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
   const [previousPageUrl, setPreviousPageUrl] = useState<string | null>(null);
-  
 
   const { accessToken, isLoggedIn } = useAuth();
 
@@ -105,18 +94,18 @@ export default function PostsPage() {
       try {
         setIsLoadingTags(true);
         setTagError("");
-  
-        const response = await fetch(`${API_BASE_URL}/tags/`,{
+
+        const response = await fetch(`${API_BASE_URL}/tags/`, {
           headers: accessToken
             ? { Authorization: `Bearer ${accessToken}` }
             : {},
         });
         const data = await response.json().catch(() => []);
-  
+
         if (!response.ok) {
           throw new Error("タグ一覧の取得に失敗しました。");
         }
-  
+
         setTags(data);
       } catch (error) {
         setTagError("タグを読み込めませんでした。");
@@ -124,7 +113,7 @@ export default function PostsPage() {
         setIsLoadingTags(false);
       }
     };
-  
+
     fetchTags();
   }, []);
 
@@ -173,35 +162,37 @@ export default function PostsPage() {
       try {
         setIsLoadingPosts(true);
         setPostError(null);
-        
+
         //URLのクエリパラメータを作成
         const searchParams = new URLSearchParams();
         searchParams.set("page", String(currentPage));
-        
+
         //キーワードが入力されていれば
         if (keyword.trim()) {
-          searchParams.set("keyword", keyword.trim());//?keyword=入力値
+          searchParams.set("keyword", keyword.trim()); //?keyword=入力値
         }
-        
+
         //タグが選択されていれば、
-        if (tag) {//?tag=タグ名
+        if (tag) {
+          //?tag=タグ名
           searchParams.set("tag", tag);
         }
-        
 
-  
-        const response = await fetch(`${API_BASE_URL}/posts/?${searchParams.toString()}`, {
-          headers: accessToken
-            ? { Authorization: `Bearer ${accessToken}` }
-            : {},
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/posts/?${searchParams.toString()}`,
+          {
+            headers: accessToken
+              ? { Authorization: `Bearer ${accessToken}` }
+              : {},
+          },
+        );
         const data: PaginatedPostsResponse = await response.json();
-  
+
         if (!response.ok) {
           setPostError(getPostError(response.status));
           return;
         }
-  
+
         setPosts(data.results);
         setPostCount(data.count);
         setNextPageUrl(data.next);
@@ -210,34 +201,35 @@ export default function PostsPage() {
         setPostError({
           code: "network",
           title: "通信エラー",
-          message: "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
+          message:
+            "サーバーに接続できませんでした。ネットワーク状況を確認してください。",
         });
       } finally {
         setIsLoadingPosts(false);
       }
     };
-  
+
     fetchPosts();
-  },  [keyword, tag, currentPage, accessToken]);
+  }, [keyword, tag, currentPage, accessToken]);
 
   const handleToggleLike = async (postId: string) => {
     if (!isLoggedIn || !accessToken) {
       return;
     }
-  
+
     const response = await fetch(`${API_BASE_URL}/posts/${postId}/like/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-  
+
     const data = await response.json();
-  
+
     if (!response.ok) {
       return;
     }
-  
+
     setPosts((current) =>
       current.map((post) =>
         post.id === postId
@@ -247,71 +239,29 @@ export default function PostsPage() {
     );
   };
 
-  const handleSendAiMessage = async () => {
-    const text = aiMessage.trim();
-  
-    if (!text) {
-      setAiError("メッセージを入力してください。");
-      return;
-    }
-  
-    try {
-      setIsSendingAiMessage(true);
-      setAiError("");
-      setAiResponse(null);
-  
-      const response = await fetch(`${API_BASE_URL}/rag-answer/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-        }),
-      });
-  
-      const data = await response.json().catch(() => null);
-  
-      if (!response.ok) {
-        throw new Error(data?.detail ?? "AIチャットの取得に失敗しました。");
-      }
-  
-      setAiResponse(data);
-    } catch (error) {
-      setAiError(
-        error instanceof Error
-          ? error.message
-          : "AIチャットの取得に失敗しました。",
-      );
-    } finally {
-      setIsSendingAiMessage(false);
-    }
-  };
-
   const toggleReplies = (postId: string) => {
     setOpenReplyIds((current) => ({
       ...current,
       [postId]: !current[postId],
     }));
-  
+
     if (!repliesByPostId[postId]) {
       fetchReplies(postId);
     }
   };
 
-
   const fetchReplies = async (postId: string) => {
     try {
       setIsLoadingReplies(true);
       setReplyListError("");
-  
+
       const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`);
       const data = await response.json().catch(() => []);
-  
+
       if (!response.ok) {
         throw new Error("返信一覧の取得に失敗しました。");
       }
-  
+
       setRepliesByPostId((current) => ({
         ...current,
         [postId]: data,
@@ -330,58 +280,53 @@ export default function PostsPage() {
           <p className="mb-2 text-sm font-bold text-blue-600">
             LifeConnect Forum
           </p>
-          <h1 className="text-3xl font-bold text-slate-900">
-            投稿スレッド
-          </h1>
+          <h1 className="text-3xl font-bold text-slate-900">投稿スレッド</h1>
           <p className="mt-3 max-w-2xl leading-7 text-slate-500">
             悩みや情報を共有できる掲示板です。気になる投稿を探したり、新しく相談を投稿できます。
           </p>
         </div>
-  
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setIsAiChatMode(true)}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-blue-200 bg-white px-5 font-bold text-blue-700 hover:bg-blue-50"
-            >
-              AI相談
-            </button>
 
-            <Link
-              href="/posts/new"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 font-bold text-white hover:bg-blue-700"
-            >
-              新規投稿
-            </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/posts/ai"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-blue-200 bg-white px-5 font-bold text-blue-700 hover:bg-blue-50"
+          >
+            AI相談
+          </Link>
+
+          <Link
+            href="/posts/new"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 font-bold text-white hover:bg-blue-700"
+          >
+            新規投稿
+          </Link>
         </div>
       </header>
 
-      {isAiChatMode ? (
+      {/* {isAiChatMode ? (
         <div className="w-4xl m-auto">
-
           <button
-                type="button"
-                onClick={() => setIsAiChatMode(false)}
-                className="mb-4 rounded border px-4 py-2"
-              >
-                投稿一覧に戻る
+            type="button"
+            onClick={() => setIsAiChatMode(false)}
+            className="mb-4 rounded border px-4 py-2"
+          >
+            投稿一覧に戻る
           </button>
-          <textarea 
-            value={aiMessage} 
+          <textarea
+            value={aiMessage}
             onChange={(e) => setAiMessage(e.target.value)}
             className="border border-black w-4xl"
-          >
-          </textarea>
+          ></textarea>
           <div>
-          <button type="button"  onClick={handleSendAiMessage} disabled={isSendingAiMessage}>
-            {isSendingAiMessage ? "送信中..." : "送信"}
-          </button>
+            <button
+              type="button"
+              onClick={handleSendAiMessage}
+              disabled={isSendingAiMessage}
+            >
+              {isSendingAiMessage ? "送信中..." : "送信"}
+            </button>
           </div>
-          {aiError && (
-            <p className="mt-4 text-red-600">
-              {aiError}
-            </p>
-          )}
+          {aiError && <p className="mt-4 text-red-600">{aiError}</p>}
 
           {aiResponse?.answer && (
             <div
@@ -412,13 +357,13 @@ export default function PostsPage() {
                           {boardPost.title}
                         </h3>
                         {boardPost.image_url && (
-                           <div className="relative mt-4 h-80 w-full overflow-hidden rounded-lg">
-                          <Image
-                            src={boardPost.image_url}
-                            alt={boardPost.title ?? "投稿画像"}
-                            unoptimized
-                            className="mt-4 max-h-96 w-full rounded-lg object-cover"
-                          />
+                          <div className="relative mt-4 h-80 w-full overflow-hidden rounded-lg">
+                            <Image
+                              src={boardPost.image_url}
+                              alt={boardPost.title ?? "投稿画像"}
+                              unoptimized
+                              className="mt-4 max-h-96 w-full rounded-lg object-cover"
+                            />
                           </div>
                         )}
                         <p className="mt-2 text-sm leading-7 text-slate-700">
@@ -427,22 +372,25 @@ export default function PostsPage() {
                       </div>
 
                       <span className="shrink-0 text-xs text-slate-500">
-                      {boardPost.created_at
-                        ? new Date(boardPost.created_at).toLocaleString("ja-JP")
-                        : ""}
+                        {boardPost.created_at
+                          ? new Date(boardPost.created_at).toLocaleString(
+                              "ja-JP",
+                            )
+                          : ""}
                       </span>
                     </div>
 
                     <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-                    
-                    <div className="flex items-center gap-2">
-                      <UserAvatar
-                        avatarUrl={boardPost.user?.avatar_url}
-                        name={boardPost.user?.nickname}
-                        size="sm"
-                      />
-                      <span>{boardPost.user?.nickname ?? "匿名ユーザー"}</span>
-                    </div>
+                      <div className="flex items-center gap-2">
+                        <UserAvatar
+                          avatarUrl={boardPost.user?.avatar_url}
+                          name={boardPost.user?.nickname}
+                          size="sm"
+                        />
+                        <span>
+                          {boardPost.user?.nickname ?? "匿名ユーザー"}
+                        </span>
+                      </div>
 
                       {commentCount > 0 && (
                         <button
@@ -469,7 +417,9 @@ export default function PostsPage() {
                     {openReplyIds[boardPost.id] && (
                       <div className="mt-4">
                         {isLoadingReplies && (
-                          <p className="text-sm text-slate-500">返信を取得中です...</p>
+                          <p className="text-sm text-slate-500">
+                            返信を取得中です...
+                          </p>
                         )}
 
                         {replyListError && (
@@ -493,13 +443,11 @@ export default function PostsPage() {
             </div>
           ) : null}
         </div>
-) : (
-  <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[240px_1fr]">
-    <aside className="rounded-lg border border-slate-200 bg-white p-4 lg:sticky lg:top-6 lg:self-start">
-          <h2 className="mb-3 text-base font-bold text-slate-900">
-            タグ
-          </h2>
-  
+      ) : ( */}
+      <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[240px_1fr]">
+        <aside className="rounded-lg border border-slate-200 bg-white p-4 lg:sticky lg:top-6 lg:self-start">
+          <h2 className="mb-3 text-base font-bold text-slate-900">タグ</h2>
+
           <nav className="flex flex-col gap-2" aria-label="タグメニュー">
             <button
               type="button"
@@ -516,19 +464,15 @@ export default function PostsPage() {
             >
               すべて
             </button>
-  
+
             {isLoadingTags && (
-              <p className="px-3 py-2 text-sm text-slate-500">
-                読み込み中...
-              </p>
+              <p className="px-3 py-2 text-sm text-slate-500">読み込み中...</p>
             )}
-  
+
             {tagError && (
-              <p className="px-3 py-2 text-sm text-red-600">
-                {tagError}
-              </p>
+              <p className="px-3 py-2 text-sm text-red-600">{tagError}</p>
             )}
-  
+
             {tags.map((tagItem) => (
               <button
                 type="button"
@@ -549,7 +493,7 @@ export default function PostsPage() {
             ))}
           </nav>
         </aside>
-  
+
         <div className="min-w-0">
           <section className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
             <label
@@ -570,9 +514,8 @@ export default function PostsPage() {
               className="h-11 w-full rounded-lg border border-slate-300 px-3 text-[15px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </section>
-  
-          <section className="grid gap-4">
 
+          <section className="grid gap-4">
             {isLoadingPosts && (
               <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
                 投稿を読み込み中...
@@ -581,7 +524,9 @@ export default function PostsPage() {
 
             {postError && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
-                <p className="text-sm font-bold">エラー番号: {postError.code}</p>
+                <p className="text-sm font-bold">
+                  エラー番号: {postError.code}
+                </p>
                 <p className="mt-2 text-base font-bold">{postError.title}</p>
                 <p className="mt-1 text-sm">{postError.message}</p>
                 {(postError.code === 401 || postError.code === 403) && (
@@ -594,7 +539,6 @@ export default function PostsPage() {
                     </Link>
                   </p>
                 )}
-                
               </div>
             )}
             {posts.map((post: Post) => {
@@ -622,7 +566,7 @@ export default function PostsPage() {
                       <h2 className="text-xl font-bold text-slate-900">
                         {post.title}
                       </h2>
-            
+
                       <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
                         <UserAvatar
                           avatarUrl={post.user?.avatar_url}
@@ -632,18 +576,18 @@ export default function PostsPage() {
                         <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
                       </div>
                     </div>
-            
+
                     <span className="text-sm text-slate-500">
                       {post.created_at
                         ? new Date(post.created_at).toLocaleDateString("ja-JP")
                         : ""}
                     </span>
                   </div>
-            
+
                   <p className="mt-3 line-clamp-3 leading-7 text-slate-600">
                     {post.comment}
                   </p>
-            
+
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex flex-wrap gap-2">
                       {(post.tags ?? []).map((tagItem) => (
@@ -665,19 +609,18 @@ export default function PostsPage() {
                       disabled={!isLoggedIn}
                       className="text-sm font-bold text-pink-600 hover:text-pink-700 disabled:text-slate-400"
                     >
-                      {post.is_liked ? "いいね済み" : "いいね"} {post.like_count ?? 0}
+                      {post.is_liked ? "いいね済み" : "いいね"}{" "}
+                      {post.like_count ?? 0}
                     </button>
-            
+
                     <span className="text-sm text-slate-500">
                       コメント {post.comment_count ?? 0}件
                     </span>
                   </div>
                 </Link>
               );
-              
-             
-    })}
-  
+            })}
+
             {/* {filteredPosts.length === 0 && (
               <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
                 条件に一致する投稿がありません。
@@ -686,32 +629,31 @@ export default function PostsPage() {
           </section>
 
           <div className="mt-6 flex items-center justify-between">
-  <button
-    type="button"
-    disabled={!previousPageUrl}
-    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    前へ
-  </button>
+            <button
+              type="button"
+              disabled={!previousPageUrl}
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              前へ
+            </button>
 
-  <span className="text-sm text-slate-500">
-    {currentPage}ページ目 / 全{postCount}件
-  </span>
+            <span className="text-sm text-slate-500">
+              {currentPage}ページ目 / 全{postCount}件
+            </span>
 
-  <button
-    type="button"
-    disabled={!nextPageUrl}
-    onClick={() => setCurrentPage((page) => page + 1)}
-    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    次へ
-  </button>
-</div>
+            <button
+              type="button"
+              disabled={!nextPageUrl}
+              onClick={() => setCurrentPage((page) => page + 1)}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              次へ
+            </button>
+          </div>
         </div>
-  </div>
-)}
-  
+      </div>
+      {/* )} */}
     </main>
   );
 }
