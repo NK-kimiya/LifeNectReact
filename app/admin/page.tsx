@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAdminAuth } from "../context/AdminAuthContext";
+import { useCallback, useEffect, useState } from "react";
 import UserAvatar from "../components/UserAvatar";
+import { useAdminAuth } from "../context/AdminAuthContext";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
@@ -74,7 +74,6 @@ export default function AdminPage() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [userError, setUserError] = useState("");
 
-
   useEffect(() => {
     if (!isAdminAllowed) {
       return;
@@ -83,34 +82,38 @@ export default function AdminPage() {
       try {
         setIsLoadingPosts(true);
         setPostError("");
-  
-        const response = await fetch(`${API_BASE_URL}/posts/?page=${currentPage}`, {
-          headers: {
-            Authorization: `Bearer ${adminAccessToken}`,
+
+        const response = await fetch(
+          `${API_BASE_URL}/posts/?page=${currentPage}`,
+          {
+            headers: {
+              Authorization: `Bearer ${adminAccessToken}`,
+            },
           },
-        });
+        );
         const data: PaginatedPostsResponse = await response.json();
-  
+
         if (!response.ok) {
           throw new Error("投稿一覧の取得に失敗しました。");
         }
-  
+
         setPosts(data.results);
         setPostCount(data.count);
         setNextPageUrl(data.next);
         setPreviousPageUrl(data.previous);
       } catch (error) {
         setPostError(
-          error instanceof Error ? error.message : "投稿一覧の取得に失敗しました。",
+          error instanceof Error
+            ? error.message
+            : "投稿一覧の取得に失敗しました。",
         );
       } finally {
         setIsLoadingPosts(false);
       }
     };
-  
-    fetchPosts();
-  }, [isAdminAllowed, currentPage,adminAccessToken]);
 
+    fetchPosts();
+  }, [isAdminAllowed, currentPage, adminAccessToken]);
 
   const handleAuthExpired = useCallback(() => {
     adminLogout();
@@ -124,32 +127,32 @@ export default function AdminPage() {
         router.replace("/admin/login");
         return;
       }
-  
+
       try {
         setIsCheckingAdmin(true);
-  
+
         const response = await fetch(`${API_BASE_URL}/me/`, {
           headers: {
             Authorization: `Bearer ${adminAccessToken}`,
           },
         });
-  
+
         const data = await response.json().catch(() => null);
-  
+
         if (!response.ok) {
           adminLogout();
           router.replace("/admin/login");
           return;
         }
-  
+
         const isAdmin = data?.role === "admin" || data?.is_staff === true;
-  
+
         if (!isAdmin) {
           adminLogout();
           router.replace("/admin/login");
           return;
         }
-  
+
         setIsAdminAllowed(true);
       } catch (error) {
         adminLogout();
@@ -158,7 +161,7 @@ export default function AdminPage() {
         setIsCheckingAdmin(false);
       }
     };
-  
+
     verifyAdmin();
   }, [adminAccessToken, adminLogout, router]);
 
@@ -195,9 +198,7 @@ export default function AdminPage() {
     };
 
     fetchTags();
-  }, [isAdminAllowed,adminAccessToken]);
-
-
+  }, [isAdminAllowed, adminAccessToken]);
 
   const handleLogout = () => {
     adminLogout();
@@ -280,30 +281,35 @@ export default function AdminPage() {
       handleAuthExpired();
       return;
     }
-  
+
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/account-applications/`, {
-        headers: {
-          Authorization: `Bearer ${adminAccessToken}`,
+      const response = await fetch(
+        `${API_BASE_URL}/admin/account-applications/`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminAccessToken}`,
+          },
         },
-      });
-  
+      );
+
       const data = await response.json().catch(() => []);
-  
+
       if (response.status === 401) {
         handleAuthExpired();
         return;
       }
-  
+
       if (!response.ok) {
         throw new Error(data?.detail ?? "申請一覧の取得に失敗しました。");
       }
-  
+
       setApplications(data);
       setApplicationError("");
     } catch (error) {
       setApplicationError(
-        error instanceof Error ? error.message : "申請一覧の取得に失敗しました。",
+        error instanceof Error
+          ? error.message
+          : "申請一覧の取得に失敗しました。",
       );
     } finally {
       setIsLoadingApplications(false);
@@ -315,48 +321,49 @@ export default function AdminPage() {
       handleAuthExpired();
       return;
     }
-  
+
     try {
       setIsLoadingUsers(true);
-  
+
       const response = await fetch(`${API_BASE_URL}/admin/users/`, {
         headers: {
           Authorization: `Bearer ${adminAccessToken}`,
         },
       });
-  
+
       const data = await response.json().catch(() => []);
-  
+
       if (response.status === 401) {
         handleAuthExpired();
         return;
       }
-  
+
       if (!response.ok) {
         throw new Error(data?.detail ?? "ユーザー一覧の取得に失敗しました。");
       }
-  
-      setUsers(Array.isArray(data) ? data : data.results ?? []);
+
+      setUsers(Array.isArray(data) ? data : (data.results ?? []));
       setUserError("");
     } catch (error) {
       setUserError(
-        error instanceof Error ? error.message : "ユーザー一覧の取得に失敗しました。",
+        error instanceof Error
+          ? error.message
+          : "ユーザー一覧の取得に失敗しました。",
       );
     } finally {
       setIsLoadingUsers(false);
     }
   }, [adminAccessToken, handleAuthExpired]);
 
-  
   useEffect(() => {
     if (!isAdminAllowed) {
       return;
     }
-  
+
     const timerId = window.setTimeout(() => {
       void fetchApplications();
     }, 0);
-  
+
     return () => {
       window.clearTimeout(timerId);
     };
@@ -370,11 +377,10 @@ export default function AdminPage() {
     const timerId = window.setTimeout(() => {
       void fetchUsers();
     }, 0);
-  
+
     return () => {
       window.clearTimeout(timerId);
     };
-  
   }, [isAdminAllowed, fetchUsers]);
 
   if (isCheckingAdmin) {
@@ -393,7 +399,7 @@ export default function AdminPage() {
       handleAuthExpired();
       return;
     }
-  
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/admin/account-applications/${applicationId}/${action}/`,
@@ -404,18 +410,18 @@ export default function AdminPage() {
           },
         },
       );
-  
+
       const data = await response.json().catch(() => null);
-  
+
       if (response.status === 401) {
         handleAuthExpired();
         return;
       }
-  
+
       if (!response.ok) {
         throw new Error(data?.detail ?? "申請ステータスの更新に失敗しました。");
       }
-  
+
       setApplications((currentApplications) =>
         currentApplications.map((application) =>
           application.id === applicationId ? data : application,
@@ -430,14 +436,11 @@ export default function AdminPage() {
     }
   };
 
-  
-  
   if (!isAdminAllowed) {
     return null;
   }
 
   return (
-    
     <main className="min-h-screen bg-gray-50 px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-col gap-4 border-b border-gray-200 pb-6 md:flex-row md:items-center md:justify-between">
@@ -477,8 +480,6 @@ export default function AdminPage() {
             </p>
           </div>
         </section>
-
-
 
         <section className="mt-8 rounded-lg border border-gray-200 bg-white">
           <div className="flex flex-col gap-4 border-b border-gray-200 p-5 md:flex-row md:items-center md:justify-between">
@@ -525,103 +526,105 @@ export default function AdminPage() {
         </section>
 
         <section className="mt-8 rounded-lg border border-gray-200 bg-white">
-  <div className="border-b border-gray-200 p-5">
-    <h2 className="text-xl font-bold text-gray-900">投稿管理</h2>
-    <p className="mt-1 text-sm text-gray-500">
-      投稿と返信内容を確認できます。
-    </p>
-  </div>
-
-  <div className="grid gap-4 p-5">
-    {isLoadingPosts && (
-      <p className="text-sm text-gray-500">投稿を読み込み中...</p>
-    )}
-
-    {postError && (
-      <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-        {postError}
-      </p>
-    )}
-
-    {posts.map((post) => {
-      if (!post.is_visible) {
-        return (
-          <article
-            key={post.id}
-            className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-500"
-          >
-            この投稿は非表示です
-          </article>
-        );
-      }
-
-      return (
-        <article
-        key={post.id}
-        onClick={() => router.push(`/admin/posts/${post.id}`)}
-        className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
-      >
-          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h3 className="font-bold text-gray-900">{post.title}</h3>
-              <p className="mt-2 leading-7 text-gray-600">{post.comment}</p>
-            </div>
-  
-            <span className="text-xs text-gray-500">
-              {new Date(post.created_at).toLocaleString("ja-JP")}
-            </span>
+          <div className="border-b border-gray-200 p-5">
+            <h2 className="text-xl font-bold text-gray-900">投稿管理</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              投稿と返信内容を確認できます。
+            </p>
           </div>
-  
-          <div className="mt-3 flex items-center justify-between gap-3 text-sm text-gray-500">
-            <div className="flex min-w-0 items-center gap-2">
-              <UserAvatar
-                avatarUrl={post.user?.avatar_url}
-                name={post.user?.nickname}
-                size="sm"
-              />
-              <span className="truncate">
-                {post.user?.nickname ?? "匿名ユーザー"}
-              </span>
-            </div>
-  
-            {(post.comment_count ?? 0) > 0 && (
-              <span className="shrink-0 text-sm font-bold text-gray-500">
-              コメント {post.comment_count ?? 0}件
-            </span>
+
+          <div className="grid gap-4 p-5">
+            {isLoadingPosts && (
+              <p className="text-sm text-gray-500">投稿を読み込み中...</p>
             )}
-          </div>
+
+            {postError && (
+              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                {postError}
+              </p>
+            )}
+
+            {posts.map((post) => {
+              if (!post.is_visible) {
+                return (
+                  <article
+                    key={post.id}
+                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-500"
+                    onClick={() => router.push(`/admin/posts/${post.id}`)}
+                  >
+                    この投稿は非表示です
+                  </article>
+                );
+              }
+
+              return (
+                <article
+                  key={post.id}
+                  onClick={() => router.push(`/admin/posts/${post.id}`)}
+                  className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+                >
+                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <h3 className="font-bold text-gray-900">{post.title}</h3>
+                      <p className="mt-2 leading-7 text-gray-600">
+                        {post.comment}
+                      </p>
+                    </div>
+
+                    <span className="text-xs text-gray-500">
+                      {new Date(post.created_at).toLocaleString("ja-JP")}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between gap-3 text-sm text-gray-500">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <UserAvatar
+                        avatarUrl={post.user?.avatar_url}
+                        name={post.user?.nickname}
+                        size="sm"
+                      />
+                      <span className="truncate">
+                        {post.user?.nickname ?? "匿名ユーザー"}
+                      </span>
+                    </div>
+
+                    {(post.comment_count ?? 0) > 0 && (
+                      <span className="shrink-0 text-sm font-bold text-gray-500">
+                        コメント {post.comment_count ?? 0}件
+                      </span>
+                    )}
+                  </div>
                 </article>
-      );
-    }
-    
-    )}
+              );
+            })}
 
-{postCount > 0 && (
-  <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-    <button
-      type="button"
-      disabled={!previousPageUrl}
-      onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      前へ
-    </button>
+            {postCount > 0 && (
+              <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+                <button
+                  type="button"
+                  disabled={!previousPageUrl}
+                  onClick={() =>
+                    setCurrentPage((page) => Math.max(1, page - 1))
+                  }
+                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  前へ
+                </button>
 
-    <span className="text-sm text-gray-500">
-      {currentPage}ページ目 / 全{postCount}件
-    </span>
+                <span className="text-sm text-gray-500">
+                  {currentPage}ページ目 / 全{postCount}件
+                </span>
 
-    <button
-      type="button"
-      disabled={!nextPageUrl}
-      onClick={() => setCurrentPage((page) => page + 1)}
-      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      次へ
-    </button>
-  </div>
-)}
-
+                <button
+                  type="button"
+                  disabled={!nextPageUrl}
+                  onClick={() => setCurrentPage((page) => page + 1)}
+                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  次へ
+                </button>
+              </div>
+            )}
 
             {!isLoadingPosts && posts.length === 0 && (
               <p className="text-sm text-gray-500">投稿はまだありません。</p>
@@ -630,140 +633,153 @@ export default function AdminPage() {
         </section>
 
         <section className="mt-8 rounded-lg border border-gray-200 bg-white">
-  <div className="border-b border-gray-200 p-5">
-    <h2 className="text-xl font-bold text-gray-900">申請管理</h2>
-    <p className="mt-1 text-sm text-gray-500">
-      アカウント作成申請を確認し、承認または却下できます。
-    </p>
-  </div>
-
-  <div className="grid gap-4 p-5">
-    {isLoadingApplications && (
-      <p className="text-sm text-gray-500">申請を読み込み中...</p>
-    )}
-
-    {applicationError && (
-      <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-        {applicationError}
-      </p>
-    )}
-
-    {applications.map((application) => (
-      <article
-        key={application.id}
-        className="rounded-lg border border-gray-200 p-4"
-      >
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-gray-900">
-                {application.nickname}
-              </h3>
-              <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                {application.status}
-              </span>
-            </div>
-
-            <p className="mt-1 text-sm text-gray-600">
-              {application.email}
-            </p>
-
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
-              {application.condition}
-            </p>
-
-            <p className="mt-3 text-xs text-gray-400">
-              申請日: {new Date(application.created_at).toLocaleString("ja-JP")}
+          <div className="border-b border-gray-200 p-5">
+            <h2 className="text-xl font-bold text-gray-900">申請管理</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              アカウント作成申請を確認し、承認または却下できます。
             </p>
           </div>
 
-          {application.status === "pending" && (
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  handleUpdateApplicationStatus(application.id, "approve")
-                }
-                className="rounded-lg bg-[#ff4500] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e63e00]"
+          <div className="grid gap-4 p-5">
+            {isLoadingApplications && (
+              <p className="text-sm text-gray-500">申請を読み込み中...</p>
+            )}
+
+            {applicationError && (
+              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                {applicationError}
+              </p>
+            )}
+
+            {applications.map((application) => (
+              <article
+                key={application.id}
+                className="rounded-lg border border-gray-200 p-4"
               >
-                承認
-              </button>
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-gray-900">
+                        {application.nickname}
+                      </h3>
+                      <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                        {application.status}
+                      </span>
+                    </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  handleUpdateApplicationStatus(application.id, "reject")
-                }
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              >
-                却下
-              </button>
-            </div>
-          )}
-        </div>
-      </article>
-    ))}
+                    <p className="mt-1 text-sm text-gray-600">
+                      {application.email}
+                    </p>
 
-    {!isLoadingApplications && applications.length === 0 && (
-      <p className="text-sm text-gray-500">申請はまだありません。</p>
-    )}
-  </div>
-</section>
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+                      {application.condition}
+                    </p>
 
-<section className="mt-8 rounded-lg border border-gray-200 bg-white">
-  <div className="border-b border-gray-200 p-5">
-    <h2 className="text-xl font-bold text-gray-900">ユーザー管理</h2>
-    <p className="mt-1 text-sm text-gray-500">
-      登録済みユーザーの状態を確認できます。
-    </p>
-  </div>
+                    <p className="mt-3 text-xs text-gray-400">
+                      申請日:{" "}
+                      {new Date(application.created_at).toLocaleString("ja-JP")}
+                    </p>
+                  </div>
 
-  <div className="grid gap-4 p-5">
-    {isLoadingUsers && (
-      <p className="text-sm text-gray-500">ユーザーを読み込み中...</p>
-    )}
+                  {application.status === "pending" && (
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdateApplicationStatus(
+                            application.id,
+                            "approve",
+                          )
+                        }
+                        className="rounded-lg bg-[#ff4500] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e63e00]"
+                      >
+                        承認
+                      </button>
 
-    {userError && (
-      <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-        {userError}
-      </p>
-    )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleUpdateApplicationStatus(
+                            application.id,
+                            "reject",
+                          )
+                        }
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                      >
+                        却下
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
 
-    {users.map((user) => (
-      <article
-      key={user.id}
-      onClick={() => router.push(`/admin/users/${user.id}`)}
-      className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
-    >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <UserAvatar
-              avatarUrl={user.avatar_url}
-              name={user.nickname}
-              size="md"
-            />
-            <div className="min-w-0">
-              <p className="truncate font-bold text-gray-900">{user.nickname}</p>
-              <p className="truncate text-sm text-gray-500">{user.email}</p>
-            </div>
+            {!isLoadingApplications && applications.length === 0 && (
+              <p className="text-sm text-gray-500">申請はまだありません。</p>
+            )}
+          </div>
+        </section>
+
+        <section className="mt-8 rounded-lg border border-gray-200 bg-white">
+          <div className="border-b border-gray-200 p-5">
+            <h2 className="text-xl font-bold text-gray-900">ユーザー管理</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              登録済みユーザーの状態を確認できます。
+            </p>
           </div>
 
-          <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-            user.account_status === "active"
-              ? "bg-green-50 text-green-700"
-              : "bg-red-50 text-red-700"
-          }`}>
-            {user.account_status === "active" ? "通常利用" : "凍結中"}
-          </span>
-        </div>
-      </article>
-    ))}
+          <div className="grid gap-4 p-5">
+            {isLoadingUsers && (
+              <p className="text-sm text-gray-500">ユーザーを読み込み中...</p>
+            )}
 
-    {!isLoadingUsers && users.length === 0 && (
-      <p className="text-sm text-gray-500">ユーザーはまだいません。</p>
-    )}
-  </div>
-</section>
+            {userError && (
+              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                {userError}
+              </p>
+            )}
+
+            {users.map((user) => (
+              <article
+                key={user.id}
+                onClick={() => router.push(`/admin/users/${user.id}`)}
+                className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <UserAvatar
+                      avatarUrl={user.avatar_url}
+                      name={user.nickname}
+                      size="md"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate font-bold text-gray-900">
+                        {user.nickname}
+                      </p>
+                      <p className="truncate text-sm text-gray-500">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                      user.account_status === "active"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    {user.account_status === "active" ? "通常利用" : "凍結中"}
+                  </span>
+                </div>
+              </article>
+            ))}
+
+            {!isLoadingUsers && users.length === 0 && (
+              <p className="text-sm text-gray-500">ユーザーはまだいません。</p>
+            )}
+          </div>
+        </section>
       </div>
 
       {isModalOpen && (
@@ -787,7 +803,10 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form className="mt-6 flex flex-col gap-4" onSubmit={handleCreateTag}>
+            <form
+              className="mt-6 flex flex-col gap-4"
+              onSubmit={handleCreateTag}
+            >
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-gray-700">
                   タグ名
@@ -821,10 +840,6 @@ export default function AdminPage() {
               </div>
             </form>
           </section>
-
-
-
-          
         </div>
       )}
     </main>
