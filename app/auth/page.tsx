@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
@@ -18,10 +18,7 @@ export default function AuthPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const handleGuestStart = () => {
-    router.push("/posts");
-  };
+
   const isLogin = authMode === "login";
 
   const switchAuthMode = (mode: "login" | "signup") => {
@@ -43,19 +40,19 @@ export default function AuthPage() {
       setIsSubmitting(true);
 
       const endpoint = isLogin
-      ? `${API_BASE_URL}/auth/login/`
-      : `${API_BASE_URL}/auth/register/`;
+        ? `${API_BASE_URL}/auth/login/`
+        : `${API_BASE_URL}/auth/register/`;
 
       const requestBody = isLogin
-      ? {
-          email,
-          password,
-        }
-      : {
-          email,
-          nickname,
-          password,
-        };
+        ? {
+            email,
+            password,
+          }
+        : {
+            email,
+            nickname,
+            password,
+          };
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -65,7 +62,6 @@ export default function AuthPage() {
         body: JSON.stringify(requestBody),
       });
 
-
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
@@ -74,7 +70,7 @@ export default function AuthPage() {
             data?.detail ?? "このメールアドレスはまだ承認されていません。",
           );
         }
-      
+
         if (response.status === 400) {
           throw new Error(
             isLogin
@@ -82,8 +78,10 @@ export default function AuthPage() {
               : "入力内容に誤りがあります。確認してください。",
           );
         }
-      
-        throw new Error(data?.detail ?? "認証に失敗しました。");
+
+        throw new Error(
+          data?.detail ?? "認証に失敗しました。入力内容を確認してください。",
+        );
       }
       if (!data?.access || !data?.refresh) {
         throw new Error("認証トークンを取得できませんでした。");
@@ -115,15 +113,15 @@ export default function AuthPage() {
     credentialResponse: CredentialResponse,
   ) => {
     setMessage("");
-  
+
     if (!credentialResponse.credential) {
       setMessage("Google認証情報を取得できませんでした。");
       return;
     }
-  
+
     try {
       setIsSubmitting(true);
-  
+
       const response = await fetch(`${API_BASE_URL}/auth/google/`, {
         method: "POST",
         headers: {
@@ -133,15 +131,15 @@ export default function AuthPage() {
           credential: credentialResponse.credential,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Google認証に失敗しました");
       }
-  
+
       const data = await response.json();
-  
+
       login(data.access, data.refresh);
-  
+
       setMessage("Googleアカウントでログインしました。");
       router.push("/posts");
     } catch (error) {
@@ -154,32 +152,17 @@ export default function AuthPage() {
   };
 
   return (
-    <main className="relative min-h-screen bg-white">
-        <Link
-    href="/admin/login"
-    className="absolute right-6 top-6 text-sm font-medium text-gray-500 hover:text-gray-900"
-  >
-    管理者はこちら
-  </Link>
-      <div className="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 md:grid-cols-10">
-        <section className="flex min-h-[40vh] items-center justify-center bg-[#f5f5f5] p-8 md:col-span-4 md:min-h-screen">
-          <div className="w-full max-w-md">
-            <h1 className="text-3xl font-bold text-gray-900">LifeNect</h1>
-            <p className="mt-4 text-gray-600">
-              あなたに必要な情報へ、すぐにアクセスできます。
-            </p>
-
-            <button
-              type="button"
-              className="mt-6 inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:border-gray-400 hover:bg-white hover:text-gray-900"
-              onClick={handleGuestStart}>
-              ログインせずに始める
-            </button>
-          </div>
-        </section>
-
-        <section className="flex min-h-[60vh] items-center justify-center p-8 md:col-span-6 md:min-h-screen">
-          <div className="w-full max-w-md">
+    <main className="relative min-h-screen bg-white py-6">
+      <Link
+        href="/admin/login"
+        className="absolute right-6 top-6 text-sm font-medium text-gray-500 hover:text-gray-900"
+      >
+        管理者はこちら
+      </Link>
+      <h1 className="text-center text-5xl">LifeNect</h1>
+      <div className="mx-auto w-80 mx-auto">
+        <section className="flex items-center justify-center md:col-span-6">
+          <div className="w-80 mx-auto max-w-md">
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900">
                 {isLogin ? "ログイン" : "サインアップ"}
@@ -244,7 +227,7 @@ export default function AuthPage() {
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500]"
+                  className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500] w-80"
                   placeholder="example@example.com"
                   required
                 />
@@ -258,7 +241,7 @@ export default function AuthPage() {
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500]"
+                  className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500] w-80"
                   placeholder="パスワード"
                   required
                 />
@@ -281,9 +264,7 @@ export default function AuthPage() {
                   <input
                     type="password"
                     value={passwordConfirm}
-                    onChange={(event) =>
-                      setPasswordConfirm(event.target.value)
-                    }
+                    onChange={(event) => setPasswordConfirm(event.target.value)}
                     className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500]"
                     placeholder="もう一度入力してください"
                     required={!isLogin}
@@ -300,7 +281,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-2 rounded-lg bg-[#ff4500] px-4 py-3 font-semibold text-white hover:bg-[#e63e00] disabled:cursor-not-allowed disabled:bg-gray-400"
+                className="mt-2 rounded-lg bg-[#ff4500] px-4 py-3 font-semibold text-white hover:bg-[#e63e00] disabled:cursor-not-allowed disabled:bg-gray-400 w-80"
               >
                 {isSubmitting
                   ? "送信中..."
@@ -316,17 +297,17 @@ export default function AuthPage() {
               </div>
 
               <div className="flex justify-center">
-  <GoogleLogin
-    onSuccess={handleGoogleSuccess}
-    onError={() => {
-      setMessage("Google認証に失敗しました");
-    }}
-    text={isLogin ? "signin_with" : "signup_with"}
-    shape="rectangular"
-    size="large"
-    width="320"
-  />
-</div>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {
+                    setMessage("Google認証に失敗しました");
+                  }}
+                  text={isLogin ? "signin_with" : "signup_with"}
+                  shape="rectangular"
+                  size="large"
+                  width="320"
+                />
+              </div>
             </form>
           </div>
         </section>

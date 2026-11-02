@@ -28,8 +28,9 @@
   p {
     @apply mb-2;
   }
+}
 
-  a {
-    @apply text-blue-600 underline;
-  }
+@theme {
+  --color-custom-black: oklch(55.4% 0.046 257.417);
+  --color-custom-gray: oklch(70.4% 0.04 256.788);
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Header from "@/app/components/Header";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -264,159 +265,165 @@ export default function PostDetailPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-800 sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-4xl">
-        <Link
-          href="/posts"
-          className="mb-6 inline-flex text-sm font-bold text-blue-600"
-        >
-          一覧に戻る
-        </Link>
+    <>
+      <Header />
+      <main className="min-h-screen px-4 py-8 text-slate-800 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-4xl">
+          <Link
+            href="/posts"
+            className="mb-6 inline-flex text-sm font-bold text-blue-600"
+          >
+            一覧に戻る
+          </Link>
 
-        {isLoading && <p className="text-sm text-slate-500">読み込み中...</p>}
+          {isLoading && <p className="text-sm text-slate-500">読み込み中...</p>}
 
-        {postError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
-            <p className="text-sm font-bold">エラー番号: {postError.code}</p>
-            <p className="mt-2 text-base font-bold">{postError.title}</p>
-            <p className="mt-1 text-sm">{postError.message}</p>
+          {postError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+              <p className="text-sm font-bold">エラー番号: {postError.code}</p>
+              <p className="mt-2 text-base font-bold">{postError.title}</p>
+              <p className="mt-1 text-sm">{postError.message}</p>
 
-            {(postError.code === 401 || postError.code === 403) && (
-              <Link
-                href="/auth"
-                className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700 p-2"
-              >
-                ログインページへ
-              </Link>
-            )}
-          </div>
-        )}
-        {post && post.is_visible === false && (
-          <article className="rounded-lg border border-slate-200 bg-white p-6">
-            <p className="text-sm font-bold text-slate-500">
-              この投稿は管理者によって非表示にされました。
-            </p>
-          </article>
-        )}
-
-        {post && post.is_visible !== false && (
-          <article className="rounded-lg border border-slate-200 bg-white p-6">
-            <h1 className="text-2xl font-bold text-slate-900">{post.title}</h1>
-
-            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
-              <UserAvatar
-                avatarUrl={post.user?.avatar_url}
-                name={post.user?.nickname}
-                size="sm"
-              />
-              <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
-              <span>
-                {post.created_at
-                  ? new Date(post.created_at).toLocaleString("ja-JP")
-                  : ""}
-              </span>
+              {(postError.code === 401 || postError.code === 403) && (
+                <Link
+                  href="/auth"
+                  className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700 p-2"
+                >
+                  ログインページへ
+                </Link>
+              )}
             </div>
+          )}
+          {post && post.is_visible === false && (
+            <article className="rounded-lg border border-slate-200 bg-white p-6">
+              <p className="text-sm font-bold text-slate-500">
+                この投稿は管理者によって非表示にされました。
+              </p>
+            </article>
+          )}
 
-            {post.image_url && (
-              <div className="relative mt-6 h-96 w-full overflow-hidden rounded-lg bg-slate-100">
-                <Image
-                  src={post.image_url}
-                  alt={post.title ?? "投稿画像"}
-                  fill
-                  unoptimized
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 768px"
+          {post && post.is_visible !== false && (
+            <article className="rounded-lg border border-slate-200 bg-white p-6">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {post.title}
+              </h1>
+
+              <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                <UserAvatar
+                  avatarUrl={post.user?.avatar_url}
+                  name={post.user?.nickname}
+                  size="sm"
                 />
-              </div>
-            )}
-
-            <p className="mt-6 whitespace-pre-wrap leading-8 text-slate-700">
-              {post.comment}
-            </p>
-
-            <section className="mt-8 border-t border-slate-100 pt-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-900">コメント</h2>
-                <span className="text-sm text-slate-500">
-                  {post.comment_count ?? 0}件
+                <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
+                <span>
+                  {post.created_at
+                    ? new Date(post.created_at).toLocaleString("ja-JP")
+                    : ""}
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault();
-                  handleToggleLike(post.id);
-                }}
-                disabled={!isLoggedIn}
-                className="text-sm font-bold text-pink-600 hover:text-pink-700 disabled:text-slate-400"
-              >
-                {post.is_liked ? "いいね済み" : "いいね"} {post.like_count ?? 0}
-              </button>
-
-              {isLoadingReplies && (
-                <p className="text-sm text-slate-500">
-                  コメントを読み込み中...
-                </p>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setReplyingPostId(post.id);
-                  setReplyComment("");
-                  setReplyMessage("");
-                }}
-                className="font-bold text-blue-600 hover:text-blue-700"
-              >
-                コメントする
-              </button>
-
-              {replyingPostId === post.id && (
-                <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <textarea
-                    rows={4}
-                    value={replyComment}
-                    onChange={(e) => setReplyComment(e.target.value)}
-                    className="w-full resize-y rounded-lg border border-slate-300 px-3 py-3"
+              {post.image_url && (
+                <div className="relative mt-6 h-96 w-full overflow-hidden rounded-lg bg-slate-100">
+                  <Image
+                    src={post.image_url}
+                    alt={post.title ?? "投稿画像"}
+                    fill
+                    unoptimized
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 768px"
                   />
-
-                  {replyMessage && (
-                    <p className="mt-2 text-sm font-bold text-red-600">
-                      {replyMessage}
-                    </p>
-                  )}
-
-                  <button
-                    type="button"
-                    disabled={isSubmittingReply}
-                    onClick={() => handleSubmitReply(post)}
-                    className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white"
-                  >
-                    {isSubmittingReply ? "投稿中..." : "投稿する"}
-                  </button>
                 </div>
               )}
 
-              <ReplyList
-                parentId={post.id}
-                repliesByPostId={repliesByPostId}
-                openReplyIds={openReplyIds}
-                toggleReplies={toggleReplies}
-                canReply={true}
-                replyingPostId={replyingPostId}
-                setReplyingPostId={setReplyingPostId}
-                replyComment={replyComment}
-                setReplyComment={setReplyComment}
-                replyMessage={replyMessage}
-                setReplyMessage={setReplyMessage}
-                isSubmittingReply={isSubmittingReply}
-                handleSubmitReply={handleSubmitReply}
-              />
-            </section>
-          </article>
-        )}
-      </div>
-    </main>
+              <p className="mt-6 whitespace-pre-wrap leading-8 text-slate-700">
+                {post.comment}
+              </p>
+
+              <section className="mt-8 border-t border-slate-100 pt-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-slate-900">コメント</h2>
+                  <span className="text-sm text-slate-500">
+                    {post.comment_count ?? 0}件
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    handleToggleLike(post.id);
+                  }}
+                  disabled={!isLoggedIn}
+                  className="text-sm font-bold text-pink-600 hover:text-pink-700 disabled:text-slate-400"
+                >
+                  {post.is_liked ? "いいね済み" : "いいね"}{" "}
+                  {post.like_count ?? 0}
+                </button>
+
+                {isLoadingReplies && (
+                  <p className="text-sm text-slate-500">
+                    コメントを読み込み中...
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyingPostId(post.id);
+                    setReplyComment("");
+                    setReplyMessage("");
+                  }}
+                  className="font-bold text-blue-600 hover:text-blue-700"
+                >
+                  コメントする
+                </button>
+
+                {replyingPostId === post.id && (
+                  <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <textarea
+                      rows={4}
+                      value={replyComment}
+                      onChange={(e) => setReplyComment(e.target.value)}
+                      className="w-full resize-y rounded-lg border border-slate-300 px-3 py-3"
+                    />
+
+                    {replyMessage && (
+                      <p className="mt-2 text-sm font-bold text-red-600">
+                        {replyMessage}
+                      </p>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={isSubmittingReply}
+                      onClick={() => handleSubmitReply(post)}
+                      className="mt-3 rounded-lg bg-custom-black px-4 py-2 text-sm font-bold text-white"
+                    >
+                      {isSubmittingReply ? "投稿中..." : "投稿する"}
+                    </button>
+                  </div>
+                )}
+
+                <ReplyList
+                  parentId={post.id}
+                  repliesByPostId={repliesByPostId}
+                  openReplyIds={openReplyIds}
+                  toggleReplies={toggleReplies}
+                  canReply={true}
+                  replyingPostId={replyingPostId}
+                  setReplyingPostId={setReplyingPostId}
+                  replyComment={replyComment}
+                  setReplyComment={setReplyComment}
+                  replyMessage={replyMessage}
+                  setReplyMessage={setReplyMessage}
+                  isSubmittingReply={isSubmittingReply}
+                  handleSubmitReply={handleSubmitReply}
+                />
+              </section>
+            </article>
+          )}
+        </div>
+      </main>
+    </>
   );
 }

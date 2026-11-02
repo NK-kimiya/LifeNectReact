@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import Header from "../components/Header";
 import UserAvatar from "../components/UserAvatar";
 import { useAdminAuth } from "../context/AdminAuthContext";
 const API_BASE_URL =
@@ -441,407 +442,418 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-8">
-      <div className="mx-auto max-w-6xl">
-        <header className="flex flex-col gap-4 border-b border-gray-200 pb-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-[#ff4500]">
-              LifeNect Admin
-            </p>
-            <h1 className="mt-1 text-3xl font-bold text-gray-900">
-              管理者ページ
-            </h1>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-white md:self-auto"
-          >
-            ログアウト
-          </button>
-        </header>
-
-        <section className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-lg border border-gray-200 bg-white p-5">
-            <p className="text-sm text-gray-500">投稿管理</p>
-            <p className="mt-2 text-2xl font-bold text-gray-900">0件</p>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-5">
-            <p className="text-sm text-gray-500">ユーザー管理</p>
-            <p className="mt-2 text-2xl font-bold text-gray-900">0人</p>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 bg-white p-5">
-            <p className="text-sm text-gray-500">タグ管理</p>
-            <p className="mt-2 text-2xl font-bold text-gray-900">
-              {tags.length}件
-            </p>
-          </div>
-        </section>
-
-        <section className="mt-8 rounded-lg border border-gray-200 bg-white">
-          <div className="flex flex-col gap-4 border-b border-gray-200 p-5 md:flex-row md:items-center md:justify-between">
+    <>
+      <Header />
+      <main className="min-h-screen bg-gray-50 px-6 py-8">
+        <div className="mx-auto max-w-6xl">
+          <header className="flex flex-col gap-4 border-b border-gray-200 pb-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">タグ管理</h2>
-              <p className="mt-1 text-sm text-gray-500">
-                投稿に利用するタグを作成できます。
+              <p className="text-sm font-semibold text-[#ff4500]">
+                LifeNect Admin
               </p>
+              <h1 className="mt-1 text-3xl font-bold text-gray-900">
+                管理者ページ
+              </h1>
             </div>
 
             <button
               type="button"
-              onClick={handleOpenModal}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#ff4500] px-5 text-sm font-semibold text-white hover:bg-[#e63e00]"
+              onClick={handleLogout}
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-white md:self-auto"
             >
-              新規作成
+              ログアウト
             </button>
-          </div>
+          </header>
 
-          {message && (
-            <p className="mx-5 mt-5 rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-700">
-              {message}
-            </p>
-          )}
+          <section className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <p className="text-sm text-gray-500">投稿管理</p>
+              <p className="mt-2 text-2xl font-bold text-gray-900">0件</p>
+            </div>
 
-          <div className="p-5">
-            {isLoadingTags ? (
-              <p className="text-sm text-gray-500">読み込み中...</p>
-            ) : tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-[#c2410c]"
-                  >
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">タグはまだありません。</p>
-            )}
-          </div>
-        </section>
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <p className="text-sm text-gray-500">ユーザー管理</p>
+              <p className="mt-2 text-2xl font-bold text-gray-900">0人</p>
+            </div>
 
-        <section className="mt-8 rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-200 p-5">
-            <h2 className="text-xl font-bold text-gray-900">投稿管理</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              投稿と返信内容を確認できます。
-            </p>
-          </div>
-
-          <div className="grid gap-4 p-5">
-            {isLoadingPosts && (
-              <p className="text-sm text-gray-500">投稿を読み込み中...</p>
-            )}
-
-            {postError && (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                {postError}
+            <div className="rounded-lg border border-gray-200 bg-white p-5">
+              <p className="text-sm text-gray-500">タグ管理</p>
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {tags.length}件
               </p>
-            )}
+            </div>
+          </section>
 
-            {posts.map((post) => {
-              if (!post.is_visible) {
-                return (
-                  <article
-                    key={post.id}
-                    className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-500"
-                    onClick={() => router.push(`/admin/posts/${post.id}`)}
-                  >
-                    この投稿は非表示です
-                  </article>
-                );
-              }
-
-              return (
-                <article
-                  key={post.id}
-                  onClick={() => router.push(`/admin/posts/${post.id}`)}
-                  className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
-                >
-                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <h3 className="font-bold text-gray-900">{post.title}</h3>
-                      <p className="mt-2 leading-7 text-gray-600">
-                        {post.comment}
-                      </p>
-                    </div>
-
-                    <span className="text-xs text-gray-500">
-                      {new Date(post.created_at).toLocaleString("ja-JP")}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between gap-3 text-sm text-gray-500">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <UserAvatar
-                        avatarUrl={post.user?.avatar_url}
-                        name={post.user?.nickname}
-                        size="sm"
-                      />
-                      <span className="truncate">
-                        {post.user?.nickname ?? "匿名ユーザー"}
-                      </span>
-                    </div>
-
-                    {(post.comment_count ?? 0) > 0 && (
-                      <span className="shrink-0 text-sm font-bold text-gray-500">
-                        コメント {post.comment_count ?? 0}件
-                      </span>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-
-            {postCount > 0 && (
-              <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-                <button
-                  type="button"
-                  disabled={!previousPageUrl}
-                  onClick={() =>
-                    setCurrentPage((page) => Math.max(1, page - 1))
-                  }
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  前へ
-                </button>
-
-                <span className="text-sm text-gray-500">
-                  {currentPage}ページ目 / 全{postCount}件
-                </span>
-
-                <button
-                  type="button"
-                  disabled={!nextPageUrl}
-                  onClick={() => setCurrentPage((page) => page + 1)}
-                  className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  次へ
-                </button>
-              </div>
-            )}
-
-            {!isLoadingPosts && posts.length === 0 && (
-              <p className="text-sm text-gray-500">投稿はまだありません。</p>
-            )}
-          </div>
-        </section>
-
-        <section className="mt-8 rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-200 p-5">
-            <h2 className="text-xl font-bold text-gray-900">申請管理</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              アカウント作成申請を確認し、承認または却下できます。
-            </p>
-          </div>
-
-          <div className="grid gap-4 p-5">
-            {isLoadingApplications && (
-              <p className="text-sm text-gray-500">申請を読み込み中...</p>
-            )}
-
-            {applicationError && (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                {applicationError}
-              </p>
-            )}
-
-            {applications.map((application) => (
-              <article
-                key={application.id}
-                className="rounded-lg border border-gray-200 p-4"
-              >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-gray-900">
-                        {application.nickname}
-                      </h3>
-                      <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                        {application.status}
-                      </span>
-                    </div>
-
-                    <p className="mt-1 text-sm text-gray-600">
-                      {application.email}
-                    </p>
-
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
-                      {application.condition}
-                    </p>
-
-                    <p className="mt-3 text-xs text-gray-400">
-                      申請日:{" "}
-                      {new Date(application.created_at).toLocaleString("ja-JP")}
-                    </p>
-                  </div>
-
-                  {application.status === "pending" && (
-                    <div className="flex shrink-0 gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleUpdateApplicationStatus(
-                            application.id,
-                            "approve",
-                          )
-                        }
-                        className="rounded-lg bg-[#ff4500] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e63e00]"
-                      >
-                        承認
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleUpdateApplicationStatus(
-                            application.id,
-                            "reject",
-                          )
-                        }
-                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        却下
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </article>
-            ))}
-
-            {!isLoadingApplications && applications.length === 0 && (
-              <p className="text-sm text-gray-500">申請はまだありません。</p>
-            )}
-          </div>
-        </section>
-
-        <section className="mt-8 rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-200 p-5">
-            <h2 className="text-xl font-bold text-gray-900">ユーザー管理</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              登録済みユーザーの状態を確認できます。
-            </p>
-          </div>
-
-          <div className="grid gap-4 p-5">
-            {isLoadingUsers && (
-              <p className="text-sm text-gray-500">ユーザーを読み込み中...</p>
-            )}
-
-            {userError && (
-              <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                {userError}
-              </p>
-            )}
-
-            {users.map((user) => (
-              <article
-                key={user.id}
-                onClick={() => router.push(`/admin/users/${user.id}`)}
-                className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <UserAvatar
-                      avatarUrl={user.avatar_url}
-                      name={user.nickname}
-                      size="md"
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate font-bold text-gray-900">
-                        {user.nickname}
-                      </p>
-                      <p className="truncate text-sm text-gray-500">
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-                      user.account_status === "active"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-red-50 text-red-700"
-                    }`}
-                  >
-                    {user.account_status === "active" ? "通常利用" : "凍結中"}
-                  </span>
-                </div>
-              </article>
-            ))}
-
-            {!isLoadingUsers && users.length === 0 && (
-              <p className="text-sm text-gray-500">ユーザーはまだいません。</p>
-            )}
-          </div>
-        </section>
-      </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <section className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between gap-4">
+          <section className="mt-8 rounded-lg border border-gray-200 bg-white">
+            <div className="flex flex-col gap-4 border-b border-gray-200 p-5 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">タグを追加</h2>
+                <h2 className="text-xl font-bold text-gray-900">タグ管理</h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  新しいタグ名を入力してください。
+                  投稿に利用するタグを作成できます。
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={handleCloseModal}
-                className="inline-flex size-9 items-center justify-center rounded-lg text-xl leading-none text-gray-500 hover:bg-gray-100"
-                aria-label="閉じる"
+                onClick={handleOpenModal}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#ff4500] px-5 text-sm font-semibold text-white hover:bg-[#e63e00]"
               >
-                ×
+                新規作成
               </button>
             </div>
 
-            <form
-              className="mt-6 flex flex-col gap-4"
-              onSubmit={handleCreateTag}
-            >
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">
-                  タグ名
-                </label>
-                <input
-                  type="text"
-                  value={tagName}
-                  onChange={(event) => setTagName(event.target.value)}
-                  className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500]"
-                  placeholder="例: メンタル"
-                  required
-                />
-              </div>
+            {message && (
+              <p className="mx-5 mt-5 rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-700">
+                {message}
+              </p>
+            )}
 
-              <div className="flex justify-end gap-3">
+            <div className="p-5">
+              {isLoadingTags ? (
+                <p className="text-sm text-gray-500">読み込み中...</p>
+              ) : tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-[#c2410c]"
+                    >
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">タグはまだありません。</p>
+              )}
+            </div>
+          </section>
+
+          <section className="mt-8 rounded-lg border border-gray-200 bg-white">
+            <div className="border-b border-gray-200 p-5">
+              <h2 className="text-xl font-bold text-gray-900">投稿管理</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                投稿と返信内容を確認できます。
+              </p>
+            </div>
+
+            <div className="grid gap-4 p-5">
+              {isLoadingPosts && (
+                <p className="text-sm text-gray-500">投稿を読み込み中...</p>
+              )}
+
+              {postError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {postError}
+                </p>
+              )}
+
+              {posts.map((post) => {
+                if (!post.is_visible) {
+                  return (
+                    <article
+                      key={post.id}
+                      className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-500"
+                      onClick={() => router.push(`/admin/posts/${post.id}`)}
+                    >
+                      この投稿は非表示です
+                    </article>
+                  );
+                }
+
+                return (
+                  <article
+                    key={post.id}
+                    onClick={() => router.push(`/admin/posts/${post.id}`)}
+                    className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <h3 className="font-bold text-gray-900">
+                          {post.title}
+                        </h3>
+                        <p className="mt-2 leading-7 text-gray-600">
+                          {post.comment}
+                        </p>
+                      </div>
+
+                      <span className="text-xs text-gray-500">
+                        {new Date(post.created_at).toLocaleString("ja-JP")}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-3 text-sm text-gray-500">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <UserAvatar
+                          avatarUrl={post.user?.avatar_url}
+                          name={post.user?.nickname}
+                          size="sm"
+                        />
+                        <span className="truncate">
+                          {post.user?.nickname ?? "匿名ユーザー"}
+                        </span>
+                      </div>
+
+                      {(post.comment_count ?? 0) > 0 && (
+                        <span className="shrink-0 text-sm font-bold text-gray-500">
+                          コメント {post.comment_count ?? 0}件
+                        </span>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+
+              {postCount > 0 && (
+                <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+                  <button
+                    type="button"
+                    disabled={!previousPageUrl}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(1, page - 1))
+                    }
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    前へ
+                  </button>
+
+                  <span className="text-sm text-gray-500">
+                    {currentPage}ページ目 / 全{postCount}件
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled={!nextPageUrl}
+                    onClick={() => setCurrentPage((page) => page + 1)}
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    次へ
+                  </button>
+                </div>
+              )}
+
+              {!isLoadingPosts && posts.length === 0 && (
+                <p className="text-sm text-gray-500">投稿はまだありません。</p>
+              )}
+            </div>
+          </section>
+
+          <section className="mt-8 rounded-lg border border-gray-200 bg-white">
+            <div className="border-b border-gray-200 p-5">
+              <h2 className="text-xl font-bold text-gray-900">申請管理</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                アカウント作成申請を確認し、承認または却下できます。
+              </p>
+            </div>
+
+            <div className="grid gap-4 p-5">
+              {isLoadingApplications && (
+                <p className="text-sm text-gray-500">申請を読み込み中...</p>
+              )}
+
+              {applicationError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {applicationError}
+                </p>
+              )}
+
+              {applications.map((application) => (
+                <article
+                  key={application.id}
+                  className="rounded-lg border border-gray-200 p-4"
+                >
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-gray-900">
+                          {application.nickname}
+                        </h3>
+                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                          {application.status}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-sm text-gray-600">
+                        {application.email}
+                      </p>
+
+                      <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
+                        {application.condition}
+                      </p>
+
+                      <p className="mt-3 text-xs text-gray-400">
+                        申請日:{" "}
+                        {new Date(application.created_at).toLocaleString(
+                          "ja-JP",
+                        )}
+                      </p>
+                    </div>
+
+                    {application.status === "pending" && (
+                      <div className="flex shrink-0 gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleUpdateApplicationStatus(
+                              application.id,
+                              "approve",
+                            )
+                          }
+                          className="rounded-lg bg-[#ff4500] px-4 py-2 text-sm font-semibold text-white hover:bg-[#e63e00]"
+                        >
+                          承認
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleUpdateApplicationStatus(
+                              application.id,
+                              "reject",
+                            )
+                          }
+                          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        >
+                          却下
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+
+              {!isLoadingApplications && applications.length === 0 && (
+                <p className="text-sm text-gray-500">申請はまだありません。</p>
+              )}
+            </div>
+          </section>
+
+          <section className="mt-8 rounded-lg border border-gray-200 bg-white">
+            <div className="border-b border-gray-200 p-5">
+              <h2 className="text-xl font-bold text-gray-900">ユーザー管理</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                登録済みユーザーの状態を確認できます。
+              </p>
+            </div>
+
+            <div className="grid gap-4 p-5">
+              {isLoadingUsers && (
+                <p className="text-sm text-gray-500">ユーザーを読み込み中...</p>
+              )}
+
+              {userError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {userError}
+                </p>
+              )}
+
+              {users.map((user) => (
+                <article
+                  key={user.id}
+                  onClick={() => router.push(`/admin/users/${user.id}`)}
+                  className="cursor-pointer rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <UserAvatar
+                        avatarUrl={user.avatar_url}
+                        name={user.nickname}
+                        size="md"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate font-bold text-gray-900">
+                          {user.nickname}
+                        </p>
+                        <p className="truncate text-sm text-gray-500">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                        user.account_status === "active"
+                          ? "bg-green-50 text-green-700"
+                          : "bg-red-50 text-red-700"
+                      }`}
+                    >
+                      {user.account_status === "active" ? "通常利用" : "凍結中"}
+                    </span>
+                  </div>
+                </article>
+              ))}
+
+              {!isLoadingUsers && users.length === 0 && (
+                <p className="text-sm text-gray-500">
+                  ユーザーはまだいません。
+                </p>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <section className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    タグを追加
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    新しいタグ名を入力してください。
+                  </p>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  disabled={isCreatingTag}
-                  className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex size-9 items-center justify-center rounded-lg text-xl leading-none text-gray-500 hover:bg-gray-100"
+                  aria-label="閉じる"
                 >
-                  キャンセル
-                </button>
-                <button
-                  type="submit"
-                  disabled={isCreatingTag}
-                  className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#ff4500] px-5 text-sm font-semibold text-white hover:bg-[#e63e00] disabled:cursor-not-allowed disabled:bg-gray-400"
-                >
-                  {isCreatingTag ? "追加中..." : "追加"}
+                  ×
                 </button>
               </div>
-            </form>
-          </section>
-        </div>
-      )}
-    </main>
+
+              <form
+                className="mt-6 flex flex-col gap-4"
+                onSubmit={handleCreateTag}
+              >
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    タグ名
+                  </label>
+                  <input
+                    type="text"
+                    value={tagName}
+                    onChange={(event) => setTagName(event.target.value)}
+                    className="rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-[#ff4500]"
+                    placeholder="例: メンタル"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    disabled={isCreatingTag}
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreatingTag}
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#ff4500] px-5 text-sm font-semibold text-white hover:bg-[#e63e00] disabled:cursor-not-allowed disabled:bg-gray-400"
+                  >
+                    {isCreatingTag ? "追加中..." : "追加"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
+      </main>
+    </>
   );
 }

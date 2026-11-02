@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Header from "../components/Header";
 import UserAvatar from "../components/UserAvatar";
 import { useAuth } from "../context/AuthContext";
 import "./posts.css";
@@ -274,36 +275,10 @@ export default function PostsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-800 sm:px-6 lg:px-10">
-      <header className="mx-auto mb-6 flex max-w-6xl flex-col gap-4 border-b border-slate-200 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-2 text-sm font-bold text-blue-600">
-            LifeConnect Forum
-          </p>
-          <h1 className="text-3xl font-bold text-slate-900">投稿スレッド</h1>
-          <p className="mt-3 max-w-2xl leading-7 text-slate-500">
-            悩みや情報を共有できる掲示板です。気になる投稿を探したり、新しく相談を投稿できます。
-          </p>
-        </div>
-
-        <div className="flex gap-3">
-          <Link
-            href="/posts/ai"
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-blue-200 bg-white px-5 font-bold text-blue-700 hover:bg-blue-50"
-          >
-            AI相談
-          </Link>
-
-          <Link
-            href="/posts/new"
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 font-bold text-white hover:bg-blue-700"
-          >
-            新規投稿
-          </Link>
-        </div>
-      </header>
-
-      {/* {isAiChatMode ? (
+    <>
+      <Header />
+      <main className="min-h-screen py-8 text-slate-800">
+        {/* {isAiChatMode ? (
         <div className="w-4xl m-auto">
           <button
             type="button"
@@ -444,216 +419,236 @@ export default function PostsPage() {
           ) : null}
         </div>
       ) : ( */}
-      <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[240px_1fr]">
-        <aside className="rounded-lg border border-slate-200 bg-white p-4 lg:sticky lg:top-6 lg:self-start">
-          <h2 className="mb-3 text-base font-bold text-slate-900">タグ</h2>
+        <div className="w-4/5   mx-auto">
+          <div className="rounded-xl bg-linear-to-r from-orange-400 to-orange-700 p-[2px] w-[100px] mb-3">
+            <div className="rounded-[10px] bg-white p-2 text-center">
+              <button className="bg-linear-to-r from-orange-400 to-orange-700 bg-clip-text text-transparent font-bold">
+                <Link href="/posts/new" className="">
+                  AIモード
+                </Link>
+              </button>
+            </div>
+          </div>
 
-          <nav className="flex flex-col gap-2" aria-label="タグメニュー">
-            <button
-              type="button"
-              className={[
-                "min-h-10 rounded-lg px-3 text-left text-sm font-bold transition",
-                tag === ""
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-600 hover:bg-blue-50 hover:text-blue-700",
-              ].join(" ")}
-              onClick={() => {
-                setTag("");
-                setCurrentPage(1);
-              }}
-            >
-              すべて
-            </button>
-
-            {isLoadingTags && (
-              <p className="px-3 py-2 text-sm text-slate-500">読み込み中...</p>
-            )}
-
-            {tagError && (
-              <p className="px-3 py-2 text-sm text-red-600">{tagError}</p>
-            )}
-
-            {tags.map((tagItem) => (
+          <section className="">
+            <div className="w-full md:w-2/4 mx-auto flex justify-center items-stretch">
+              <input
+                id="keyword"
+                type="text"
+                placeholder="タイトル・本文で検索"
+                value={keyword}
+                onChange={(e) => {
+                  setKeyword(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-4/5 flex-auto border-t-1 border-b-1 border-l-1 border-gray-200  p-1 focus:outline-gray-200 rounded-l-full h-10"
+              />
+              <button className="w-1/5  bg-orange-300 border-1 border-orange-100 text-white rounded-r-full">
+                検索
+              </button>
+            </div>
+          </section>
+          <aside className="">
+            <nav className="overflow-x-auto pb-1" aria-label="タグメニュー">
               <button
                 type="button"
-                key={tagItem.id}
                 className={[
-                  "min-h-10 rounded-lg px-3 text-left text-sm font-bold transition",
-                  tag === tagItem.name
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-600 hover:bg-blue-50 hover:text-blue-700",
+                  "min-h-10 px-3 text-left text-sm font-bold transition",
+                  tag === ""
+                    ? "border-b-1 text-orange-400"
+                    : "text-slate-600 hover:orange-400 hover:text-orange-400",
                 ].join(" ")}
                 onClick={() => {
-                  setTag(tagItem.name);
+                  setTag("");
                   setCurrentPage(1);
                 }}
               >
-                {tagItem.name}
+                すべて
               </button>
-            ))}
-          </nav>
-        </aside>
 
-        <div className="min-w-0">
-          <section className="mb-6 rounded-lg border border-slate-200 bg-white p-4">
-            <label
-              htmlFor="keyword"
-              className="mb-2 block text-sm font-bold text-slate-700"
-            >
-              キーワード検索
-            </label>
-            <input
-              id="keyword"
-              type="text"
-              placeholder="タイトル・本文で検索"
-              value={keyword}
-              onChange={(e) => {
-                setKeyword(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-11 w-full rounded-lg border border-slate-300 px-3 text-[15px] outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </section>
-
-          <section className="grid gap-4">
-            {isLoadingPosts && (
-              <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
-                投稿を読み込み中...
-              </div>
-            )}
-
-            {postError && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
-                <p className="text-sm font-bold">
-                  エラー番号: {postError.code}
+              {isLoadingTags && (
+                <p className="px-3 py-2 text-sm text-slate-500">
+                  読み込み中...
                 </p>
-                <p className="mt-2 text-base font-bold">{postError.title}</p>
-                <p className="mt-1 text-sm">{postError.message}</p>
-                {(postError.code === 401 || postError.code === 403) && (
-                  <p className="mt-4 text-sm">
-                    <Link
-                      href="/auth"
-                      className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700"
-                    >
-                      ログインページへ移動する
-                    </Link>
-                  </p>
-                )}
-              </div>
-            )}
-            {posts.map((post: Post) => {
-              if (post.is_visible === false) {
-                return (
-                  <article
-                    key={post.id}
-                    className="rounded-lg border border-slate-200 bg-white p-5"
-                  >
-                    <p className="text-sm font-bold text-slate-500">
-                      この投稿は管理者によって非表示にされました。
-                    </p>
-                  </article>
-                );
-              }
+              )}
 
-              return (
-                <Link
-                  key={post.id}
-                  href={`/posts/${post.id}`}
-                  className="block rounded-lg border border-slate-200 bg-white p-5 hover:bg-slate-50"
+              {tagError && (
+                <p className="px-3 py-2 text-sm text-red-600">{tagError}</p>
+              )}
+
+              {tags.map((tagItem) => (
+                <button
+                  type="button"
+                  key={tagItem.id}
+                  className={[
+                    "min-h-10 px-3 text-left text-sm font-bold transition",
+                    tag === tagItem.name
+                      ? "border-b-1 text-orange-400"
+                      : "text-slate-600 hover:orange-400 hover:text-orange-400",
+                  ].join(" ")}
+                  onClick={() => {
+                    setTag(tagItem.name);
+                    setCurrentPage(1);
+                  }}
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-slate-900">
-                        {post.title}
-                      </h2>
+                  {tagItem.name}
+                </button>
+              ))}
+            </nav>
+          </aside>
 
-                      <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                        <UserAvatar
-                          avatarUrl={post.user?.avatar_url}
-                          name={post.user?.nickname}
-                          size="sm"
-                        />
-                        <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
+          <div className="min-w-0">
+            <section className="grid gap-4">
+              {isLoadingPosts && (
+                <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
+                  投稿を読み込み中...
+                </div>
+              )}
+
+              {postError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-700">
+                  <p className="text-sm font-bold">
+                    エラー番号: {postError.code}
+                  </p>
+                  <p className="mt-2 text-base font-bold">{postError.title}</p>
+                  <p className="mt-1 text-sm">{postError.message}</p>
+                  {(postError.code === 401 || postError.code === 403) && (
+                    <p className="mt-4 text-sm">
+                      <Link
+                        href="/auth"
+                        className="font-bold text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                      >
+                        ログインページへ移動する
+                      </Link>
+                    </p>
+                  )}
+                </div>
+              )}
+              {posts.map((post: Post) => {
+                if (post.is_visible === false) {
+                  return (
+                    <article
+                      key={post.id}
+                      className="rounded-lg border border-slate-200 bg-white p-5"
+                    >
+                      <p className="text-sm font-bold text-slate-500">
+                        この投稿は管理者によって非表示にされました。
+                      </p>
+                    </article>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={post.id}
+                    href={`/posts/${post.id}`}
+                    className="block rounded-lg border border-slate-200 bg-white p-5 hover:bg-slate-50"
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h2 className="text-xl font-bold text-slate-900">
+                          {post.title}
+                        </h2>
+
+                        <div className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+                          <UserAvatar
+                            avatarUrl={post.user?.avatar_url}
+                            name={post.user?.nickname}
+                            size="sm"
+                          />
+                          <span>{post.user?.nickname ?? "匿名ユーザー"}</span>
+                        </div>
+                      </div>
+
+                      <span className="text-sm text-slate-500">
+                        {post.created_at
+                          ? new Date(post.created_at).toLocaleDateString(
+                              "ja-JP",
+                            )
+                          : ""}
+                      </span>
+                    </div>
+
+                    <p className="mt-3 line-clamp-3 leading-7 text-slate-600">
+                      {post.comment}
+                    </p>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <div className="flex flex-wrap gap-2">
+                        {(post.tags ?? []).map((tagItem) => (
+                          <span
+                            key={tagItem.id}
+                            className="rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-400"
+                          >
+                            {tagItem.name}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
-                    <span className="text-sm text-slate-500">
-                      {post.created_at
-                        ? new Date(post.created_at).toLocaleDateString("ja-JP")
-                        : ""}
-                    </span>
-                  </div>
-
-                  <p className="mt-3 line-clamp-3 leading-7 text-slate-600">
-                    {post.comment}
-                  </p>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex flex-wrap gap-2">
-                      {(post.tags ?? []).map((tagItem) => (
-                        <span
-                          key={tagItem.id}
-                          className="rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-700"
-                        >
-                          {tagItem.name}
-                        </span>
-                      ))}
+                    <div className="flex justify-start py-2">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          handleToggleLike(post.id);
+                        }}
+                        disabled={!isLoggedIn}
+                        className="text-sm font-bold text-pink-600 hover:text-pink-700 disabled:text-slate-400 px-3"
+                      >
+                        {post.is_liked ? "いいね済み" : "いいね"}{" "}
+                        {post.like_count ?? 0}
+                      </button>
+                      <span className="text-sm text-slate-500">
+                        コメント {post.comment_count ?? 0}件
+                      </span>
                     </div>
+                  </Link>
+                );
+              })}
 
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        handleToggleLike(post.id);
-                      }}
-                      disabled={!isLoggedIn}
-                      className="text-sm font-bold text-pink-600 hover:text-pink-700 disabled:text-slate-400"
-                    >
-                      {post.is_liked ? "いいね済み" : "いいね"}{" "}
-                      {post.like_count ?? 0}
-                    </button>
-
-                    <span className="text-sm text-slate-500">
-                      コメント {post.comment_count ?? 0}件
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-
-            {/* {filteredPosts.length === 0 && (
+              {/* {filteredPosts.length === 0 && (
               <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
                 条件に一致する投稿がありません。
               </div>
             )} */}
-          </section>
+            </section>
 
-          <div className="mt-6 flex items-center justify-between">
-            <button
-              type="button"
-              disabled={!previousPageUrl}
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                type="button"
+                disabled={!previousPageUrl}
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                前へ
+              </button>
+
+              <span className="text-sm text-slate-500">
+                {currentPage}ページ目 / 全{postCount}件
+              </span>
+
+              <button
+                type="button"
+                disabled={!nextPageUrl}
+                onClick={() => setCurrentPage((page) => page + 1)}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                次へ
+              </button>
+            </div>
+          </div>
+          <div className="sticky bottom-1 right-1  h-[100px] pt-2]">
+            <Link
+              href="/posts/new"
+              className="mt-6 rounded-full w-[80px] h-[80px] flex items-center justify-center bg-custom-black text-white text-3xl"
             >
-              前へ
-            </button>
-
-            <span className="text-sm text-slate-500">
-              {currentPage}ページ目 / 全{postCount}件
-            </span>
-
-            <button
-              type="button"
-              disabled={!nextPageUrl}
-              onClick={() => setCurrentPage((page) => page + 1)}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              次へ
-            </button>
+              ＋
+            </Link>
           </div>
         </div>
-      </div>
-      {/* )} */}
-    </main>
+        {/* )} */}
+      </main>
+    </>
   );
 }
