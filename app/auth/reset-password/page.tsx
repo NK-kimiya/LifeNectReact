@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
 
@@ -34,17 +34,20 @@ export default function ResetPasswordPage() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(`${API_BASE_URL}/auth/password-reset/confirm/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${API_BASE_URL}/auth/password-reset/confirm/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            password,
+            password_confirm: passwordConfirm,
+          }),
         },
-        body: JSON.stringify({
-          token,
-          password,
-          password_confirm: passwordConfirm,
-        }),
-      });
+      );
 
       const data = await response.json().catch(() => null);
 
@@ -56,7 +59,9 @@ export default function ResetPasswordPage() {
       setMessage(data?.detail ?? "パスワードを再設定しました。");
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "パスワード再設定に失敗しました。",
+        error instanceof Error
+          ? error.message
+          : "パスワード再設定に失敗しました。",
       );
     } finally {
       setIsSubmitting(false);
@@ -107,11 +112,22 @@ export default function ResetPasswordPage() {
         </form>
 
         {isCompleted && (
-          <Link href="/auth" className="mt-4 inline-block text-sm text-gray-600">
+          <Link
+            href="/auth"
+            className="mt-4 inline-block text-sm text-gray-600"
+          >
             ログイン画面へ
           </Link>
         )}
       </div>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<p>読み込み中...</p>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
