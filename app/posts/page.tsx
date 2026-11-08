@@ -423,7 +423,7 @@ export default function PostsPage() {
           <div className="rounded-xl bg-linear-to-r from-orange-400 to-orange-700 p-[2px] w-[100px] mb-3">
             <div className="rounded-[10px] bg-white p-2 text-center">
               <button className="bg-linear-to-r from-orange-400 to-orange-700 bg-clip-text text-transparent font-bold">
-                <Link href="/posts/new" className="">
+                <Link href="/posts/ai" className="">
                   AIモード
                 </Link>
               </button>
