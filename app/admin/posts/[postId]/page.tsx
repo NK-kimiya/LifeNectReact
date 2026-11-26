@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/app/components/Header";
+import AdminHeader from "@/app/admin/components/AdminHeader";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -289,7 +289,7 @@ export default function AdminPostDetailPage() {
 
   return (
     <>
-      <Header />
+      <AdminHeader />
       <main className="min-h-screen bg-gray-50 px-6 py-8">
         <div className="mx-auto max-w-4xl">
           <button

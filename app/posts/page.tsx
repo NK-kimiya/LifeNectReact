@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
 import UserAvatar from "../components/UserAvatar";
 import { useAuth } from "../context/AuthContext";
@@ -63,6 +64,8 @@ type PostError = {
 };
 
 export default function PostsPage() {
+  const router = useRouter();
+  const isRedirectingToLogin = useRef(false);
   const [keyword, setKeyword] = useState("");
   const [tag, setTag] = useState("");
 
@@ -90,6 +93,22 @@ export default function PostsPage() {
 
   const { accessToken, isLoggedIn } = useAuth();
 
+  const redirectOnUnauthorized = useCallback(
+    (status: number) => {
+      if (status !== 401) {
+        return false;
+      }
+
+      if (!isRedirectingToLogin.current) {
+        isRedirectingToLogin.current = true;
+        router.replace("/auth");
+      }
+
+      return true;
+    },
+    [router],
+  );
+
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -101,12 +120,15 @@ export default function PostsPage() {
             ? { Authorization: `Bearer ${accessToken}` }
             : {},
         });
-        const data = await response.json().catch(() => []);
+        if (redirectOnUnauthorized(response.status)) {
+          return;
+        }
 
         if (!response.ok) {
           throw new Error("タグ一覧の取得に失敗しました。");
         }
 
+        const data = await response.json().catch(() => []);
         setTags(data);
       } catch (error) {
         setTagError("タグを読み込めませんでした。");
@@ -116,7 +138,7 @@ export default function PostsPage() {
     };
 
     fetchTags();
-  }, []);
+  }, [accessToken, redirectOnUnauthorized]);
 
   useEffect(() => {
     const getPostError = (status: number): PostError => {
@@ -126,12 +148,6 @@ export default function PostsPage() {
             code: 400,
             title: "リクエストエラー",
             message: "投稿一覧の取得条件に問題があります。",
-          };
-        case 401:
-          return {
-            code: 401,
-            title: "認証エラー",
-            message: "ログイン情報が無効です。再ログインしてください。",
           };
         case 403:
           return {
@@ -187,13 +203,16 @@ export default function PostsPage() {
               : {},
           },
         );
-        const data: PaginatedPostsResponse = await response.json();
+        if (redirectOnUnauthorized(response.status)) {
+          return;
+        }
 
         if (!response.ok) {
           setPostError(getPostError(response.status));
           return;
         }
 
+        const data: PaginatedPostsResponse = await response.json();
         setPosts(data.results);
         setPostCount(data.count);
         setNextPageUrl(data.next);
@@ -211,7 +230,7 @@ export default function PostsPage() {
     };
 
     fetchPosts();
-  }, [keyword, tag, currentPage, accessToken]);
+  }, [keyword, tag, currentPage, accessToken, redirectOnUnauthorized]);
 
   const handleToggleLike = async (postId: string) => {
     if (!isLoggedIn || !accessToken) {
@@ -256,13 +275,18 @@ export default function PostsPage() {
       setIsLoadingReplies(true);
       setReplyListError("");
 
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`);
-      const data = await response.json().catch(() => []);
+      const response = await fetch(`${API_BASE_URL}/posts/${postId}/replies/`, {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      if (redirectOnUnauthorized(response.status)) {
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("返信一覧の取得に失敗しました。");
       }
 
+      const data = await response.json().catch(() => []);
       setRepliesByPostId((current) => ({
         ...current,
         [postId]: data,
@@ -512,7 +536,7 @@ export default function PostsPage() {
                   </p>
                   <p className="mt-2 text-base font-bold">{postError.title}</p>
                   <p className="mt-1 text-sm">{postError.message}</p>
-                  {(postError.code === 401 || postError.code === 403) && (
+                  {postError.code === 403 && (
                     <p className="mt-4 text-sm">
                       <Link
                         href="/auth"

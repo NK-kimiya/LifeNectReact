@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import Header from "../components/Header";
+import AdminHeader from "@/app/admin/components/AdminHeader";
 import UserAvatar from "../components/UserAvatar";
 import { useAdminAuth } from "../context/AdminAuthContext";
 const API_BASE_URL =
@@ -200,11 +200,6 @@ export default function AdminPage() {
 
     fetchTags();
   }, [isAdminAllowed, adminAccessToken]);
-
-  const handleLogout = () => {
-    adminLogout();
-    router.push("/admin/login");
-  };
 
   const handleOpenModal = () => {
     setTagName("");
@@ -443,26 +438,14 @@ export default function AdminPage() {
 
   return (
     <>
-      <Header />
+      <AdminHeader />
       <main className="min-h-screen bg-gray-50 px-6 py-8">
         <div className="mx-auto max-w-6xl">
-          <header className="flex flex-col gap-4 border-b border-gray-200 pb-6 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#ff4500]">
-                LifeNect Admin
-              </p>
-              <h1 className="mt-1 text-3xl font-bold text-gray-900">
-                管理者ページ
-              </h1>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-white md:self-auto"
-            >
-              ログアウト
-            </button>
+          <header className="border-b border-gray-200 pb-6">
+            <p className="text-sm font-semibold text-[#ff4500]">LifeNect Admin</p>
+            <h1 className="mt-1 text-3xl font-bold text-gray-900">
+              管理者ページ
+            </h1>
           </header>
 
           <section className="mt-8 grid gap-4 md:grid-cols-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/app/components/Header";
+import AdminHeader from "@/app/admin/components/AdminHeader";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import UserAvatar from "../../../components/UserAvatar";
@@ -209,7 +209,7 @@ export default function AdminUserDetailPage() {
 
   return (
     <>
-      <Header />
+      <AdminHeader />
       <main className="min-h-screen bg-gray-50 px-6 py-8">
         <div className="mx-auto max-w-6xl">
           <button

@@ -51,11 +51,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import UserAvatar from "../components/UserAvatar";
+import { useAdminAuth } from "../context/AdminAuthContext";
 import { useAuth } from "../context/AuthContext";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 export default function ProfilePage() {
-  const { accessToken, isLoggedIn, logout } = useAuth();
+  const { accessToken, logout } = useAuth();
   const router = useRouter();
 
   /* State定義*/
@@ -73,12 +74,15 @@ export default function ProfilePage() {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [activeTab, setActiveTab] = useState<"my" | "liked">("my");
+  const { adminAccessToken } = useAdminAuth();
+  const profileAccessToken = accessToken || adminAccessToken;
+
   const canDeleteAccount =
     Boolean(me?.email) && deleteConfirmText === me?.email;
 
   useEffect(() => {
-    if (!isLoggedIn || !accessToken) {
-      router.replace("/");
+    if (!profileAccessToken) {
+      router.replace("/auth");
       return;
     }
 
@@ -88,24 +92,23 @@ export default function ProfilePage() {
       setIsLoading(true);
 
       try {
+        const headers = { Authorization: `Bearer ${profileAccessToken}` };
         const [meResponse, myPostsResponse, likedPostsResponse] =
           await Promise.all([
-            fetch(`${API_BASE_URL}/me/`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }),
-            fetch(`${API_BASE_URL}/posts/my-posts/`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }),
-            fetch(`${API_BASE_URL}/posts/liked/`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }),
+            fetch(`${API_BASE_URL}/me/`, { headers }),
+            fetch(`${API_BASE_URL}/posts/my-posts/`, { headers }),
+            fetch(`${API_BASE_URL}/posts/liked/`, { headers }),
           ]);
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (meResponse.status === 401 || meResponse.status === 404) {
+          logout();
+          router.replace("/auth");
+          return;
+        }
 
         const meData = await meResponse.json().catch(() => null);
         const myPostsData = await myPostsResponse.json().catch(() => []);
@@ -147,7 +150,7 @@ export default function ProfilePage() {
     return () => {
       isCancelled = true;
     };
-  }, [isLoggedIn, accessToken, router]);
+  }, [profileAccessToken, logout, router]);
 
   //ファイル選択処理
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -161,10 +161,7 @@ export default function AiChatPage() {
       <div className="h-1/10">
         <Header />
       </div>
-      <main className="mx-auto flex h-9/10 w-8/10 max-w-4xl flex-col rounded-lg border border-orange-300">
-        <h2 className="border-b-1 border-gray-100 p-4 text-slate-900">
-          AIチャット
-        </h2>
+      <main className="mx-auto flex h-9/10 w-5/6 max-w-4xl flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <div className="mx-auto mt-4 md:w-4/5">
             {aiError && (
@@ -290,19 +287,31 @@ export default function AiChatPage() {
             )}
           </div>
         </div>
-        <form className="flex w-full items-center justify-center p-2">
+        <form className="mx-2 flex items-end gap-2 rounded-xl border border-orange-300 p-2 focus-within:ring-2 focus-within:ring-orange-400 mb-2">
           <textarea
+            aria-label="メッセージ"
             value={aiMessage}
             onChange={(e) => setAiMessage(e.target.value)}
-            className="min-h-[10px]  rounded-lg border border-orange-300  w-7/10  h-[50px]"
+            className="min-h-11 min-w-0 flex-1 resize-none px-2 py-2 outline-none"
           />
           <button
             type="button"
             onClick={handleSendAiMessage}
             disabled={isSendingAiMessage}
-            className="rounded-lg bg-orange-500 px-5 font-bold text-white disabled:bg-slate-400 w-3/10  p-2 h-[50px]"
+            aria-label={isSendingAiMessage ? "送信中" : "送信"}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white disabled:bg-slate-400"
           >
-            {isSendingAiMessage ? "送信中..." : "送信"}
+            {isSendingAiMessage ? (
+              <span
+                aria-hidden="true"
+                className="size-4 rounded-full border-2 border-white border-r-transparent motion-safe:animate-spin"
+              />
+            ) : (
+              <span aria-hidden="true" className="relative block size-5">
+                <span className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-current" />
+                <span className="absolute left-1/2 top-0.5 size-3 -translate-x-1/2 rotate-45 border-l-[3px] border-t-[3px] border-current" />
+              </span>
+            )}
           </button>
         </form>
       </main>
