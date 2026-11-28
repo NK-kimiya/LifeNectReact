@@ -1,8 +1,8 @@
 "use client";
 
+import AdminHeader from "@/app/admin/components/AdminHeader";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import AdminHeader from "@/app/admin/components/AdminHeader";
 import UserAvatar from "../components/UserAvatar";
 import { useAdminAuth } from "../context/AdminAuthContext";
 const API_BASE_URL =
@@ -442,30 +442,13 @@ export default function AdminPage() {
       <main className="min-h-screen bg-gray-50 px-6 py-8">
         <div className="mx-auto max-w-6xl">
           <header className="border-b border-gray-200 pb-6">
-            <p className="text-sm font-semibold text-[#ff4500]">LifeNect Admin</p>
+            <p className="text-sm font-semibold text-[#ff4500]">
+              LifeNect Admin
+            </p>
             <h1 className="mt-1 text-3xl font-bold text-gray-900">
               管理者ページ
             </h1>
           </header>
-
-          <section className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <p className="text-sm text-gray-500">投稿管理</p>
-              <p className="mt-2 text-2xl font-bold text-gray-900">0件</p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <p className="text-sm text-gray-500">ユーザー管理</p>
-              <p className="mt-2 text-2xl font-bold text-gray-900">0人</p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-5">
-              <p className="text-sm text-gray-500">タグ管理</p>
-              <p className="mt-2 text-2xl font-bold text-gray-900">
-                {tags.length}件
-              </p>
-            </div>
-          </section>
 
           <section className="mt-8 rounded-lg border border-gray-200 bg-white">
             <div className="flex flex-col gap-4 border-b border-gray-200 p-5 md:flex-row md:items-center md:justify-between">

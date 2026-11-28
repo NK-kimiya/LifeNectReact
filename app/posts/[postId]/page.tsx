@@ -46,10 +46,13 @@ type PostDetailError = {
 };
 
 export default function PostDetailPage() {
+  // URLの投稿IDとログイン情報を取得する
   const params = useParams<{ postId: string }>();
   const { accessToken, isLoggedIn } = useAuth();
 
+  // 投稿・返信一覧のデータと読み込み状態を管理する
   const [post, setPost] = useState<Post | null>(null);
+  // 返信先・入力内容・送信状態を管理する
   const [repliesByPostId, setRepliesByPostId] = useState<
     Record<string, Post[]>
   >({});
@@ -62,6 +65,7 @@ export default function PostDetailPage() {
   const [replyMessage, setReplyMessage] = useState("");
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
 
+  // いいねを切り替え、結果を画面に反映する
   const handleToggleLike = async (postId: string) => {
     if (!isLoggedIn || !accessToken) {
       return;
@@ -87,6 +91,7 @@ export default function PostDetailPage() {
     );
   };
 
+  // 指定した投稿またはコメントの直下の返信を取得する
   const fetchReplies = useCallback(async (postId: string) => {
     try {
       setIsLoadingReplies(true);
@@ -112,6 +117,7 @@ export default function PostDetailPage() {
     }
   }, []);
 
+  // HTTPステータスに応じたエラー文言を返す
   const getPostDetailError = (status: number): PostDetailError => {
     switch (status) {
       case 400:
@@ -153,6 +159,7 @@ export default function PostDetailPage() {
     }
   };
 
+  // 投稿詳細を取得し、表示可能ならコメント一覧も読み込む
   const fetchPost = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -192,6 +199,7 @@ export default function PostDetailPage() {
     }
   }, [fetchReplies, params.postId, accessToken]);
 
+  // 投稿IDが確定したら詳細を読み込む
   useEffect(() => {
     if (!params.postId) return;
 
@@ -202,6 +210,7 @@ export default function PostDetailPage() {
     return () => window.clearTimeout(timeoutId);
   }, [fetchPost, params.postId]);
 
+  // 返信一覧を開閉し、未取得なら読み込む
   const toggleReplies = (postId: string) => {
     setOpenReplyIds((current) => ({
       ...current,
@@ -213,6 +222,7 @@ export default function PostDetailPage() {
     }
   };
 
+  // 本文とログイン状態を確認してコメント・返信を送信する
   const handleSubmitReply = async (targetPost: Post) => {
     const comment = replyComment.trim();
 
@@ -250,6 +260,7 @@ export default function PostDetailPage() {
         throw new Error(data?.detail ?? "コメントの投稿に失敗しました。");
       }
 
+      // 送信後にフォームを閉じ、返信先の一覧を再取得する
       setReplyComment("");
       setReplyingPostId(null);
       fetchReplies(targetPost.id);

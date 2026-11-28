@@ -22,9 +22,14 @@ export default function AuthPage() {
   const isLogin = authMode === "login";
 
   const switchAuthMode = (mode: "login" | "signup") => {
+    if (mode === authMode) return;
+
     setAuthMode(mode);
-    setMessage("");
+    setEmail("");
+    setNickname("");
+    setPassword("");
     setPasswordConfirm("");
+    setMessage("");
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -92,7 +97,7 @@ export default function AuthPage() {
       if (isLogin) {
         router.push("/posts");
       } else {
-        setMessage("アカウントを作成しました。");
+        setMessage("ログインに成功しました。");
       }
 
       setMessage("アカウントを作成しました。");
